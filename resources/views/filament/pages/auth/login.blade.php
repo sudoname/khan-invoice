@@ -53,5 +53,17 @@
                 </a>
             </div>
         </div>
+
+        <!-- Registration Link -->
+        @if (filament()->hasRegistration())
+            <div class="mt-6 text-center">
+                <p class="text-sm text-gray-600 dark:text-gray-400">
+                    Don't have an account?
+                    <a href="{{ route('filament.app.auth.register') }}" class="text-purple-600 hover:text-purple-700 dark:text-purple-400 dark:hover:text-purple-300 font-semibold underline">
+                        Create an account
+                    </a>
+                </p>
+            </div>
+        @endif
     @endif
 </x-filament-panels::page.simple>
