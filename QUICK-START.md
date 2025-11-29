@@ -1,18 +1,26 @@
 # Khan Invoice - Quick Start Deployment
 
-## 🚀 Deploy to Digital Ocean in 15 Minutes
+## 🚀 Deploy to Digital Ocean (Multi-Site Environment)
+
+**Important:** This guide is for servers with existing sites. The application will be installed in `/var/www/kinvoice.ng`
 
 ### Step 1: Connect to Your Server
 ```bash
 ssh root@147.182.242.177
 ```
 
-### Step 2: Run One-Command Setup
+### Step 2: Run Setup Script
 ```bash
-curl -o setup.sh https://raw.githubusercontent.com/sudoname/khan-invoice/main/deploy-server-setup.sh && chmod +x setup.sh && ./setup.sh
+curl -o setup.sh https://raw.githubusercontent.com/sudoname/khan-invoice/main/deploy-server-setup.sh && chmod +x setup.sh && sudo bash setup.sh
 ```
 
-Wait 5-10 minutes for installation...
+The script will:
+- Check for existing installations (PHP, MySQL, Nginx, etc.)
+- Install only missing components
+- Create dedicated database: `khan_invoice`
+- Create directory: `/var/www/kinvoice.ng`
+
+Enter your MySQL root password when prompted.
 
 ### Step 3: Set Up SSH for GitHub (if not already configured)
 ```bash
@@ -28,29 +36,40 @@ Copy the output and add it to GitHub:
 2. Click "New SSH key"
 3. Paste the key and save
 
-### Step 4: Clone and Deploy
+### Step 4: Clone Repository
 ```bash
 cd /var/www
 git clone git@github.com:sudoname/khan-invoice.git kinvoice.ng
 cd kinvoice.ng
-
-# Configure Nginx
-cp nginx-kinvoice.conf /etc/nginx/sites-available/kinvoice.ng
-ln -s /etc/nginx/sites-available/kinvoice.ng /etc/nginx/sites-enabled/
-rm -f /etc/nginx/sites-enabled/default
-nginx -t && systemctl reload nginx
-
-# Run deployment
-chmod +x deploy.sh
-./deploy.sh
 ```
 
-### Step 5: Configure Environment
+### Step 5: Configure Nginx (Add New Site)
+```bash
+# Copy Nginx configuration for kinvoice.ng
+sudo cp nginx-kinvoice.conf /etc/nginx/sites-available/kinvoice.ng
+sudo ln -s /etc/nginx/sites-available/kinvoice.ng /etc/nginx/sites-enabled/
+
+# Test configuration (make sure it doesn't conflict with other sites)
+sudo nginx -t
+
+# If test passes, reload
+sudo systemctl reload nginx
+```
+
+### Step 6: Run Deployment Script
+```bash
+chmod +x deploy.sh
+sudo ./deploy.sh
+```
+
+This will install dependencies, build assets, and run migrations.
+
+### Step 7: Configure Environment
 ```bash
 nano .env
 ```
 
-Update these lines:
+Verify/update these critical values:
 ```env
 APP_URL=https://kinvoice.ng
 DB_DATABASE=khan_invoice
@@ -64,21 +83,23 @@ Save (Ctrl+X, Y, Enter)
 php artisan config:cache
 ```
 
-### Step 6: Create Admin User
+### Step 8: Create Admin User
 ```bash
 php artisan make:admin
 ```
 
 Enter your details when prompted.
 
-### Step 7: Configure SSL
+### Step 9: Configure SSL (if not already configured)
 ```bash
-certbot --nginx -d kinvoice.ng -d www.kinvoice.ng
+sudo certbot --nginx -d kinvoice.ng -d www.kinvoice.ng
 ```
 
 Select option 2 (Redirect HTTP to HTTPS).
 
-### Step 8: Done! 🎉
+**Note:** If you already have other sites with SSL, certbot will handle multiple certificates automatically.
+
+### Step 10: Done! 🎉
 Visit https://kinvoice.ng
 
 Login at: https://kinvoice.ng/app
@@ -111,24 +132,23 @@ chmod -R 755 .
 chmod -R 775 storage bootstrap/cache
 ```
 
-## Important Security Notes
+## Important Notes for Multi-Site Environment
 
-1. **Change MySQL root password immediately:**
+1. **Database Isolation:** Khan Invoice uses its own database (`khan_invoice`) and won't interfere with other site databases.
+
+2. **PHP-FPM Pool:** All sites share PHP 8.3-FPM. For better isolation, you can create a dedicated pool (see DEPLOYMENT.md).
+
+3. **Nginx Configuration:** The kinvoice.ng site config won't conflict with existing sites.
+
+4. **SSL Certificates:** Certbot manages multiple certificates automatically.
+
+5. **File Permissions:** Make sure `/var/www/kinvoice.ng` has proper ownership:
 ```bash
-mysql -u root -ptemp_password_change_later
-ALTER USER 'root'@'localhost' IDENTIFIED BY 'YourNewStrongPassword#123';
-exit;
+sudo chown -R www-data:www-data /var/www/kinvoice.ng
+sudo chmod -R 755 /var/www/kinvoice.ng
+sudo chmod -R 775 /var/www/kinvoice.ng/storage
+sudo chmod -R 775 /var/www/kinvoice.ng/bootstrap/cache
 ```
-
-2. **Enable firewall:**
-```bash
-ufw allow 22/tcp
-ufw allow 80/tcp
-ufw allow 443/tcp
-ufw enable
-```
-
-3. **Set up backups** (see DEPLOYMENT.md)
 
 ## Need Help?
 
