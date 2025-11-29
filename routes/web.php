@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\InvoiceController;
+use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\SocialAuthController;
 use Illuminate\Support\Facades\Route;
 
@@ -36,6 +37,11 @@ Route::get('/auth/facebook/deletion', function () {
 // Public invoice routes
 Route::get('/inv/{publicId}', [InvoiceController::class, 'showPublic'])->name('invoice.public');
 Route::get('/inv/{publicId}/download', [InvoiceController::class, 'downloadPdf'])->name('invoice.download');
+
+// Payment routes
+Route::post('/payment/{publicId}/initiate', [PaymentController::class, 'initiate'])->name('payment.initiate');
+Route::get('/payment/callback', [PaymentController::class, 'callback'])->name('payment.callback');
+Route::post('/payment/webhook', [PaymentController::class, 'webhook'])->name('payment.webhook');
 
 // Social authentication routes (rate limited to prevent abuse)
 Route::get('/auth/{provider}/redirect', [SocialAuthController::class, 'redirect'])

@@ -31,11 +31,16 @@ class Invoice extends Model
         'notes',
         'footer',
         'public_id',
+        'payment_reference',
+        'payment_status',
+        'payment_gateway',
+        'paid_at',
     ];
 
     protected $casts = [
         'issue_date' => 'date',
         'due_date' => 'date',
+        'paid_at' => 'datetime',
         'sub_total' => 'decimal:2',
         'discount_total' => 'decimal:2',
         'vat_rate' => 'decimal:2',
