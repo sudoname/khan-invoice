@@ -24,12 +24,17 @@ class BusinessProfile extends Model
         'bank_account_name',
         'bank_account_number',
         'bank_account_type',
+        'paystack_subaccount_id',
+        'paystack_subaccount_code',
+        'paystack_settlement_bank',
+        'paystack_split_percentage',
         'default_currency',
         'default_vat_rate',
     ];
 
     protected $casts = [
         'default_vat_rate' => 'decimal:2',
+        'paystack_split_percentage' => 'decimal:2',
     ];
 
     public function user(): BelongsTo

@@ -52,8 +52,8 @@ class PaymentController extends Controller
                 'payment_gateway' => 'paystack',
             ]);
 
-            // Initialize Paystack transaction
-            $result = $this->paystackService->initializeTransaction([
+            // Prepare transaction data
+            $transactionData = [
                 'email' => $invoice->customer->email,
                 'amount' => $balanceDue,
                 'reference' => $reference,
@@ -62,8 +62,17 @@ class PaymentController extends Controller
                     'invoice_id' => $invoice->id,
                     'invoice_number' => $invoice->invoice_number,
                     'customer_name' => $invoice->customer->name,
+                    'business_name' => $invoice->businessProfile->business_name ?? '',
                 ],
-            ]);
+            ];
+
+            // Add subaccount if business has one configured
+            if ($invoice->businessProfile && $invoice->businessProfile->paystack_subaccount_code) {
+                $transactionData['subaccount'] = $invoice->businessProfile->paystack_subaccount_code;
+            }
+
+            // Initialize Paystack transaction
+            $result = $this->paystackService->initializeTransaction($transactionData);
 
             if ($result['status']) {
                 // Redirect to Paystack payment page
