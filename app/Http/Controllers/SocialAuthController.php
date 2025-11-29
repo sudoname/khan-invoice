@@ -72,12 +72,12 @@ class SocialAuthController extends Controller
             // Log the user in
             Auth::login($user, true);
 
-            // Redirect to admin dashboard
-            return redirect()->intended('/admin');
+            // Redirect to home page
+            return redirect()->intended('/');
 
         } catch (\Exception $e) {
             // Handle error
-            return redirect('/admin/login')->with('error', 'Unable to login using ' . ucfirst($provider) . '. Please try again.');
+            return redirect('/app/login')->with('error', 'Unable to login using ' . ucfirst($provider) . '. Please try again.');
         }
     }
 }

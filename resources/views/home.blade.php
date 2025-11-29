@@ -11,9 +11,15 @@
                         Create, manage, and track invoices with built-in VAT, Withholding Tax, and Nigerian banking support.
                     </p>
                     <div class="flex flex-col sm:flex-row gap-4">
-                        <a href="/login" class="bg-white text-purple-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition text-center">
-                            Get Started
-                        </a>
+                        @auth
+                            <a href="/app" class="bg-white text-purple-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition text-center">
+                                Go to Dashboard
+                            </a>
+                        @else
+                            <a href="/login" class="bg-white text-purple-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition text-center">
+                                Get Started
+                            </a>
+                        @endauth
                         <a href="/about" class="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-purple-600 transition text-center">
                             Learn More
                         </a>
@@ -154,9 +160,15 @@
             <p class="text-xl text-gray-600 mb-8">
                 Start creating professional Nigerian invoices in minutes.
             </p>
-            <a href="/login" class="inline-block gradient-bg text-white px-8 py-4 rounded-lg font-semibold text-lg hover:shadow-lg transition">
-                Get Started
-            </a>
+            @auth
+                <a href="/app" class="inline-block gradient-bg text-white px-8 py-4 rounded-lg font-semibold text-lg hover:shadow-lg transition">
+                    Go to Dashboard
+                </a>
+            @else
+                <a href="/login" class="inline-block gradient-bg text-white px-8 py-4 rounded-lg font-semibold text-lg hover:shadow-lg transition">
+                    Get Started
+                </a>
+            @endauth
         </div>
     </section>
 </x-layout>

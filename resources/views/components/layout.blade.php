@@ -33,7 +33,11 @@
                 <div class="flex items-center space-x-4">
                     <a href="/about" class="text-gray-700 hover:text-purple-600 px-3 py-2 rounded-md text-sm font-medium">About</a>
                     <a href="/contact" class="text-gray-700 hover:text-purple-600 px-3 py-2 rounded-md text-sm font-medium">Contact</a>
-                    <a href="/login" class="bg-purple-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-purple-700 transition">Login</a>
+                    @auth
+                        <a href="/app" class="bg-purple-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-purple-700 transition">Dashboard</a>
+                    @else
+                        <a href="/login" class="bg-purple-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-purple-700 transition">Login</a>
+                    @endauth
                 </div>
             </div>
         </div>
