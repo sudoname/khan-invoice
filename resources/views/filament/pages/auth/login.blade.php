@@ -1,7 +1,7 @@
 <x-filament-panels::page.simple>
     @if (filament()->hasLogin())
         <x-slot name="heading">
-            {{ config('app.name') }} - Sign in
+            Sign in
         </x-slot>
 
         {{ \Filament\Support\Facades\FilamentView::renderHook('panels::auth.login.form.before') }}
