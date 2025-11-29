@@ -110,6 +110,27 @@ class UserResource extends Resource
                     ->counts('invoices')
                     ->sortable()
                     ->alignCenter(),
+                Tables\Columns\TextColumn::make('total_invoiced')
+                    ->label('Total Invoiced')
+                    ->money('NGN')
+                    ->getStateUsing(fn (User $record): float => $record->invoices()->sum('total_amount'))
+                    ->sortable(query: function (Builder $query, string $direction): Builder {
+                        return $query->withSum('invoices as total_invoiced', 'total_amount')
+                            ->orderBy('total_invoiced', $direction);
+                    })
+                    ->color('success')
+                    ->weight('bold'),
+                Tables\Columns\TextColumn::make('total_paid')
+                    ->label('Total Paid')
+                    ->money('NGN')
+                    ->getStateUsing(fn (User $record): float => $record->invoices()->where('status', 'paid')->sum('total_amount'))
+                    ->color('primary')
+                    ->weight('semibold'),
+                Tables\Columns\TextColumn::make('total_pending')
+                    ->label('Pending')
+                    ->money('NGN')
+                    ->getStateUsing(fn (User $record): float => $record->invoices()->whereIn('status', ['draft', 'sent', 'overdue'])->sum('total_amount'))
+                    ->color('warning'),
                 Tables\Columns\TextColumn::make('customers_count')
                     ->label('Customers')
                     ->counts('customers')
