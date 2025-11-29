@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Invoice;
+use App\Models\Payment;
 use App\Services\PaystackService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -133,6 +134,23 @@ class PaymentController extends Controller
             if ($data['status'] === 'success') {
                 $amountPaid = PaystackService::toNaira($data['amount']);
 
+                // Check if payment record already exists to avoid duplicates
+                $existingPayment = Payment::where('reference_number', $reference)
+                    ->where('invoice_id', $invoice->id)
+                    ->first();
+
+                if (!$existingPayment) {
+                    // Create payment record
+                    Payment::create([
+                        'invoice_id' => $invoice->id,
+                        'amount' => $amountPaid,
+                        'payment_date' => now(),
+                        'payment_method' => 'paystack',
+                        'reference_number' => $reference,
+                        'notes' => 'Payment via Paystack - Transaction ID: ' . ($data['id'] ?? $reference),
+                    ]);
+                }
+
                 // Update invoice payment details
                 $invoice->update([
                     'amount_paid' => $invoice->amount_paid + $amountPaid,
@@ -189,6 +207,23 @@ class PaymentController extends Controller
 
                 if ($invoice) {
                     $amountPaid = PaystackService::toNaira($data['amount']);
+
+                    // Check if payment record already exists to avoid duplicates
+                    $existingPayment = Payment::where('reference_number', $reference)
+                        ->where('invoice_id', $invoice->id)
+                        ->first();
+
+                    if (!$existingPayment) {
+                        // Create payment record
+                        Payment::create([
+                            'invoice_id' => $invoice->id,
+                            'amount' => $amountPaid,
+                            'payment_date' => now(),
+                            'payment_method' => 'paystack',
+                            'reference_number' => $reference,
+                            'notes' => 'Payment via Paystack Webhook - Transaction ID: ' . ($data['id'] ?? $reference),
+                        ]);
+                    }
 
                     // Update invoice payment details
                     $invoice->update([
