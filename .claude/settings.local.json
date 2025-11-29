@@ -6,7 +6,9 @@
       "mcp__ide__getDiagnostics",
       "Bash(ssh root@147.182.242.177 \"grep -r ''VerifyCsrfToken'' /var/www/kinvoice.ng/bootstrap/app.php\")",
       "Bash(ssh root@147.182.242.177:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit -m \"Re-enable Facebook login and update navigation for logged-in users\n\n- Re-enabled Facebook login button (app is now approved)\n- Changed social auth redirect from /admin to home page (/)\n- Updated error redirect to /app/login instead of /admin/login\n- Navigation now shows ''Dashboard'' when logged in, ''Login'' when not\n- Home page CTAs update based on auth state:\n  - ''Get Started'' → ''Go to Dashboard'' for logged-in users\n- All redirects now go to home page for better UX\n\n$(cat <<''EOF''\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")",
+      "Bash(git push:*)"
     ],
     "deny": [],
     "ask": []

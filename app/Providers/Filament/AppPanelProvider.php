@@ -27,7 +27,7 @@ class AppPanelProvider extends PanelProvider
             ->id('app')
             ->path('app')
             ->login(\App\Filament\Pages\Auth\Login::class)
-            ->registration()
+            ->registration(\App\Filament\Pages\Auth\Register::class)
             ->emailVerification()
             ->colors([
                 'primary' => Color::Amber,
