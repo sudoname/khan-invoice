@@ -21,6 +21,14 @@ class SocialAuthController extends Controller
             abort(404);
         }
 
+        // For Facebook, only request public_profile scope (always approved)
+        // Email scope requires Facebook App Review approval
+        if ($provider === 'facebook') {
+            return Socialite::driver($provider)
+                ->scopes(['public_profile'])
+                ->redirect();
+        }
+
         return Socialite::driver($provider)->redirect();
     }
 
@@ -44,8 +52,16 @@ class SocialAuthController extends Controller
                 ->first();
 
             if (!$user) {
+                // Get email from social provider (may be null for Facebook without approval)
+                $email = $socialUser->getEmail();
+
+                // For Facebook without email permission, generate email from ID
+                if (!$email && $provider === 'facebook') {
+                    $email = 'facebook_' . $socialUser->getId() . '@kinvoice.ng';
+                }
+
                 // Check if user with this email already exists
-                $existingUser = User::where('email', $socialUser->getEmail())->first();
+                $existingUser = User::where('email', $email)->first();
 
                 if ($existingUser) {
                     // Link social account to existing user
@@ -59,7 +75,7 @@ class SocialAuthController extends Controller
                     // Create new user
                     $user = User::create([
                         'name' => $socialUser->getName(),
-                        'email' => $socialUser->getEmail(),
+                        'email' => $email,
                         'provider' => $provider,
                         'provider_id' => $socialUser->getId(),
                         'avatar' => $socialUser->getAvatar(),
