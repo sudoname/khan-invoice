@@ -122,8 +122,7 @@ class BusinessProfileResource extends Resource
                             ->imageCropAspectRatio(null)
                             ->imageResizeTargetWidth('500')
                             ->imageResizeTargetHeight('500')
-                            ->optimize('webp')
-                            ->helperText('Recommended: PNG or JPG, max 2MB. Will be optimized automatically.')
+                            ->helperText('Recommended: PNG or JPG, max 2MB. Images will be resized to 500x500.')
                             ->columnSpanFull(),
                     ])
                     ->columns(2),
