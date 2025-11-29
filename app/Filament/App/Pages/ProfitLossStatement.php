@@ -71,7 +71,7 @@ class ProfitLossStatement extends Page
 
         $totalRevenue = $revenueQuery->sum('total_amount');
         $revenueByMonth = $revenueQuery
-            ->selectRaw("CAST(strftime('%m', issue_date) AS INTEGER) as month, SUM(total_amount) as total")
+            ->selectRaw("MONTH(issue_date) as month, SUM(total_amount) as total")
             ->groupBy('month')
             ->pluck('total', 'month')
             ->toArray();
@@ -93,7 +93,7 @@ class ProfitLossStatement extends Page
             ->toArray();
 
         $expensesByMonth = $expensesQuery
-            ->selectRaw("CAST(strftime('%m', expense_date) AS INTEGER) as month, SUM(total_amount) as total")
+            ->selectRaw("MONTH(expense_date) as month, SUM(total_amount) as total")
             ->groupBy('month')
             ->pluck('total', 'month')
             ->toArray();
