@@ -13,26 +13,37 @@ class UserStatsOverview extends BaseWidget
 
     protected function getStats(): array
     {
-        // Total users
+        $lastMonthEnd = now()->subMonth()->endOfMonth();
+
+        // Current totals
         $totalUsers = User::count();
         $verifiedUsers = User::whereNotNull('email_verified_at')->count();
         $activeUsers = User::whereHas('invoices')->count();
 
-        // All invoices across all users
-        $allInvoices = Invoice::query();
+        // Last month totals for comparison
+        $lastMonthUsers = User::where('created_at', '<=', $lastMonthEnd)->count();
+        $lastMonthActiveUsers = User::where('created_at', '<=', $lastMonthEnd)
+            ->whereHas('invoices', function ($query) use ($lastMonthEnd) {
+                $query->where('created_at', '<=', $lastMonthEnd);
+            })->count();
 
         // Total invoiced amount
-        $totalInvoiced = $allInvoices->sum('total_amount');
-
-        // Total paid
-        $totalPaid = Invoice::where('status', 'paid')->sum('total_amount');
+        $totalInvoiced = Invoice::sum('total_amount');
+        $lastMonthTotalInvoiced = Invoice::where('created_at', '<=', $lastMonthEnd)->sum('total_amount');
 
         // Total amount paid (including partially paid)
         $totalAmountPaid = Invoice::sum('amount_paid');
+        $lastMonthAmountPaid = Invoice::where('created_at', '<=', $lastMonthEnd)->sum('amount_paid');
 
         // Pending/Outstanding
         $totalPending = Invoice::whereIn('status', ['draft', 'sent', 'overdue', 'partially_paid'])
             ->sum('total_amount') - Invoice::whereIn('status', ['partially_paid'])
+            ->sum('amount_paid');
+
+        $lastMonthPending = Invoice::where('created_at', '<=', $lastMonthEnd)
+            ->whereIn('status', ['draft', 'sent', 'overdue', 'partially_paid'])
+            ->sum('total_amount') - Invoice::where('created_at', '<=', $lastMonthEnd)
+            ->whereIn('status', ['partially_paid'])
             ->sum('amount_paid');
 
         // Overdue
@@ -40,6 +51,9 @@ class UserStatsOverview extends BaseWidget
 
         // Total invoices by status
         $totalProcessed = Invoice::whereIn('status', ['paid', 'partially_paid', 'sent', 'overdue'])->count();
+        $lastMonthProcessed = Invoice::where('created_at', '<=', $lastMonthEnd)
+            ->whereIn('status', ['paid', 'partially_paid', 'sent', 'overdue'])->count();
+
         $totalDraft = Invoice::where('status', 'draft')->count();
         $paidCount = Invoice::where('status', 'paid')->count();
 
@@ -57,27 +71,58 @@ class UserStatsOverview extends BaseWidget
             ->whereYear('created_at', now()->subMonth()->year)
             ->sum('total_amount');
 
+        // Calculate growth rates
+        $usersGrowth = $lastMonthUsers > 0
+            ? round((($totalUsers - $lastMonthUsers) / $lastMonthUsers) * 100, 1)
+            : ($totalUsers > 0 ? 100 : 0);
+
+        $activeUsersGrowth = $lastMonthActiveUsers > 0
+            ? round((($activeUsers - $lastMonthActiveUsers) / $lastMonthActiveUsers) * 100, 1)
+            : ($activeUsers > 0 ? 100 : 0);
+
+        $invoicedGrowth = $lastMonthTotalInvoiced > 0
+            ? round((($totalInvoiced - $lastMonthTotalInvoiced) / $lastMonthTotalInvoiced) * 100, 1)
+            : ($totalInvoiced > 0 ? 100 : 0);
+
+        $paidGrowth = $lastMonthAmountPaid > 0
+            ? round((($totalAmountPaid - $lastMonthAmountPaid) / $lastMonthAmountPaid) * 100, 1)
+            : ($totalAmountPaid > 0 ? 100 : 0);
+
+        $pendingGrowth = $lastMonthPending > 0
+            ? round((($totalPending - $lastMonthPending) / $lastMonthPending) * 100, 1)
+            : ($totalPending > 0 ? 100 : 0);
+
+        $processedGrowth = $lastMonthProcessed > 0
+            ? round((($totalProcessed - $lastMonthProcessed) / $lastMonthProcessed) * 100, 1)
+            : ($totalProcessed > 0 ? 100 : 0);
+
+        $avgInvoiceValue = $totalProcessed > 0 ? $totalInvoiced / $totalProcessed : 0;
+        $lastMonthAvgValue = $lastMonthProcessed > 0 ? $lastMonthTotalInvoiced / $lastMonthProcessed : 0;
+        $avgValueGrowth = $lastMonthAvgValue > 0
+            ? round((($avgInvoiceValue - $lastMonthAvgValue) / $lastMonthAvgValue) * 100, 1)
+            : ($avgInvoiceValue > 0 ? 100 : 0);
+
         $monthlyGrowth = $lastMonthInvoiced > 0
             ? round((($thisMonthInvoiced - $lastMonthInvoiced) / $lastMonthInvoiced) * 100, 1)
-            : 0;
+            : ($thisMonthInvoiced > 0 ? 100 : 0);
 
         return [
             Stat::make('Total Users', number_format($totalUsers))
-                ->description("{$verifiedUsers} verified ({$verificationRate}%)")
-                ->descriptionIcon('heroicon-m-users')
-                ->color('primary')
+                ->description(($usersGrowth >= 0 ? '+' : '') . $usersGrowth . '% from last month')
+                ->descriptionIcon($usersGrowth >= 0 ? 'heroicon-m-arrow-trending-up' : 'heroicon-m-arrow-trending-down')
+                ->color($usersGrowth >= 0 ? 'success' : 'danger')
                 ->chart([7, 12, 15, 18, 22, 25, $totalUsers]),
 
             Stat::make('Active Users', number_format($activeUsers))
-                ->description("{$activeRate}% of all users")
-                ->descriptionIcon('heroicon-m-arrow-trending-up')
-                ->color('success')
+                ->description(($activeUsersGrowth >= 0 ? '+' : '') . $activeUsersGrowth . '% from last month')
+                ->descriptionIcon($activeUsersGrowth >= 0 ? 'heroicon-m-arrow-trending-up' : 'heroicon-m-arrow-trending-down')
+                ->color($activeUsersGrowth >= 0 ? 'success' : 'danger')
                 ->chart([3, 7, 9, 12, 15, 18, $activeUsers]),
 
             Stat::make('Total Invoiced', '₦' . number_format($totalInvoiced, 2))
-                ->description("Across all users")
-                ->descriptionIcon('heroicon-m-document-text')
-                ->color('info')
+                ->description(($invoicedGrowth >= 0 ? '+' : '') . $invoicedGrowth . '% from last month')
+                ->descriptionIcon($invoicedGrowth >= 0 ? 'heroicon-m-arrow-trending-up' : 'heroicon-m-arrow-trending-down')
+                ->color($invoicedGrowth >= 0 ? 'success' : 'danger')
                 ->chart([
                     $totalInvoiced * 0.3,
                     $totalInvoiced * 0.5,
@@ -88,9 +133,9 @@ class UserStatsOverview extends BaseWidget
                 ]),
 
             Stat::make('Total Paid', '₦' . number_format($totalAmountPaid, 2))
-                ->description("{$paidCount} invoices • {$collectionRate}% collection rate")
-                ->descriptionIcon('heroicon-m-check-circle')
-                ->color('success')
+                ->description(($paidGrowth >= 0 ? '+' : '') . $paidGrowth . '% from last month')
+                ->descriptionIcon($paidGrowth >= 0 ? 'heroicon-m-arrow-trending-up' : 'heroicon-m-arrow-trending-down')
+                ->color($paidGrowth >= 0 ? 'success' : 'danger')
                 ->chart([
                     $totalAmountPaid * 0.4,
                     $totalAmountPaid * 0.6,
@@ -101,9 +146,9 @@ class UserStatsOverview extends BaseWidget
                 ]),
 
             Stat::make('Outstanding', '₦' . number_format($totalPending, 2))
-                ->description($totalOverdue > 0 ? '₦' . number_format($totalOverdue, 2) . ' overdue' : 'No overdue invoices')
-                ->descriptionIcon($totalOverdue > 0 ? 'heroicon-m-exclamation-triangle' : 'heroicon-m-clock')
-                ->color($totalOverdue > 0 ? 'warning' : 'gray')
+                ->description(($pendingGrowth >= 0 ? '+' : '') . $pendingGrowth . '% from last month')
+                ->descriptionIcon($pendingGrowth >= 0 ? 'heroicon-m-arrow-trending-down' : 'heroicon-m-arrow-trending-up')
+                ->color($pendingGrowth >= 0 ? 'danger' : 'success')
                 ->chart([
                     $totalPending * 0.6,
                     $totalPending * 0.8,
@@ -114,9 +159,9 @@ class UserStatsOverview extends BaseWidget
                 ]),
 
             Stat::make('Invoices Processed', number_format($totalProcessed))
-                ->description("{$totalDraft} drafts pending")
-                ->descriptionIcon('heroicon-m-document-check')
-                ->color('primary')
+                ->description(($processedGrowth >= 0 ? '+' : '') . $processedGrowth . '% from last month')
+                ->descriptionIcon($processedGrowth >= 0 ? 'heroicon-m-arrow-trending-up' : 'heroicon-m-arrow-trending-down')
+                ->color($processedGrowth >= 0 ? 'success' : 'danger')
                 ->chart([
                     $totalProcessed * 0.5,
                     $totalProcessed * 0.65,
@@ -139,10 +184,10 @@ class UserStatsOverview extends BaseWidget
                     $thisMonthInvoiced
                 ]),
 
-            Stat::make('Avg Invoice Value', $totalProcessed > 0 ? '₦' . number_format($totalInvoiced / $totalProcessed, 2) : '₦0.00')
-                ->description("Based on {$totalProcessed} invoices")
-                ->descriptionIcon('heroicon-m-calculator')
-                ->color('info'),
+            Stat::make('Avg Invoice Value', $avgInvoiceValue > 0 ? '₦' . number_format($avgInvoiceValue, 2) : '₦0.00')
+                ->description(($avgValueGrowth >= 0 ? '+' : '') . $avgValueGrowth . '% from last month')
+                ->descriptionIcon($avgValueGrowth >= 0 ? 'heroicon-m-arrow-trending-up' : 'heroicon-m-arrow-trending-down')
+                ->color($avgValueGrowth >= 0 ? 'success' : 'danger'),
         ];
     }
 
