@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(curl:*)",
+      "Bash(php artisan:*)",
+      "mcp__ide__getDiagnostics"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
