@@ -165,7 +165,7 @@
                     @if($invoice->discount_percentage > 0)
                     <div class="flex justify-between py-2 border-b border-gray-200">
                         <span class="text-gray-700">Discount ({{ number_format($invoice->discount_percentage, 2) }}%):</span>
-                        <span class="font-semibold text-red-600">-₦{{ number_format($invoice->discount_amount, 2) }}</span>
+                        <span class="font-semibold text-green-600">-₦{{ number_format($invoice->discount_amount, 2) }}</span>
                     </div>
                     @endif
                     <div class="flex justify-between py-3 bg-gradient-to-r from-purple-50 to-blue-50 px-4 rounded-lg mt-2">

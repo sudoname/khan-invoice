@@ -261,7 +261,7 @@
             @if($invoice->discount_percentage > 0)
             <tr>
                 <td>Discount ({{ number_format($invoice->discount_percentage, 2) }}%):</td>
-                <td class="text-right"><strong style="color: #dc2626;">-₦{{ number_format($invoice->discount_amount, 2) }}</strong></td>
+                <td class="text-right"><strong style="color: #16a34a;">-₦{{ number_format($invoice->discount_amount, 2) }}</strong></td>
             </tr>
             @endif
             <tr class="total-row">
@@ -281,9 +281,19 @@
         <!-- Payment Section -->
         <div class="payment-section">
             <h3>PAY THIS INVOICE</h3>
-            <p>To pay this invoice securely online, visit:</p>
-            <p class="payment-link">{{ route('public-invoice.show', $invoice->public_id) }}</p>
-            <p style="margin-top: 10px; font-size: 8pt;">Visit the link above to pay via card, bank transfer, or other payment methods.</p>
+            <div style="display: table; width: 100%;">
+                <div style="display: table-cell; width: 70%; vertical-align: top;">
+                    <p>To pay this invoice securely online, visit:</p>
+                    <p class="payment-link">{{ route('public-invoice.show', $invoice->public_id) }}</p>
+                    <p style="margin-top: 10px; font-size: 8pt;">Visit the link above to pay via card, bank transfer, or other payment methods.</p>
+                </div>
+                <div style="display: table-cell; width: 30%; text-align: right; vertical-align: top;">
+                    <div style="background: white; padding: 10px; display: inline-block;">
+                        {!! QrCode::size(120)->generate(route('public-invoice.show', $invoice->public_id)) !!}
+                    </div>
+                    <p style="font-size: 7pt; margin-top: 5px; color: #666;">Scan to pay</p>
+                </div>
+            </div>
         </div>
 
         <!-- Footer -->
