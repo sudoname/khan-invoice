@@ -42,8 +42,8 @@
                                     <span class="font-semibold">₦37,500.00</span>
                                 </div>
                                 <div class="flex justify-between">
-                                    <span class="text-gray-600">WHT (5%)</span>
-                                    <span class="font-semibold text-red-600">-₦25,000.00</span>
+                                    <span class="text-gray-600">Discount (5%)</span>
+                                    <span class="font-semibold text-green-600">-₦25,000.00</span>
                                 </div>
                                 <div class="flex justify-between pt-2 border-t-2 border-purple-600">
                                     <span class="font-bold text-lg">Total</span>
