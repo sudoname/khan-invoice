@@ -151,6 +151,96 @@
         </div>
     </section>
 
+    <!-- Free Invoice Generator Section -->
+    <section class="py-20 bg-gradient-to-br from-purple-600 to-blue-600">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="bg-white rounded-2xl shadow-2xl p-8 md:p-12">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+                    <div>
+                        <div class="inline-block bg-purple-100 text-purple-600 px-4 py-2 rounded-lg font-semibold text-sm mb-4">
+                            Try it Free - No Signup Required
+                        </div>
+                        <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                            Free Invoice Generator
+                        </h2>
+                        <p class="text-xl text-gray-600 mb-6">
+                            Create professional Nigerian invoices instantly without creating an account. Try our invoice generator and see how easy it is!
+                        </p>
+                        <ul class="space-y-3 mb-8">
+                            <li class="flex items-start">
+                                <svg class="w-6 h-6 text-green-600 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                </svg>
+                                <span class="text-gray-700">No signup or registration required</span>
+                            </li>
+                            <li class="flex items-start">
+                                <svg class="w-6 h-6 text-green-600 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                </svg>
+                                <span class="text-gray-700">Automatic VAT and WHT calculations</span>
+                            </li>
+                            <li class="flex items-start">
+                                <svg class="w-6 h-6 text-green-600 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                </svg>
+                                <span class="text-gray-700">Professional PDF download</span>
+                            </li>
+                            <li class="flex items-start">
+                                <svg class="w-6 h-6 text-green-600 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                </svg>
+                                <span class="text-gray-700">Nigerian Naira (₦) formatting</span>
+                            </li>
+                        </ul>
+                        <a href="{{ route('public-invoice.create') }}" class="inline-block bg-gradient-to-r from-purple-600 to-blue-600 text-white px-8 py-4 rounded-lg font-semibold text-lg hover:from-purple-700 hover:to-blue-700 transition transform hover:scale-105 shadow-lg">
+                            Try Invoice Generator Free
+                        </a>
+                    </div>
+                    <div class="hidden md:block">
+                        <div class="relative">
+                            <div class="absolute -top-4 -right-4 bg-yellow-400 text-yellow-900 px-4 py-2 rounded-lg font-bold text-sm transform rotate-12 shadow-lg">
+                                100% Free!
+                            </div>
+                            <div class="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-6 shadow-2xl border-2 border-purple-200">
+                                <div class="flex justify-between items-center mb-4 pb-3 border-b-2 border-purple-600">
+                                    <div class="text-purple-600 font-bold text-lg">Sample Invoice</div>
+                                    <div class="text-sm text-gray-500">INV-20250130</div>
+                                </div>
+                                <div class="space-y-3 text-sm mb-4">
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Web Design Services</span>
+                                        <span class="font-semibold">₦250,000</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Hosting (12 months)</span>
+                                        <span class="font-semibold">₦50,000</span>
+                                    </div>
+                                    <div class="flex justify-between pt-2 border-t">
+                                        <span class="text-gray-600">Subtotal</span>
+                                        <span class="font-semibold">₦300,000</span>
+                                    </div>
+                                    <div class="flex justify-between text-green-600">
+                                        <span>VAT (7.5%)</span>
+                                        <span class="font-semibold">+₦22,500</span>
+                                    </div>
+                                    <div class="flex justify-between pt-2 border-t-2 border-purple-600">
+                                        <span class="font-bold">Total</span>
+                                        <span class="font-bold text-purple-600">₦322,500</span>
+                                    </div>
+                                </div>
+                                <div class="mt-4 pt-4 border-t">
+                                    <div class="text-xs text-gray-500 text-center">
+                                        Download as PDF • Email to Client • Professional Format
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- CTA Section -->
     <section class="py-20 bg-gray-50">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">

@@ -1,0 +1,163 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\PublicInvoice;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Http\Request;
+
+class PublicInvoiceController extends Controller
+{
+    /**
+     * Show the invoice generator form
+     */
+    public function create()
+    {
+        return view('public-invoice.create');
+    }
+
+    /**
+     * Generate invoice preview and save to database
+     */
+    public function preview(Request $request)
+    {
+        $data = $this->validateAndPrepareData($request);
+
+        // Create public invoice
+        $publicInvoice = PublicInvoice::create([
+            'public_id' => PublicInvoice::generatePublicId(),
+            'invoice_number' => $data['invoice_number'],
+            'from_name' => $data['from_name'],
+            'from_email' => $data['from_email'] ?? null,
+            'from_phone' => $data['from_phone'] ?? null,
+            'from_address' => $data['from_address'] ?? null,
+            'from_bank_name' => $data['from_bank_name'] ?? null,
+            'from_account_number' => $data['from_account_number'] ?? null,
+            'from_account_name' => $data['from_account_name'] ?? null,
+            'from_account_type' => $data['from_account_type'] ?? null,
+            'to_name' => $data['to_name'],
+            'to_email' => $data['to_email'] ?? null,
+            'to_phone' => $data['to_phone'] ?? null,
+            'to_address' => $data['to_address'] ?? null,
+            'issue_date' => $data['issue_date'],
+            'due_date' => $data['due_date'],
+            'items' => $data['items'],
+            'subtotal' => $data['subtotal'],
+            'vat_percentage' => $data['vat_percentage'] ?? 0,
+            'vat_amount' => $data['vat_amount'],
+            'wht_percentage' => $data['wht_percentage'] ?? 0,
+            'wht_amount' => $data['wht_amount'],
+            'discount_percentage' => $data['discount_percentage'] ?? 0,
+            'discount_amount' => $data['discount_amount'],
+            'total_amount' => $data['total_amount'],
+            'notes' => $data['notes'] ?? null,
+        ]);
+
+        // Redirect to the invoice show page
+        return redirect()->route('public-invoice.show', $publicInvoice->public_id);
+    }
+
+    /**
+     * Show a saved public invoice
+     */
+    public function show(string $publicId)
+    {
+        $invoice = PublicInvoice::where('public_id', $publicId)->firstOrFail();
+
+        return view('public-invoice.show', compact('invoice'));
+    }
+
+    /**
+     * Download invoice as PDF
+     */
+    public function download(string $publicId)
+    {
+        $invoice = PublicInvoice::where('public_id', $publicId)->firstOrFail();
+
+        $pdf = Pdf::loadView('public-invoice.pdf', ['invoice' => $invoice]);
+
+        $filename = 'invoice-' . $invoice->invoice_number . '.pdf';
+
+        return $pdf->download($filename);
+    }
+
+    /**
+     * Handle payment for a public invoice
+     */
+    public function pay(string $publicId)
+    {
+        $invoice = PublicInvoice::where('public_id', $publicId)->firstOrFail();
+
+        // For now, just show the invoice with payment option
+        // This will be enhanced with actual Paystack integration
+        return view('public-invoice.show', compact('invoice'));
+    }
+
+    /**
+     * Validate and prepare invoice data
+     */
+    private function validateAndPrepareData(Request $request)
+    {
+        $validated = $request->validate([
+            // From (Business)
+            'from_name' => 'required|string|max:255',
+            'from_email' => 'nullable|email|max:255',
+            'from_phone' => 'nullable|string|max:50',
+            'from_address' => 'nullable|string|max:500',
+            'from_bank_name' => 'nullable|string|max:255',
+            'from_account_number' => 'nullable|string|max:50',
+            'from_account_name' => 'nullable|string|max:255',
+            'from_account_type' => 'nullable|string|max:50',
+
+            // To (Customer)
+            'to_name' => 'required|string|max:255',
+            'to_email' => 'nullable|email|max:255',
+            'to_phone' => 'nullable|string|max:50',
+            'to_address' => 'nullable|string|max:500',
+
+            // Invoice Details
+            'invoice_number' => 'nullable|string|max:50',
+            'issue_date' => 'required|date',
+            'due_date' => 'required|date|after_or_equal:issue_date',
+
+            // Items
+            'items' => 'required|array|min:1',
+            'items.*.description' => 'required|string|max:500',
+            'items.*.quantity' => 'required|numeric|min:0.01',
+            'items.*.unit_price' => 'required|numeric|min:0',
+
+            // Tax and Discount
+            'vat_percentage' => 'nullable|numeric|min:0|max:100',
+            'wht_percentage' => 'nullable|numeric|min:0|max:100',
+            'discount_percentage' => 'nullable|numeric|min:0|max:100',
+
+            // Notes
+            'notes' => 'nullable|string|max:1000',
+        ]);
+
+        // Generate invoice number if not provided
+        if (empty($validated['invoice_number'])) {
+            $validated['invoice_number'] = 'INV-' . now()->format('YmdHis');
+        }
+
+        // Calculate totals
+        $subtotal = 0;
+        foreach ($validated['items'] as &$item) {
+            $item['total'] = $item['quantity'] * $item['unit_price'];
+            $subtotal += $item['total'];
+        }
+
+        $vat = $subtotal * ($validated['vat_percentage'] ?? 0) / 100;
+        $wht = $subtotal * ($validated['wht_percentage'] ?? 0) / 100;
+        $discount = $subtotal * ($validated['discount_percentage'] ?? 0) / 100;
+        $total = $subtotal + $vat - $wht - $discount;
+
+        $validated['subtotal'] = $subtotal;
+        $validated['vat_amount'] = $vat;
+        $validated['wht_amount'] = $wht;
+        $validated['discount_amount'] = $discount;
+        $validated['total_amount'] = $total;
+
+        return $validated;
+    }
+}

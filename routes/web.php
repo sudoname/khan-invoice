@@ -3,6 +3,7 @@
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\PublicInvoiceController;
 use App\Http\Controllers\SocialAuthController;
 use Illuminate\Support\Facades\Route;
 
@@ -40,6 +41,13 @@ Route::get('/faq', function () {
 Route::get('/auth/facebook/deletion', function () {
     return view('pages.facebook-deletion');
 });
+
+// Public Invoice Generator routes
+Route::get('/invoice-generator', [PublicInvoiceController::class, 'create'])->name('public-invoice.create');
+Route::post('/invoice-generator/preview', [PublicInvoiceController::class, 'preview'])->name('public-invoice.preview');
+Route::get('/invoice/{publicId}', [PublicInvoiceController::class, 'show'])->name('public-invoice.show');
+Route::get('/invoice/{publicId}/download', [PublicInvoiceController::class, 'download'])->name('public-invoice.download');
+Route::get('/invoice/{publicId}/pay', [PublicInvoiceController::class, 'pay'])->name('public-invoice.pay');
 
 // Public invoice routes
 Route::get('/inv/{publicId}', [InvoiceController::class, 'showPublic'])->name('invoice.public');
