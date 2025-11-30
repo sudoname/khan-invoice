@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ContactController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\SocialAuthController;
@@ -28,6 +29,12 @@ Route::get('/about', function () {
 
 Route::get('/contact', function () {
     return view('pages.contact');
+});
+
+Route::post('/contact', [ContactController::class, 'store'])->name('contact.store');
+
+Route::get('/faq', function () {
+    return view('pages.faq');
 });
 
 Route::get('/auth/facebook/deletion', function () {

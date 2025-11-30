@@ -103,31 +103,41 @@
                     <h2 class="text-3xl font-bold text-gray-900 mb-2">Send Us a Message</h2>
                     <p class="text-gray-600 mb-6">Fill out the form below and we'll get back to you as soon as possible.</p>
 
-                    <form action="#" method="POST" class="space-y-6" id="contactForm">
+                    @if(session('success'))
+                        <div class="mb-6 bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded">
+                            <p class="font-medium">{{ session('success') }}</p>
+                        </div>
+                    @endif
+
+                    @if($errors->any())
+                        <div class="mb-6 bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded">
+                            <ul class="list-disc list-inside">
+                                @foreach($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+
+                    <form action="{{ route('contact.store') }}" method="POST" class="space-y-6">
+                        @csrf
                         <div>
                             <label for="name" class="block text-sm font-semibold text-gray-700 mb-2">Full Name *</label>
-                            <input type="text" id="name" name="name" required
+                            <input type="text" id="name" name="name" required value="{{ old('name') }}"
                                 class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition"
                                 placeholder="John Doe">
                         </div>
 
                         <div>
                             <label for="email" class="block text-sm font-semibold text-gray-700 mb-2">Email Address *</label>
-                            <input type="email" id="email" name="email" required
+                            <input type="email" id="email" name="email" required value="{{ old('email') }}"
                                 class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition"
                                 placeholder="john@example.com">
                         </div>
 
                         <div>
-                            <label for="phone" class="block text-sm font-semibold text-gray-700 mb-2">Phone Number</label>
-                            <input type="tel" id="phone" name="phone"
-                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition"
-                                placeholder="+234 800 000 0000">
-                        </div>
-
-                        <div>
                             <label for="subject" class="block text-sm font-semibold text-gray-700 mb-2">Subject *</label>
-                            <input type="text" id="subject" name="subject" required
+                            <input type="text" id="subject" name="subject" required value="{{ old('subject') }}"
                                 class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition"
                                 placeholder="How can we help?">
                         </div>
@@ -136,7 +146,7 @@
                             <label for="message" class="block text-sm font-semibold text-gray-700 mb-2">Message *</label>
                             <textarea id="message" name="message" rows="5" required
                                 class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition resize-none"
-                                placeholder="Tell us more about your inquiry..."></textarea>
+                                placeholder="Tell us more about your inquiry...">{{ old('message') }}</textarea>
                         </div>
 
                         <button type="submit"
@@ -151,21 +161,6 @@
                             We typically respond within 24-48 hours during business days.
                         </p>
                     </form>
-
-                    <script>
-                        document.getElementById('contactForm').addEventListener('submit', function(e) {
-                            e.preventDefault();
-                            const formData = new FormData(this);
-                            const name = formData.get('name');
-                            const email = formData.get('email');
-                            const subject = formData.get('subject');
-                            const message = formData.get('message');
-
-                            // Create mailto link
-                            const mailtoLink = `mailto:info@khan.ng?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(`Name: ${name}\nEmail: ${email}\n\nMessage:\n${message}`)}`;
-                            window.location.href = mailtoLink;
-                        });
-                    </script>
                 </div>
 
                 <!-- CTA Box -->
