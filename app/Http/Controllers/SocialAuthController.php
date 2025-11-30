@@ -69,6 +69,7 @@ class SocialAuthController extends Controller
                         'provider' => $provider,
                         'provider_id' => $socialUser->getId(),
                         'avatar' => $socialUser->getAvatar(),
+                        'email_verified_at' => now(), // Ensure OAuth users are verified
                     ]);
                     $user = $existingUser;
                 } else {
@@ -82,6 +83,11 @@ class SocialAuthController extends Controller
                         'password' => Hash::make(Str::random(24)), // Random password
                         'email_verified_at' => now(), // Social accounts are pre-verified
                     ]);
+                }
+            } else {
+                // Ensure existing OAuth user is verified
+                if (!$user->email_verified_at) {
+                    $user->update(['email_verified_at' => now()]);
                 }
             }
 
