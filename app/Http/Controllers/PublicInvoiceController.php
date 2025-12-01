@@ -101,10 +101,27 @@ class PublicInvoiceController extends Controller
      */
     public function webhook(Request $request)
     {
+        // Log all webhook requests
+        Log::info('Public invoice webhook received', [
+            'event' => $request->input('event'),
+            'reference' => $request->input('data.reference'),
+            'headers' => $request->headers->all(),
+        ]);
+
         // Verify Paystack signature
         $signature = $request->header('x-paystack-signature');
 
-        if (!$signature || $signature !== hash_hmac('sha512', $request->getContent(), config('services.paystack.secret_key'))) {
+        if (!$signature) {
+            Log::warning('Webhook missing signature');
+            return response()->json(['message' => 'Missing signature'], 400);
+        }
+
+        $computedSignature = hash_hmac('sha512', $request->getContent(), config('services.paystack.secret_key'));
+        if ($signature !== $computedSignature) {
+            Log::warning('Webhook signature mismatch', [
+                'received' => $signature,
+                'computed' => $computedSignature,
+            ]);
             return response()->json(['message' => 'Invalid signature'], 400);
         }
 
@@ -112,8 +129,11 @@ class PublicInvoiceController extends Controller
         $data = $request->input('data');
 
         try {
+            Log::info('Processing webhook event', ['event' => $event]);
+
             if ($event === 'charge.success') {
                 $reference = $data['reference'];
+                Log::info('Processing charge.success', ['reference' => $reference]);
 
                 // Check if this is a public invoice payment (reference starts with KI_PUBLIC_)
                 if (str_starts_with($reference, 'KI_PUBLIC_')) {
@@ -122,10 +142,12 @@ class PublicInvoiceController extends Controller
 
                     if (isset($matches[1])) {
                         $publicId = $matches[1];
+                        Log::info('Extracted public_id', ['publicId' => $publicId]);
+
                         $invoice = PublicInvoice::where('public_id', $publicId)->first();
 
                         if ($invoice) {
-                            $amountPaid = PaystackService::toNaira($data['amount']);
+                            $amountPaid = $data['amount'] / 100; // Convert from kobo to naira
 
                             // Update invoice payment details
                             $invoice->update([
@@ -138,15 +160,24 @@ class PublicInvoiceController extends Controller
                                 'reference' => $reference,
                                 'amount' => $amountPaid,
                             ]);
+                        } else {
+                            Log::warning('Invoice not found', ['publicId' => $publicId]);
                         }
+                    } else {
+                        Log::warning('Could not extract publicId from reference', ['reference' => $reference]);
                     }
+                } else {
+                    Log::info('Not a public invoice payment', ['reference' => $reference]);
                 }
             }
 
             return response()->json(['message' => 'Webhook processed'], 200);
 
         } catch (\Exception $e) {
-            Log::error('Public invoice webhook processing error: ' . $e->getMessage());
+            Log::error('Public invoice webhook processing error: ' . $e->getMessage(), [
+                'exception' => $e,
+                'trace' => $e->getTraceAsString(),
+            ]);
             return response()->json(['message' => 'Error processing webhook'], 500);
         }
     }
