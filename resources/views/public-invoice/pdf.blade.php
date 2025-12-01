@@ -281,21 +281,10 @@
         <!-- Payment Section -->
         <div class="payment-section">
             <h3>PAY THIS INVOICE</h3>
-            <div style="display: table; width: 100%;">
-                <div style="display: table-cell; width: 70%; vertical-align: top;">
-                    <p>To pay this invoice securely online, visit:</p>
-                    <p class="payment-link">{{ route('public-invoice.show', $invoice->public_id) }}</p>
-                    <p style="margin-top: 10px; font-size: 8pt;">Visit the link above to pay via card, bank transfer, or other payment methods.</p>
-                </div>
-                <div style="display: table-cell; width: 30%; text-align: right; vertical-align: top;">
-                    <div style="background: white; padding: 10px; display: inline-block;">
-                        @php
-                            $qrCode = base64_encode(QrCode::format('png')->size(120)->errorCorrection('H')->generate(route('public-invoice.show', $invoice->public_id)));
-                        @endphp
-                        <img src="data:image/png;base64,{{ $qrCode }}" alt="QR Code" style="width: 120px; height: 120px;">
-                    </div>
-                    <p style="font-size: 7pt; margin-top: 5px; color: #666;">Scan to pay</p>
-                </div>
+            <div style="width: 100%;">
+                <p>To pay this invoice securely online, visit:</p>
+                <p class="payment-link">{{ route('public-invoice.show', $invoice->public_id) }}</p>
+                <p style="margin-top: 10px; font-size: 8pt;">Visit the link above to pay via card, bank transfer, or other payment methods.</p>
             </div>
         </div>
 
