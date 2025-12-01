@@ -48,6 +48,7 @@ Route::post('/invoice-generator/preview', [PublicInvoiceController::class, 'prev
 Route::get('/invoice/{publicId}', [PublicInvoiceController::class, 'show'])->name('public-invoice.show');
 Route::get('/invoice/{publicId}/download', [PublicInvoiceController::class, 'download'])->name('public-invoice.download');
 Route::get('/invoice/{publicId}/pay', [PublicInvoiceController::class, 'pay'])->name('public-invoice.pay');
+Route::post('/webhook/public-invoice/paystack', [PublicInvoiceController::class, 'webhook'])->name('public-invoice.webhook');
 
 // Public invoice routes
 Route::get('/inv/{publicId}', [InvoiceController::class, 'showPublic'])->name('invoice.public');

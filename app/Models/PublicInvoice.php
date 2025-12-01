@@ -36,6 +36,7 @@ class PublicInvoice extends Model
         'notes',
         'payment_status',
         'amount_paid',
+        'paid_at',
     ];
 
     protected $casts = [
@@ -51,6 +52,7 @@ class PublicInvoice extends Model
         'discount_amount' => 'decimal:2',
         'total_amount' => 'decimal:2',
         'amount_paid' => 'decimal:2',
+        'paid_at' => 'datetime',
     ];
 
     /**

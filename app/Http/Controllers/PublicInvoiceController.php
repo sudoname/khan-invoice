@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\PublicInvoice;
+use App\Services\PaystackService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class PublicInvoiceController extends Controller
 {
@@ -92,6 +94,61 @@ class PublicInvoiceController extends Controller
         // For now, just show the invoice with payment option
         // This will be enhanced with actual Paystack integration
         return view('public-invoice.show', compact('invoice'));
+    }
+
+    /**
+     * Handle Paystack webhook for public invoices
+     */
+    public function webhook(Request $request)
+    {
+        // Verify Paystack signature
+        $signature = $request->header('x-paystack-signature');
+
+        if (!$signature || $signature !== hash_hmac('sha512', $request->getContent(), config('services.paystack.secret_key'))) {
+            return response()->json(['message' => 'Invalid signature'], 400);
+        }
+
+        $event = $request->input('event');
+        $data = $request->input('data');
+
+        try {
+            if ($event === 'charge.success') {
+                $reference = $data['reference'];
+
+                // Check if this is a public invoice payment (reference starts with KI_PUBLIC_)
+                if (str_starts_with($reference, 'KI_PUBLIC_')) {
+                    // Extract public_id from reference: KI_PUBLIC_{publicId}_{timestamp}
+                    preg_match('/KI_PUBLIC_(.+?)_/', $reference, $matches);
+
+                    if (isset($matches[1])) {
+                        $publicId = $matches[1];
+                        $invoice = PublicInvoice::where('public_id', $publicId)->first();
+
+                        if ($invoice) {
+                            $amountPaid = PaystackService::toNaira($data['amount']);
+
+                            // Update invoice payment details
+                            $invoice->update([
+                                'amount_paid' => ($invoice->amount_paid ?? 0) + $amountPaid,
+                                'payment_status' => 'paid',
+                                'paid_at' => now(),
+                            ]);
+
+                            Log::info('Public invoice payment processed: ' . $invoice->invoice_number, [
+                                'reference' => $reference,
+                                'amount' => $amountPaid,
+                            ]);
+                        }
+                    }
+                }
+            }
+
+            return response()->json(['message' => 'Webhook processed'], 200);
+
+        } catch (\Exception $e) {
+            Log::error('Public invoice webhook processing error: ' . $e->getMessage());
+            return response()->json(['message' => 'Error processing webhook'], 500);
+        }
     }
 
     /**
