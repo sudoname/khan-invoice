@@ -7,8 +7,21 @@
     <!-- Header -->
     <div class="bg-gradient-to-r from-purple-600 to-blue-600 text-white py-8">
         <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-            <h1 class="text-3xl font-bold">Invoice {{ $invoice->invoice_number }}</h1>
-            <p class="text-purple-100 mt-2">View and pay invoice</p>
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-3xl font-bold">Invoice {{ $invoice->invoice_number }}</h1>
+                    <p class="text-purple-100 mt-2">View and pay invoice</p>
+                </div>
+                @if($invoice->payment_status === 'paid')
+                    <div class="bg-green-500 text-white px-4 py-2 rounded-lg font-bold text-sm">
+                        ✓ PAID
+                    </div>
+                @else
+                    <div class="bg-yellow-500 text-white px-4 py-2 rounded-lg font-bold text-sm">
+                        UNPAID
+                    </div>
+                @endif
+            </div>
         </div>
     </div>
 
@@ -263,7 +276,15 @@
 
         // Payment Modal Functions
         function openPaymentModal() {
-            document.getElementById('paymentModal').classList.remove('hidden');
+            const paymentStatus = '{{ $invoice->payment_status }}';
+
+            if (paymentStatus === 'paid') {
+                if (confirm('⚠️ This invoice appears to have been paid already.\n\nPaid on: {{ $invoice->paid_at ? $invoice->paid_at->format("M d, Y h:i A") : "N/A" }}\nAmount Paid: ₦{{ number_format($invoice->amount_paid ?? 0, 2) }}\n\nDo you still want to make a payment?')) {
+                    document.getElementById('paymentModal').classList.remove('hidden');
+                }
+            } else {
+                document.getElementById('paymentModal').classList.remove('hidden');
+            }
         }
 
         function closePaymentModal() {

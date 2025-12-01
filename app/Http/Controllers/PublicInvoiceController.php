@@ -147,6 +147,18 @@ class PublicInvoiceController extends Controller
                         $invoice = PublicInvoice::where('public_id', $publicId)->first();
 
                         if ($invoice) {
+                            // Check if invoice is already paid
+                            if ($invoice->payment_status === 'paid') {
+                                Log::warning('Duplicate payment attempt for already paid invoice', [
+                                    'invoice_number' => $invoice->invoice_number,
+                                    'reference' => $reference,
+                                    'current_status' => $invoice->payment_status,
+                                    'paid_at' => $invoice->paid_at,
+                                ]);
+                                // Don't process payment, but return success to avoid webhook retries
+                                return response()->json(['message' => 'Invoice already paid'], 200);
+                            }
+
                             $amountPaid = $data['amount'] / 100; // Convert from kobo to naira
 
                             // Update invoice payment details
