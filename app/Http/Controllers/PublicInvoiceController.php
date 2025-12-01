@@ -171,6 +171,10 @@ class PublicInvoiceController extends Controller
                             Log::info('Public invoice payment processed: ' . $invoice->invoice_number, [
                                 'reference' => $reference,
                                 'amount' => $amountPaid,
+                                'receiver_bank' => $invoice->from_bank_name,
+                                'receiver_account' => $invoice->from_account_number,
+                                'receiver_account_name' => $invoice->from_account_name,
+                                'metadata' => $data['metadata'] ?? [],
                             ]);
                         } else {
                             Log::warning('Invoice not found', ['publicId' => $publicId]);

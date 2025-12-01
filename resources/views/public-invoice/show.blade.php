@@ -314,6 +314,12 @@
                     payer_name: payerName,
                     receiver_name: "{{ $invoice->from_name }}",
                     receiver_email: "{{ $invoice->from_email ?? '' }}",
+                    @if($invoice->from_bank_name && $invoice->from_account_number)
+                    receiver_bank_name: "{{ $invoice->from_bank_name }}",
+                    receiver_account_number: "{{ $invoice->from_account_number }}",
+                    receiver_account_name: "{{ $invoice->from_account_name ?? '' }}",
+                    receiver_account_type: "{{ $invoice->from_account_type ?? '' }}",
+                    @endif
                 },
                 callback: function(response) {
                     // Payment successful
