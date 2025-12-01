@@ -51,6 +51,7 @@ class PublicInvoiceController extends Controller
             'discount_amount' => $data['discount_amount'],
             'total_amount' => $data['total_amount'],
             'notes' => $data['notes'] ?? null,
+            'payment_status' => 'sent', // Invoice is sent when created
         ]);
 
         // Redirect to the invoice show page
@@ -135,9 +136,9 @@ class PublicInvoiceController extends Controller
             'notes' => 'nullable|string|max:1000',
         ]);
 
-        // Generate invoice number if not provided
+        // Generate invoice number if not provided (INV-G + year + 5 random digits)
         if (empty($validated['invoice_number'])) {
-            $validated['invoice_number'] = 'INV-' . now()->format('YmdHis');
+            $validated['invoice_number'] = 'INV-G' . now()->year . str_pad(rand(0, 99999), 5, '0', STR_PAD_LEFT);
         }
 
         // Calculate totals
