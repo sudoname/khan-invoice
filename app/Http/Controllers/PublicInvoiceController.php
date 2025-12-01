@@ -25,6 +25,12 @@ class PublicInvoiceController extends Controller
     {
         $data = $this->validateAndPrepareData($request);
 
+        // Handle logo upload if present
+        $logoPath = null;
+        if ($request->hasFile('company_logo')) {
+            $logoPath = $request->file('company_logo')->store('company-logos', 'public');
+        }
+
         // Create public invoice
         $publicInvoice = PublicInvoice::create([
             'public_id' => PublicInvoice::generatePublicId(),
@@ -33,10 +39,10 @@ class PublicInvoiceController extends Controller
             'from_email' => $data['from_email'] ?? null,
             'from_phone' => $data['from_phone'] ?? null,
             'from_address' => $data['from_address'] ?? null,
+            'company_logo' => $logoPath,
             'from_bank_name' => $data['from_bank_name'] ?? null,
             'from_account_number' => $data['from_account_number'] ?? null,
             'from_account_name' => $data['from_account_name'] ?? null,
-            'from_account_type' => $data['from_account_type'] ?? null,
             'to_name' => $data['to_name'],
             'to_email' => $data['to_email'] ?? null,
             'to_phone' => $data['to_phone'] ?? null,
@@ -209,10 +215,10 @@ class PublicInvoiceController extends Controller
             'from_email' => 'nullable|email|max:255',
             'from_phone' => 'nullable|string|max:50',
             'from_address' => 'nullable|string|max:500',
+            'company_logo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'from_bank_name' => 'nullable|string|max:255',
             'from_account_number' => 'nullable|string|max:50',
             'from_account_name' => 'nullable|string|max:255',
-            'from_account_type' => 'nullable|string|max:50',
 
             // To (Customer)
             'to_name' => 'required|string|max:255',

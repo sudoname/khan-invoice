@@ -154,6 +154,13 @@
 </head>
 <body>
     <div class="container">
+        <!-- Company Logo -->
+        @if($invoice->company_logo)
+        <div style="text-align: center; margin-bottom: 15px;">
+            <img src="{{ storage_path('app/public/' . $invoice->company_logo) }}" alt="Company Logo" style="max-width: 150px; max-height: 80px;">
+        </div>
+        @endif
+
         <!-- Header -->
         <div class="header">
             <div class="header-content">
@@ -193,12 +200,8 @@
                         @if($invoice->from_account_name)
                             <p><strong>Name on Account:</strong> {{ $invoice->from_account_name }}</p>
                         @endif
-                        @if($invoice->from_bank_name && $invoice->from_account_type)
-                            <p><strong>Bank and Account Type:</strong> {{ $invoice->from_bank_name }} - {{ $invoice->from_account_type }}</p>
-                        @elseif($invoice->from_bank_name)
+                        @if($invoice->from_bank_name)
                             <p><strong>Bank:</strong> {{ $invoice->from_bank_name }}</p>
-                        @elseif($invoice->from_account_type)
-                            <p><strong>Account Type:</strong> {{ $invoice->from_account_type }}</p>
                         @endif
                     </div>
                 @endif

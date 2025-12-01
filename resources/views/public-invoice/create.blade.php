@@ -13,7 +13,7 @@
 
     <!-- Invoice Form -->
     <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <form method="POST" action="{{ route('public-invoice.preview') }}" id="invoiceForm">
+        <form method="POST" action="{{ route('public-invoice.preview') }}" id="invoiceForm" enctype="multipart/form-data">
             @csrf
 
             <!-- From Section -->
@@ -43,6 +43,12 @@
                         <input type="text" name="from_address"
                             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                             placeholder="Business Address" value="{{ old('from_address') }}">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Company Logo (Optional)</label>
+                        <input type="file" name="company_logo" accept="image/*"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                        <p class="text-xs text-gray-500 mt-1">Accepted formats: JPG, PNG, GIF (Max: 2MB)</p>
                     </div>
                 </div>
 
@@ -92,16 +98,6 @@
                         <input type="text" name="from_account_name"
                             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                             placeholder="Account Holder Name" value="{{ old('from_account_name') }}">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Account Type</label>
-                        <select name="from_account_type"
-                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
-                            <option value="">Select Type</option>
-                            <option value="Savings" {{ old('from_account_type') == 'Savings' ? 'selected' : '' }}>Savings</option>
-                            <option value="Current" {{ old('from_account_type') == 'Current' ? 'selected' : '' }}>Current</option>
-                            <option value="Domiciliary" {{ old('from_account_type') == 'Domiciliary' ? 'selected' : '' }}>Domiciliary</option>
-                        </select>
                     </div>
                 </div>
             </div>

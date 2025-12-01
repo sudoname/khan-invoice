@@ -66,6 +66,13 @@
 
         <!-- Invoice Preview -->
         <div class="bg-white rounded-xl shadow-2xl overflow-hidden border-2 border-gray-200">
+            <!-- Company Logo -->
+            @if($invoice->company_logo)
+            <div class="bg-white p-4 text-center border-b border-gray-200">
+                <img src="{{ asset('storage/' . $invoice->company_logo) }}" alt="Company Logo" class="mx-auto" style="max-width: 180px; max-height: 100px;">
+            </div>
+            @endif
+
             <!-- Header -->
             <div class="bg-gradient-to-r from-purple-600 to-blue-600 text-white p-4 sm:p-6">
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
@@ -105,12 +112,8 @@
                                 @if($invoice->from_account_name)
                                     <p class="text-sm"><span class="font-semibold">Name on Account:</span> {{ $invoice->from_account_name }}</p>
                                 @endif
-                                @if($invoice->from_bank_name && $invoice->from_account_type)
-                                    <p class="text-sm"><span class="font-semibold">Bank and Account Type:</span> {{ $invoice->from_bank_name }} - {{ $invoice->from_account_type }}</p>
-                                @elseif($invoice->from_bank_name)
+                                @if($invoice->from_bank_name)
                                     <p class="text-sm"><span class="font-semibold">Bank:</span> {{ $invoice->from_bank_name }}</p>
-                                @elseif($invoice->from_account_type)
-                                    <p class="text-sm"><span class="font-semibold">Account Type:</span> {{ $invoice->from_account_type }}</p>
                                 @endif
                             </div>
                         @endif
@@ -318,7 +321,6 @@
                     receiver_bank_name: "{{ $invoice->from_bank_name }}",
                     receiver_account_number: "{{ $invoice->from_account_number }}",
                     receiver_account_name: "{{ $invoice->from_account_name ?? '' }}",
-                    receiver_account_type: "{{ $invoice->from_account_type ?? '' }}",
                     @endif
                 },
                 callback: function(response) {

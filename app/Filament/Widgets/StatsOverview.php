@@ -3,6 +3,7 @@
 namespace App\Filament\Widgets;
 
 use App\Models\Invoice;
+use App\Models\PublicInvoice;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 use Illuminate\Support\Facades\DB;
@@ -17,6 +18,12 @@ class StatsOverview extends BaseWidget
         if (!auth()->user()->isAdmin()) {
             $query->where('user_id', auth()->id());
         }
+
+        // Public invoices stats (available to all)
+        $publicInvoicesQuery = PublicInvoice::query();
+        $totalPublicInvoices = $publicInvoicesQuery->count();
+        $publicInvoicesRevenue = $publicInvoicesQuery->sum('total_amount');
+        $publicInvoicesPaid = $publicInvoicesQuery->where('payment_status', 'paid')->sum('amount_paid');
 
         // Current month stats
         $thisMonth = (clone $query)->whereMonth('created_at', now()->month)
@@ -47,12 +54,33 @@ class StatsOverview extends BaseWidget
             ->whereYear('updated_at', now()->year)
             ->sum('amount_paid');
 
-        // Collection rate
+        // Collection rate (private invoices)
         $totalBilled = $query->sum('total_amount');
         $totalCollected = $query->sum('amount_paid');
         $collectionRate = $totalBilled > 0 ? ($totalCollected / $totalBilled) * 100 : 0;
 
+        // Combined totals (private + public)
+        $totalPrivateInvoices = $query->count();
+        $combinedInvoiceCount = $totalPrivateInvoices + $totalPublicInvoices;
+        $combinedRevenue = $totalBilled + $publicInvoicesRevenue;
+        $combinedCollected = $totalCollected + $publicInvoicesPaid;
+
         return [
+            Stat::make('Total Invoices', $combinedInvoiceCount)
+                ->description('Private: ' . $totalPrivateInvoices . ' | Public: ' . $totalPublicInvoices)
+                ->descriptionIcon('heroicon-m-document-text')
+                ->color('info'),
+
+            Stat::make('Private Invoices', $totalPrivateInvoices)
+                ->description('₦' . number_format($totalBilled, 2) . ' billed')
+                ->descriptionIcon('heroicon-m-lock-closed')
+                ->color('primary'),
+
+            Stat::make('Public Invoices', $totalPublicInvoices)
+                ->description('₦' . number_format($publicInvoicesRevenue, 2) . ' total')
+                ->descriptionIcon('heroicon-m-globe-alt')
+                ->color('success'),
+
             Stat::make('Outstanding Amount', '₦' . number_format($outstandingAmount, 2))
                 ->description($outstandingCount . ' unpaid invoices')
                 ->descriptionIcon('heroicon-m-banknotes')
@@ -64,18 +92,18 @@ class StatsOverview extends BaseWidget
                 ->descriptionIcon($revenueChange >= 0 ? 'heroicon-m-arrow-trending-up' : 'heroicon-m-arrow-trending-down')
                 ->color($revenueChange >= 0 ? 'success' : 'danger'),
 
+            Stat::make('Combined Revenue', '₦' . number_format($combinedRevenue, 2))
+                ->description('₦' . number_format($combinedCollected, 2) . ' collected')
+                ->descriptionIcon('heroicon-m-currency-dollar')
+                ->color('success'),
+
             Stat::make('Overdue Invoices', $overdueCount)
                 ->description('₦' . number_format($overdueAmount, 2) . ' overdue')
                 ->descriptionIcon('heroicon-m-exclamation-triangle')
                 ->color($overdueCount > 0 ? 'danger' : 'success'),
 
-            Stat::make('Collections This Month', '₦' . number_format($thisMonthPaid, 2))
-                ->description('Payment received')
-                ->descriptionIcon('heroicon-m-check-circle')
-                ->color('success'),
-
             Stat::make('Collection Rate', number_format($collectionRate, 1) . '%')
-                ->description('Overall collection efficiency')
+                ->description('Private invoices efficiency')
                 ->descriptionIcon('heroicon-m-chart-bar')
                 ->color($collectionRate >= 90 ? 'success' : ($collectionRate >= 70 ? 'warning' : 'danger')),
         ];
