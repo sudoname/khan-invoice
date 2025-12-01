@@ -30,7 +30,7 @@ class RestoreDatabaseFromSQLite extends Command
             'prefix' => '',
         ]]);
 
-        $tables = ['users', 'invoices', 'public_invoices'];
+        $tables = ['users', 'customers', 'invoices', 'public_invoices'];
 
         foreach ($tables as $table) {
             $this->info("\nProcessing table: {$table}");

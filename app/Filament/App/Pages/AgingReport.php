@@ -59,7 +59,8 @@ class AgingReport extends Page
 
             $daysOverdue = now()->diffInDays($invoice->due_date, false);
 
-            $customerName = $invoice->customer->name;
+            // Handle missing customer
+            $customerName = $invoice->customer ? $invoice->customer->name : 'Unknown Customer';
 
             if (!isset($data[$customerName])) {
                 $data[$customerName] = [
