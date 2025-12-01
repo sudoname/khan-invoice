@@ -289,7 +289,10 @@
                 </div>
                 <div style="display: table-cell; width: 30%; text-align: right; vertical-align: top;">
                     <div style="background: white; padding: 10px; display: inline-block;">
-                        <img src="data:image/png;base64,{{ base64_encode(QrCode::format('png')->imageBackEnd('gd')->size(120)->generate(route('public-invoice.show', $invoice->public_id))) }}" alt="QR Code" style="width: 120px; height: 120px;">
+                        @php
+                            $qrCode = base64_encode(QrCode::format('png')->size(120)->errorCorrection('H')->generate(route('public-invoice.show', $invoice->public_id)));
+                        @endphp
+                        <img src="data:image/png;base64,{{ $qrCode }}" alt="QR Code" style="width: 120px; height: 120px;">
                     </div>
                     <p style="font-size: 7pt; margin-top: 5px; color: #666;">Scan to pay</p>
                 </div>
