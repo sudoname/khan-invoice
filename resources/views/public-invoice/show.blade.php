@@ -15,35 +15,35 @@
     <!-- Preview and Actions -->
     <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <!-- Action Buttons -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
             <!-- Download & Create New -->
-            <div class="flex gap-2">
+            <div class="flex flex-col sm:flex-row gap-2">
                 <a href="{{ route('public-invoice.download', $invoice->public_id) }}"
-                    class="flex-1 bg-gradient-to-r from-purple-600 to-blue-600 text-white px-4 py-3 rounded-lg font-semibold hover:from-purple-700 hover:to-blue-700 transition flex items-center justify-center gap-2">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    class="flex-1 bg-gradient-to-r from-purple-600 to-blue-600 text-white px-4 py-3 rounded-lg font-semibold hover:from-purple-700 hover:to-blue-700 transition flex items-center justify-center gap-2 text-sm sm:text-base">
+                    <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
                     </svg>
                     Download PDF
                 </a>
                 <a href="{{ route('public-invoice.create') }}"
-                    class="bg-gray-200 text-gray-700 px-4 py-3 rounded-lg font-semibold hover:bg-gray-300 transition flex items-center">
+                    class="bg-gray-200 text-gray-700 px-4 py-3 rounded-lg font-semibold hover:bg-gray-300 transition flex items-center justify-center text-sm sm:text-base">
                     New
                 </a>
             </div>
 
             <!-- Share & Pay -->
-            <div class="flex gap-2">
+            <div class="flex flex-col sm:flex-row gap-2">
                 <!-- WhatsApp Share -->
-                <button onclick="shareWhatsApp()" class="flex-1 bg-green-600 text-white px-4 py-3 rounded-lg font-semibold hover:bg-green-700 transition flex items-center justify-center gap-2">
-                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                <button onclick="shareWhatsApp()" class="flex-1 bg-green-600 text-white px-4 py-3 rounded-lg font-semibold hover:bg-green-700 transition flex items-center justify-center gap-2 text-sm sm:text-base">
+                    <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="currentColor" viewBox="0 0 24 24">
                         <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
                     </svg>
                     WhatsApp
                 </button>
 
                 <!-- Pay Now -->
-                <button onclick="openPaymentModal()" class="flex-1 bg-gradient-to-r from-green-500 to-green-600 text-white px-4 py-3 rounded-lg font-semibold hover:from-green-600 hover:to-green-700 transition flex items-center justify-center gap-2">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <button onclick="openPaymentModal()" class="flex-1 bg-gradient-to-r from-green-500 to-green-600 text-white px-4 py-3 rounded-lg font-semibold hover:from-green-600 hover:to-green-700 transition flex items-center justify-center gap-2 text-sm sm:text-base">
+                    <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
                     </svg>
                     Pay Now
@@ -52,23 +52,24 @@
         </div>
 
         <!-- Invoice Preview -->
-        <div class="bg-white rounded-xl shadow-2xl overflow-hidden border-2 border-gray-200 p-8">
+        <div class="bg-white rounded-xl shadow-2xl overflow-hidden border-2 border-gray-200">
             <!-- Header -->
-            <div class="bg-gradient-to-r from-purple-600 to-blue-600 text-white p-6 -m-8 mb-6">
-                <div class="flex justify-between items-start">
+            <div class="bg-gradient-to-r from-purple-600 to-blue-600 text-white p-4 sm:p-6">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                     <div>
-                        <h1 class="text-3xl font-bold">INVOICE</h1>
-                        <p class="text-purple-100 mt-1">{{ $invoice->invoice_number }}</p>
+                        <h1 class="text-2xl sm:text-3xl font-bold">INVOICE</h1>
+                        <p class="text-purple-100 mt-1 text-sm sm:text-base">{{ $invoice->invoice_number }}</p>
                     </div>
-                    <div class="text-right">
-                        <p class="text-sm">Issue Date: {{ $invoice->issue_date->format('M d, Y') }}</p>
-                        <p class="text-sm">Due Date: {{ $invoice->due_date->format('M d, Y') }}</p>
+                    <div class="text-left sm:text-right">
+                        <p class="text-xs sm:text-sm">Issue Date: {{ $invoice->issue_date->format('M d, Y') }}</p>
+                        <p class="text-xs sm:text-sm">Due Date: {{ $invoice->due_date->format('M d, Y') }}</p>
                     </div>
                 </div>
             </div>
 
+            <div class="p-4 sm:p-6 md:p-8">
             <!-- From/To Section -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 mb-6 sm:mb-8">
                 <div>
                     <h3 class="text-sm font-semibold text-gray-500 mb-2">FROM</h3>
                     <div class="text-gray-900">
@@ -120,27 +121,29 @@
             </div>
 
             <!-- Items Table -->
-            <div class="mb-8">
-                <table class="w-full">
-                    <thead class="bg-gray-100">
-                        <tr>
-                            <th class="text-left p-3 text-sm font-semibold text-gray-700">Description</th>
-                            <th class="text-center p-3 text-sm font-semibold text-gray-700">Qty</th>
-                            <th class="text-right p-3 text-sm font-semibold text-gray-700">Unit Price</th>
-                            <th class="text-right p-3 text-sm font-semibold text-gray-700">Total</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach($invoice->items as $item)
-                        <tr class="border-b border-gray-200">
-                            <td class="p-3 text-sm text-gray-900">{{ $item['description'] }}</td>
-                            <td class="p-3 text-sm text-gray-900 text-center">{{ number_format($item['quantity'], 2) }}</td>
-                            <td class="p-3 text-sm text-gray-900 text-right">₦{{ number_format($item['unit_price'], 2) }}</td>
-                            <td class="p-3 text-sm text-gray-900 text-right">₦{{ number_format($item['total'], 2) }}</td>
-                        </tr>
-                        @endforeach
-                    </tbody>
-                </table>
+            <div class="mb-8 overflow-x-auto -mx-4 sm:mx-0">
+                <div class="inline-block min-w-full align-middle">
+                    <table class="w-full">
+                        <thead class="bg-gray-100">
+                            <tr>
+                                <th class="text-left p-2 sm:p-3 text-xs sm:text-sm font-semibold text-gray-700 whitespace-nowrap">Description</th>
+                                <th class="text-center p-2 sm:p-3 text-xs sm:text-sm font-semibold text-gray-700 whitespace-nowrap">Qty</th>
+                                <th class="text-right p-2 sm:p-3 text-xs sm:text-sm font-semibold text-gray-700 whitespace-nowrap">Unit Price</th>
+                                <th class="text-right p-2 sm:p-3 text-xs sm:text-sm font-semibold text-gray-700 whitespace-nowrap">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($invoice->items as $item)
+                            <tr class="border-b border-gray-200">
+                                <td class="p-2 sm:p-3 text-xs sm:text-sm text-gray-900">{{ $item['description'] }}</td>
+                                <td class="p-2 sm:p-3 text-xs sm:text-sm text-gray-900 text-center whitespace-nowrap">{{ number_format($item['quantity'], 2) }}</td>
+                                <td class="p-2 sm:p-3 text-xs sm:text-sm text-gray-900 text-right whitespace-nowrap">₦{{ number_format($item['unit_price'], 2) }}</td>
+                                <td class="p-2 sm:p-3 text-xs sm:text-sm text-gray-900 text-right whitespace-nowrap">₦{{ number_format($item['total'], 2) }}</td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
             <!-- Totals -->
@@ -182,14 +185,15 @@
                 <p class="text-sm text-gray-600">{{ $invoice->notes }}</p>
             </div>
             @endif
+            </div>
         </div>
 
         <!-- CTA Section -->
-        <div class="mt-8 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-xl p-8 text-center">
-            <h3 class="text-2xl font-bold mb-2">Want to manage invoices professionally?</h3>
-            <p class="text-purple-100 mb-4">Track payments, send invoices, and manage your business with Khan Invoice</p>
+        <div class="mt-8 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-xl p-6 sm:p-8 text-center">
+            <h3 class="text-xl sm:text-2xl font-bold mb-2">Want to manage invoices professionally?</h3>
+            <p class="text-sm sm:text-base text-purple-100 mb-4">Track payments, send invoices, and manage your business with Khan Invoice</p>
             <a href="{{ route('filament.app.auth.register') }}"
-                class="inline-block bg-white text-purple-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition">
+                class="inline-block bg-white text-purple-600 px-6 sm:px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition text-sm sm:text-base">
                 Create Free Account
             </a>
         </div>
