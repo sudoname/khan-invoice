@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\PublicInvoice;
 use App\Services\PaystackService;
+use App\Services\PaystackSubaccountService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -31,6 +32,31 @@ class PublicInvoiceController extends Controller
             $logoPath = $request->file('company_logo')->store('company-logos', 'public');
         }
 
+        // Create Paystack subaccount if bank details are provided
+        $subaccountCode = null;
+        if (!empty($data['from_bank_name']) && !empty($data['from_account_number'])) {
+            $subaccountService = new PaystackSubaccountService();
+
+            // Get bank code from bank name
+            $bankCode = $subaccountService->getBankCode($data['from_bank_name']);
+
+            if ($bankCode) {
+                $subaccountCode = $subaccountService->createSubaccount([
+                    'business_name' => $data['from_name'],
+                    'bank_code' => $bankCode,
+                    'account_number' => $data['from_account_number'],
+                    'description' => 'Public invoice merchant: ' . $data['from_name'],
+                ]);
+
+                if ($subaccountCode) {
+                    Log::info('Subaccount created for public invoice', [
+                        'subaccount_code' => $subaccountCode,
+                        'business_name' => $data['from_name'],
+                    ]);
+                }
+            }
+        }
+
         // Create public invoice
         $publicInvoice = PublicInvoice::create([
             'public_id' => PublicInvoice::generatePublicId(),
@@ -44,6 +70,7 @@ class PublicInvoiceController extends Controller
             'from_account_number' => $data['from_account_number'] ?? null,
             'from_account_name' => $data['from_account_name'] ?? null,
             'from_account_type' => $data['from_account_type'] ?? null,
+            'paystack_subaccount_code' => $subaccountCode,
             'to_name' => $data['to_name'],
             'to_email' => $data['to_email'] ?? null,
             'to_phone' => $data['to_phone'] ?? null,

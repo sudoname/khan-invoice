@@ -338,6 +338,11 @@
                 amount: Math.round(totalWithFees * 100), // Convert to kobo
                 currency: 'NGN',
                 ref: reference,
+                @if($invoice->paystack_subaccount_code)
+                subaccount: '{{ $invoice->paystack_subaccount_code }}',
+                transaction_charge: Math.round((totalFees) * 100), // Platform keeps the fees (in kobo)
+                bearer: 'account', // Customer bears ALL fees (Paystack + Platform)
+                @endif
                 metadata: {
                     invoice_id: '{{ $invoice->public_id }}',
                     invoice_number: "{{ $invoice->invoice_number }}",
