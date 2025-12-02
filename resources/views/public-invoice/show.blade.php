@@ -229,10 +229,27 @@
 
             <form id="paymentForm">
                 <div class="space-y-4">
-                    <!-- Amount Display -->
+                    <!-- Amount Display with Fee Breakdown -->
+                    @php
+                        $invoiceAmount = $invoice->total_amount;
+                        $paystackFee = max($invoiceAmount * 0.02, 75);
+                        $totalWithFee = $invoiceAmount + $paystackFee;
+                    @endphp
                     <div class="bg-purple-50 p-4 rounded-lg">
-                        <p class="text-sm text-gray-600">Amount to Pay</p>
-                        <p class="text-2xl font-bold text-purple-600">₦{{ number_format($invoice->total_amount, 2) }}</p>
+                        <div class="space-y-2">
+                            <div class="flex justify-between text-sm text-gray-700">
+                                <span>Invoice Amount</span>
+                                <span class="font-semibold">₦{{ number_format($invoiceAmount, 2) }}</span>
+                            </div>
+                            <div class="flex justify-between text-sm text-gray-600">
+                                <span>Paystack Processing Fee</span>
+                                <span class="font-semibold">₦{{ number_format($paystackFee, 2) }}</span>
+                            </div>
+                            <div class="border-t border-purple-200 pt-2 flex justify-between">
+                                <span class="text-sm font-medium text-gray-700">Total to Pay</span>
+                                <span class="text-2xl font-bold text-purple-600">₦{{ number_format($totalWithFee, 2) }}</span>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Payer Information -->
@@ -304,16 +321,24 @@
             // Generate reference for this payment
             const reference = 'KI_PUBLIC_{{ $invoice->public_id }}_' + Date.now();
 
+            // Calculate fee and total
+            const invoiceAmount = {{ $invoice->total_amount }};
+            const paystackFee = Math.max(invoiceAmount * 0.02, 75);
+            const totalWithFee = invoiceAmount + paystackFee;
+
             // Initialize Paystack payment
             const handler = PaystackPop.setup({
                 key: '{{ config("services.paystack.public_key") }}',
                 email: payerEmail,
-                amount: {{ $invoice->total_amount * 100 }}, // Convert to kobo
+                amount: Math.round(totalWithFee * 100), // Convert to kobo
                 currency: 'NGN',
                 ref: reference,
                 metadata: {
                     invoice_id: '{{ $invoice->public_id }}',
                     invoice_number: "{{ $invoice->invoice_number }}",
+                    invoice_amount: invoiceAmount.toFixed(2),
+                    paystack_fee: paystackFee.toFixed(2),
+                    total_charged: totalWithFee.toFixed(2),
                     payer_name: payerName,
                     receiver_name: "{{ $invoice->from_name }}",
                     receiver_email: "{{ $invoice->from_email ?? '' }}",
@@ -331,7 +356,9 @@
                     // Show success message
                     alert('Payment Successful!\n\n' +
                           'Transaction Reference: ' + response.reference + '\n' +
-                          'Amount: ₦{{ number_format($invoice->total_amount, 2) }}\n\n' +
+                          'Invoice Amount: ₦' + invoiceAmount.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',') + '\n' +
+                          'Processing Fee: ₦' + paystackFee.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',') + '\n' +
+                          'Total Paid: ₦' + totalWithFee.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',') + '\n\n' +
                           'Thank you for your payment!');
 
                     // Reload page to show updated payment status
