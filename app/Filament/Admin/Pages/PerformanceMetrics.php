@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\App\Pages;
+namespace App\Filament\Admin\Pages;
 
 use Filament\Pages\Page;
 use Illuminate\Support\Facades\DB;
@@ -10,7 +10,7 @@ class PerformanceMetrics extends Page
 {
     protected static ?string $navigationIcon = 'heroicon-o-chart-bar-square';
 
-    protected static string $view = 'filament.app.pages.performance-metrics';
+    protected static string $view = 'filament.admin.pages.performance-metrics';
 
     protected static ?string $navigationLabel = 'Performance Metrics';
 

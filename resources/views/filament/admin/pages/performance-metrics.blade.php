@@ -26,25 +26,41 @@
                 <!-- Query Time Chart -->
                 <div class="bg-white p-4 rounded-lg border border-gray-200">
                     <h4 class="text-sm font-semibold text-gray-700 mb-4">Database Query Time</h4>
-                    <canvas id="queryTimeChart"></canvas>
+                    <div style="height: 300px;">
+                        <canvas id="queryTimeChart"></canvas>
+                    </div>
                 </div>
 
                 <!-- Cache Write/Read Time Chart -->
                 <div class="bg-white p-4 rounded-lg border border-gray-200">
                     <h4 class="text-sm font-semibold text-gray-700 mb-4">Cache Write/Read Time</h4>
-                    <canvas id="cacheTimeChart"></canvas>
+                    <div style="height: 300px;">
+                        <canvas id="cacheTimeChart"></canvas>
+                    </div>
                 </div>
             </div>
         </x-filament::section>
 
         <script>
             document.addEventListener('DOMContentLoaded', function() {
+                const rawLabels = @json($metrics['charts']['labels']);
+                const currentTime = new Date();
+
+                // Convert labels to show relative time (e.g., "2h ago", "1h ago", "now")
+                const labels = rawLabels.map((label, index) => {
+                    if (rawLabels.length - 1 === index) {
+                        return 'Now';
+                    }
+                    const hoursAgo = rawLabels.length - 1 - index;
+                    return hoursAgo === 1 ? '1h ago' : hoursAgo + 'h ago';
+                });
+
                 // Query Time Chart
                 const queryCtx = document.getElementById('queryTimeChart').getContext('2d');
                 new Chart(queryCtx, {
                     type: 'line',
                     data: {
-                        labels: @json($metrics['charts']['labels']),
+                        labels: labels,
                         datasets: [{
                             label: 'Query Time (ms)',
                             data: @json($metrics['charts']['query_times']),
@@ -56,7 +72,7 @@
                     },
                     options: {
                         responsive: true,
-                        maintainAspectRatio: true,
+                        maintainAspectRatio: false,
                         plugins: {
                             legend: {
                                 display: true,
@@ -86,7 +102,7 @@
                 new Chart(cacheCtx, {
                     type: 'line',
                     data: {
-                        labels: @json($metrics['charts']['labels']),
+                        labels: labels,
                         datasets: [{
                             label: 'Cache Write/Read Time (ms)',
                             data: @json($metrics['charts']['cache_times']),
@@ -98,7 +114,7 @@
                     },
                     options: {
                         responsive: true,
-                        maintainAspectRatio: true,
+                        maintainAspectRatio: false,
                         plugins: {
                             legend: {
                                 display: true,
