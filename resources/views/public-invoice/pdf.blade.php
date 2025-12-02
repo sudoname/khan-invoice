@@ -29,12 +29,20 @@
             display: table;
             width: 100%;
         }
-        .header-left, .header-right {
+        .header-left, .header-center, .header-right {
             display: table-cell;
-            width: 50%;
-            vertical-align: top;
+            vertical-align: middle;
+        }
+        .header-left {
+            width: 33%;
+            text-align: left;
+        }
+        .header-center {
+            width: 34%;
+            text-align: center;
         }
         .header-right {
+            width: 33%;
             text-align: right;
         }
         h1 {
@@ -154,19 +162,17 @@
 </head>
 <body>
     <div class="container">
-        <!-- Company Logo -->
-        @if($invoice->company_logo)
-        <div style="text-align: center; margin-bottom: 15px;">
-            <img src="{{ storage_path('app/public/' . $invoice->company_logo) }}" alt="Company Logo" style="max-width: 150px; max-height: 80px;">
-        </div>
-        @endif
-
         <!-- Header -->
         <div class="header">
             <div class="header-content">
                 <div class="header-left">
                     <h1>INVOICE</h1>
                     <p style="font-size: 10pt;">{{ $invoice->invoice_number }}</p>
+                </div>
+                <div class="header-center">
+                    @if($invoice->company_logo)
+                        <img src="{{ storage_path('app/public/' . $invoice->company_logo) }}" alt="Company Logo" style="max-width: 120px; max-height: 70px; object-fit: contain;">
+                    @endif
                 </div>
                 <div class="header-right">
                     <p style="font-size: 9pt;">

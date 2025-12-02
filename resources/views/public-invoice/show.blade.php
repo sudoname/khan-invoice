@@ -66,21 +66,22 @@
 
         <!-- Invoice Preview -->
         <div class="bg-white rounded-xl shadow-2xl overflow-hidden border-2 border-gray-200">
-            <!-- Company Logo -->
-            @if($invoice->company_logo)
-            <div class="bg-white p-4 text-center border-b border-gray-200">
-                <img src="{{ asset('storage/' . $invoice->company_logo) }}" alt="Company Logo" class="mx-auto" style="max-width: 180px; max-height: 100px;">
-            </div>
-            @endif
-
             <!-- Header -->
             <div class="bg-gradient-to-r from-purple-600 to-blue-600 text-white p-4 sm:p-6">
-                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-                    <div>
+                <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
+                    <div class="text-center sm:text-left">
                         <h1 class="text-2xl sm:text-3xl font-bold">INVOICE</h1>
                         <p class="text-purple-100 mt-1 text-sm sm:text-base">{{ $invoice->invoice_number }}</p>
                     </div>
-                    <div class="text-left sm:text-right">
+
+                    <!-- Company Logo - Centered -->
+                    @if($invoice->company_logo)
+                    <div class="flex-shrink-0">
+                        <img src="{{ asset('storage/' . $invoice->company_logo) }}" alt="Company Logo" class="mx-auto" style="max-width: 150px; max-height: 80px; object-fit: contain;">
+                    </div>
+                    @endif
+
+                    <div class="text-center sm:text-right">
                         <p class="text-xs sm:text-sm">Issue Date: {{ $invoice->issue_date->format('M d, Y') }}</p>
                         <p class="text-xs sm:text-sm">Due Date: {{ $invoice->due_date->format('M d, Y') }}</p>
                     </div>
