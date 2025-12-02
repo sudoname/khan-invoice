@@ -99,6 +99,16 @@
                             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                             placeholder="Account Holder Name" value="{{ old('from_account_name') }}">
                     </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Account Type</label>
+                        <select name="from_account_type"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                            <option value="">Select Type</option>
+                            <option value="Savings" {{ old('from_account_type') == 'Savings' ? 'selected' : '' }}>Savings</option>
+                            <option value="Current" {{ old('from_account_type') == 'Current' ? 'selected' : '' }}>Current</option>
+                            <option value="Domiciliary" {{ old('from_account_type') == 'Domiciliary' ? 'selected' : '' }}>Domiciliary</option>
+                        </select>
+                    </div>
                 </div>
             </div>
 

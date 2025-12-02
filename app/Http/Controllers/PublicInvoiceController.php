@@ -43,6 +43,7 @@ class PublicInvoiceController extends Controller
             'from_bank_name' => $data['from_bank_name'] ?? null,
             'from_account_number' => $data['from_account_number'] ?? null,
             'from_account_name' => $data['from_account_name'] ?? null,
+            'from_account_type' => $data['from_account_type'] ?? null,
             'to_name' => $data['to_name'],
             'to_email' => $data['to_email'] ?? null,
             'to_phone' => $data['to_phone'] ?? null,
@@ -219,6 +220,7 @@ class PublicInvoiceController extends Controller
             'from_bank_name' => 'nullable|string|max:255',
             'from_account_number' => 'nullable|string|max:50',
             'from_account_name' => 'nullable|string|max:255',
+            'from_account_type' => 'nullable|string|max:50',
 
             // To (Customer)
             'to_name' => 'required|string|max:255',

@@ -18,6 +18,7 @@ class PublicInvoice extends Model
         'from_bank_name',
         'from_account_number',
         'from_account_name',
+        'from_account_type',
         'to_name',
         'to_email',
         'to_phone',
