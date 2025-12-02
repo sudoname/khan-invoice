@@ -232,8 +232,7 @@
                     <!-- Amount Display with Fee Breakdown -->
                     @php
                         $invoiceAmount = $invoice->total_amount;
-                        $paystackFee = max($invoiceAmount * 0.02, 75);
-                        $totalWithFee = $invoiceAmount + $paystackFee;
+                        $fees = \App\Models\PaymentSetting::calculateTotalFees($invoiceAmount);
                     @endphp
                     <div class="bg-purple-50 p-4 rounded-lg">
                         <div class="space-y-2">
@@ -241,13 +240,17 @@
                                 <span>Invoice Amount</span>
                                 <span class="font-semibold">₦{{ number_format($invoiceAmount, 2) }}</span>
                             </div>
-                            <div class="flex justify-between text-sm text-gray-600">
+                            <div class="flex justify-between text-sm text-blue-600">
                                 <span>Paystack Processing Fee</span>
-                                <span class="font-semibold">₦{{ number_format($paystackFee, 2) }}</span>
+                                <span class="font-semibold">₦{{ number_format($fees['paystack_fee'], 2) }}</span>
+                            </div>
+                            <div class="flex justify-between text-sm text-purple-600">
+                                <span>Service Charge</span>
+                                <span class="font-semibold">₦{{ number_format($fees['service_charge'], 2) }}</span>
                             </div>
                             <div class="border-t border-purple-200 pt-2 flex justify-between">
                                 <span class="text-sm font-medium text-gray-700">Total to Pay</span>
-                                <span class="text-2xl font-bold text-purple-600">₦{{ number_format($totalWithFee, 2) }}</span>
+                                <span class="text-2xl font-bold text-purple-600">₦{{ number_format($fees['total_with_fees'], 2) }}</span>
                             </div>
                         </div>
                     </div>
@@ -321,16 +324,18 @@
             // Generate reference for this payment
             const reference = 'KI_PUBLIC_{{ $invoice->public_id }}_' + Date.now();
 
-            // Calculate fee and total
+            // Get fee breakdown from backend
             const invoiceAmount = {{ $invoice->total_amount }};
-            const paystackFee = Math.max(invoiceAmount * 0.02, 75);
-            const totalWithFee = invoiceAmount + paystackFee;
+            const paystackFee = {{ $fees['paystack_fee'] }};
+            const serviceCharge = {{ $fees['service_charge'] }};
+            const totalFees = {{ $fees['total_fees'] }};
+            const totalWithFees = {{ $fees['total_with_fees'] }};
 
             // Initialize Paystack payment
             const handler = PaystackPop.setup({
                 key: '{{ config("services.paystack.public_key") }}',
                 email: payerEmail,
-                amount: Math.round(totalWithFee * 100), // Convert to kobo
+                amount: Math.round(totalWithFees * 100), // Convert to kobo
                 currency: 'NGN',
                 ref: reference,
                 metadata: {
@@ -338,7 +343,9 @@
                     invoice_number: "{{ $invoice->invoice_number }}",
                     invoice_amount: invoiceAmount.toFixed(2),
                     paystack_fee: paystackFee.toFixed(2),
-                    total_charged: totalWithFee.toFixed(2),
+                    service_charge: serviceCharge.toFixed(2),
+                    total_fees: totalFees.toFixed(2),
+                    total_charged: totalWithFees.toFixed(2),
                     payer_name: payerName,
                     receiver_name: "{{ $invoice->from_name }}",
                     receiver_email: "{{ $invoice->from_email ?? '' }}",
@@ -357,8 +364,9 @@
                     alert('Payment Successful!\n\n' +
                           'Transaction Reference: ' + response.reference + '\n' +
                           'Invoice Amount: ₦' + invoiceAmount.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',') + '\n' +
-                          'Processing Fee: ₦' + paystackFee.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',') + '\n' +
-                          'Total Paid: ₦' + totalWithFee.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',') + '\n\n' +
+                          'Paystack Fee: ₦' + paystackFee.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',') + '\n' +
+                          'Service Charge: ₦' + serviceCharge.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',') + '\n' +
+                          'Total Paid: ₦' + totalWithFees.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',') + '\n\n' +
                           'Thank you for your payment!');
 
                     // Reload page to show updated payment status
