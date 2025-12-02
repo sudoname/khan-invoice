@@ -42,8 +42,13 @@
                     <tbody class="divide-y divide-gray-200">
                         @foreach($testAmounts as $amount)
                             @php
-                                $paystackFee = min(max($amount * ($paystackFeePercentage / 100), $paystackFeeMinimum), $paystackFeeCap);
+                                // Paystack fee: percentage + fixed amount, capped at maximum
+                                $paystackPercentageFee = $amount * ($paystackFeePercentage / 100);
+                                $paystackFee = min($paystackPercentageFee + $paystackFeeMinimum, $paystackFeeCap);
+
+                                // Service charge: max(percentage, minimum), capped at maximum
                                 $serviceCharge = min(max($amount * ($serviceChargePercentage / 100), $serviceChargeMinimum), $serviceChargeCap);
+
                                 $totalFees = $paystackFee + $serviceCharge;
                                 $customerPays = $amount + $totalFees;
                             @endphp
@@ -61,7 +66,10 @@
 
             <div class="mt-4 p-4 bg-blue-50 border-l-4 border-blue-500 rounded">
                 <p class="text-sm text-blue-800">
-                    <strong>Note:</strong> Fees are calculated as max(percentage, minimum) and capped at the maximum value. Both Paystack fee and service charge apply to all Paystack payments.
+                    <strong>Fee Calculation Formula:</strong><br>
+                    • <strong>Paystack Fee:</strong> (Percentage + Fixed Amount), capped at maximum<br>
+                    • <strong>Service Charge:</strong> max(Percentage, Minimum), capped at maximum<br>
+                    • Both fees apply to all Paystack payments and are charged to customers.
                 </p>
             </div>
         </div>

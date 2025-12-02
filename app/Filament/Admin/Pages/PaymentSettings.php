@@ -47,7 +47,7 @@ class PaymentSettings extends Page implements HasForms
         return $form
             ->schema([
                 Section::make('Paystack Fee Settings')
-                    ->description('Configure Paystack processing fees for all payments')
+                    ->description('Configure Paystack processing fees. Formula: (Percentage + Fixed Amount), capped at maximum. Paystack\'s actual local fee: 1.5% + ₦100, capped at ₦2,000')
                     ->schema([
                         TextInput::make('paystack_fee_percentage')
                             ->label('Paystack Fee Percentage (%)')
@@ -57,23 +57,23 @@ class PaymentSettings extends Page implements HasForms
                             ->maxValue(100)
                             ->step(0.1)
                             ->suffix('%')
-                            ->helperText('Percentage fee charged on invoice amount'),
+                            ->helperText('Percentage of invoice amount (Paystack local: 1.5%)'),
 
                         TextInput::make('paystack_fee_minimum')
-                            ->label('Minimum Paystack Fee (₦)')
+                            ->label('Fixed Amount (₦)')
                             ->numeric()
                             ->required()
                             ->minValue(0)
                             ->prefix('₦')
-                            ->helperText('Minimum fee if percentage is lower than this amount'),
+                            ->helperText('Fixed amount ADDED to percentage (Paystack: ₦100)'),
 
                         TextInput::make('paystack_fee_cap')
-                            ->label('Maximum Paystack Fee Cap (₦)')
+                            ->label('Maximum Fee Cap (₦)')
                             ->numeric()
                             ->required()
                             ->minValue(0)
                             ->prefix('₦')
-                            ->helperText('Maximum fee cap - fees won\'t exceed this amount'),
+                            ->helperText('Maximum total fee cap (Paystack local: ₦2,000)'),
                     ])
                     ->columns(3),
 

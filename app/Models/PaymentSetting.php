@@ -34,15 +34,17 @@ class PaymentSetting extends Model
 
     /**
      * Calculate Paystack fee based on settings
+     * Formula: percentage + fixed amount (e.g., 1.5% + ₦100)
      */
     public static function calculatePaystackFee(float $amount): float
     {
         $percentage = (float) self::get('paystack_fee_percentage', 1.5);
-        $minimum = (float) self::get('paystack_fee_minimum', 100);
-        $cap = (float) self::get('paystack_fee_cap', 3000);
+        $fixedAmount = (float) self::get('paystack_fee_minimum', 100);
+        $cap = (float) self::get('paystack_fee_cap', 2000);
 
-        $calculatedFee = $amount * ($percentage / 100);
-        $fee = max($calculatedFee, $minimum);
+        // Paystack formula: percentage + fixed amount
+        $percentageFee = $amount * ($percentage / 100);
+        $fee = $percentageFee + $fixedAmount;
 
         return min($fee, $cap);
     }
