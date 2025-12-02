@@ -33,6 +33,7 @@ class PerformanceMetrics extends Page
             'database' => $this->getDatabaseMetrics(),
             'cache' => $this->getCacheMetrics(),
             'application' => $this->getApplicationMetrics(),
+            'charts' => $this->getChartData(),
         ];
     }
 
@@ -86,6 +87,11 @@ class PerformanceMetrics extends Page
             'debug_mode' => config('app.debug') ? 'Enabled' : 'Disabled',
             'timezone' => config('app.timezone'),
         ];
+    }
+
+    protected function getChartData(): array
+    {
+        return \App\Models\PerformanceLog::getLast24Hours();
     }
 
     public function refreshMetrics(): void
