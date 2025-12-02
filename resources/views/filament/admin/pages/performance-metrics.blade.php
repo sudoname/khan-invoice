@@ -22,19 +22,19 @@
                 Historical performance data showing query time and cache performance over time
             </x-slot>
 
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <!-- Query Time Chart -->
-                <div class="bg-white p-4 rounded-lg border border-gray-200">
-                    <h4 class="text-sm font-semibold text-gray-700 mb-4">Database Query Time</h4>
-                    <div style="height: 300px;">
+                <div class="bg-white p-3 rounded-lg border border-gray-200">
+                    <h4 class="text-xs font-semibold text-gray-700 mb-2">Database Query Time</h4>
+                    <div style="height: 200px;">
                         <canvas id="queryTimeChart"></canvas>
                     </div>
                 </div>
 
                 <!-- Cache Write/Read Time Chart -->
-                <div class="bg-white p-4 rounded-lg border border-gray-200">
-                    <h4 class="text-sm font-semibold text-gray-700 mb-4">Cache Write/Read Time</h4>
-                    <div style="height: 300px;">
+                <div class="bg-white p-3 rounded-lg border border-gray-200">
+                    <h4 class="text-xs font-semibold text-gray-700 mb-2">Cache Write/Read Time</h4>
+                    <div style="height: 200px;">
                         <canvas id="cacheTimeChart"></canvas>
                     </div>
                 </div>
