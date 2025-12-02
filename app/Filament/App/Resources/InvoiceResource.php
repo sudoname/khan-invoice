@@ -117,26 +117,20 @@ class InvoiceResource extends Resource
                                     ->numeric()
                                     ->default(0)
                                     ->prefix('₦'),
-                                Forms\Components\TextInput::make('tax_rate')
-                                    ->label('Item Tax Rate (%)')
-                                    ->numeric()
-                                    ->default(0)
-                                    ->suffix('%'),
                                 Forms\Components\Placeholder::make('line_total')
                                     ->label('Total')
                                     ->content(function (Get $get) {
                                         $quantity = floatval($get('quantity') ?: 0);
                                         $price = floatval($get('unit_price') ?: 0);
                                         $discount = floatval($get('discount') ?: 0);
-                                        $taxRate = floatval($get('tax_rate') ?: 0);
 
-                                        $subtotal = ($quantity * $price) - $discount;
-                                        $total = $subtotal + ($subtotal * ($taxRate / 100));
+                                        // Line total WITHOUT per-item tax (VAT is applied at invoice level)
+                                        $total = ($quantity * $price) - $discount;
 
                                         return '₦' . number_format($total, 2);
                                     }),
                             ])
-                            ->columns(7)
+                            ->columns(6)
                             ->defaultItems(1)
                             ->addActionLabel('Add Line Item')
                             ->reorderable()

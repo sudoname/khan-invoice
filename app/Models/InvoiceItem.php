@@ -47,10 +47,9 @@ class InvoiceItem extends Model
                 $item->tax_rate = 0;
             }
 
+            // Calculate line total WITHOUT per-item tax
+            // VAT is applied at invoice level, not per-item
             $item->line_total = ($item->quantity * $item->unit_price) - $item->discount;
-            if ($item->tax_rate) {
-                $item->line_total += $item->line_total * ($item->tax_rate / 100);
-            }
         });
     }
 
