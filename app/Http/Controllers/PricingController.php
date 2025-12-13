@@ -25,7 +25,12 @@ class PricingController extends Controller
     public function selectPlan(Request $request, $planSlug)
     {
         $plan = Plan::where('slug', $planSlug)->where('is_active', true)->firstOrFail();
-        $billingCycle = $request->input('cycle', 'monthly');
+
+        // Ensure cycle is always a valid string
+        $billingCycle = $request->input('cycle') ?: 'monthly';
+        if (!in_array($billingCycle, ['monthly', 'yearly'])) {
+            $billingCycle = 'monthly';
+        }
 
         // If user is not authenticated, redirect to registration with plan selection
         if (!auth()->check()) {
