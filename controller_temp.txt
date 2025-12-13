@@ -1,0 +1,71 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Plan;
+use App\Models\PaymentTransaction;
+use App\Services\PaystackService;
+use App\Services\SubscriptionService;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+
+class SubscriptionUpgradeController extends Controller
+{
+    public function __construct(
+        private SubscriptionService \,
+        private PaystackService     ) {}
+
+    public function initiate(Request \)
+    {
+        \->validate([
+            'plan_slug' => 'required|exists:plans,slug',
+        ]);
+
+        \ = auth()->user();
+        \ = \->subscription;
+
+        if (\!\) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No active subscription found',
+            ], 400);
+        }
+
+        \ = Plan::where('slug', \->plan_slug)->firstOrFail();
+        \ = \->subscriptionService->canChangePlan(\, \);
+
+        if (\!\['can_change']) {
+            return response()->json([
+                'success' => false,
+                'message' => \['reason'],
+            ], 400);
+        }
+
+        \ = \->subscriptionService->upgrade(\, \);
+
+        if (\!\['success']) {
+            return response()->json(\, 400);
+        }
+
+        if (\!isset(\['requires_payment']) || \!\['requires_payment']) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Subscription upgraded successfully using credits',
+                'redirect' => route('filament.app.pages.my-subscription'),
+            ]);
+        }
+
+        // Create transaction and initialize Paystack payment
+        return response()->json(['success' => true]);
+    }
+
+    public function verify(Request \)
+    {
+        return redirect()->route('filament.app.pages.my-subscription');
+    }
+
+    public function downgrade(Request \)
+    {
+        return response()->json(['success' => true]);
+    }
+}
