@@ -32,6 +32,12 @@ return Application::configure(basePath: dirname(__DIR__))
 
         // Check for overdue invoices daily at 10:00 AM
         $schedule->command('reminders:check-overdue')->dailyAt('10:00');
+
+        // Check for expired subscriptions daily at 1:00 AM
+        $schedule->command('subscriptions:check-expired')->dailyAt('01:00');
+
+        // Reset subscription usage counters on the 1st of each month at 12:00 AM
+        $schedule->command('subscriptions:reset-usage')->monthlyOn(1, '00:00');
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
