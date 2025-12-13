@@ -110,6 +110,118 @@ class User extends Authenticatable implements MustVerifyEmail, FilamentUser
     }
 
     /**
+     * Get the subscription for the user.
+     */
+    public function subscription(): HasOne
+    {
+        return $this->hasOne(Subscription::class);
+    }
+
+    /**
+     * Get the payment transactions for the user.
+     */
+    public function paymentTransactions(): HasMany
+    {
+        return $this->hasMany(PaymentTransaction::class);
+    }
+
+    /**
+     * Get the usage records for the user.
+     */
+    public function usageRecords(): HasMany
+    {
+        return $this->hasMany(UsageRecord::class);
+    }
+
+    /**
+     * Get the user's active subscription plan
+     */
+    public function plan(): ?Plan
+    {
+        return $this->subscription?->plan;
+    }
+
+    /**
+     * Check if user has an active subscription
+     */
+    public function hasActiveSubscription(): bool
+    {
+        return $this->subscription && $this->subscription->isActive();
+    }
+
+    /**
+     * Check if user can create invoice based on subscription limits
+     */
+    public function canCreateInvoice(): bool
+    {
+        if (!$this->subscription || !$this->subscription->plan) {
+            return false;
+        }
+
+        return $this->subscription->plan->canCreateInvoice($this->subscription);
+    }
+
+    /**
+     * Check if user can create customer based on subscription limits
+     */
+    public function canCreateCustomer(): bool
+    {
+        if (!$this->subscription || !$this->subscription->plan) {
+            return false;
+        }
+
+        return $this->subscription->plan->canCreateCustomer($this->subscription);
+    }
+
+    /**
+     * Check if user can send SMS based on subscription limits
+     */
+    public function canSendSMS(): bool
+    {
+        if (!$this->subscription || !$this->subscription->plan) {
+            return false;
+        }
+
+        return $this->subscription->plan->canSendSMS($this->subscription);
+    }
+
+    /**
+     * Check if user can send WhatsApp based on subscription limits
+     */
+    public function canSendWhatsApp(): bool
+    {
+        if (!$this->subscription || !$this->subscription->plan) {
+            return false;
+        }
+
+        return $this->subscription->plan->canSendWhatsApp($this->subscription);
+    }
+
+    /**
+     * Check if user can make API request based on subscription limits
+     */
+    public function canMakeApiRequest(): bool
+    {
+        if (!$this->subscription || !$this->subscription->plan) {
+            return false;
+        }
+
+        return $this->subscription->plan->canMakeApiRequest($this->subscription);
+    }
+
+    /**
+     * Check if user has specific feature in their plan
+     */
+    public function hasFeature(string $feature): bool
+    {
+        if (!$this->subscription || !$this->subscription->plan) {
+            return false;
+        }
+
+        return $this->subscription->plan->hasFeature($feature);
+    }
+
+    /**
      * Check if user is an admin.
      */
     public function isAdmin(): bool
