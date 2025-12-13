@@ -62,7 +62,7 @@ sudo bash copy-prod-to-staging.sh
 1. ✅ **Reads database credentials from .env files** (no hardcoded values!)
 2. ✅ **Backs up PRODUCTION database** (safety first!)
 3. ✅ **Backs up STAGING database** (double safety!)
-4. ✅ Drops staging tables
+4. ✅ Drops and recreates staging database
 5. ✅ Imports production data to staging
 6. ✅ Updates environment-specific data
 7. ✅ Runs any new migrations
@@ -105,7 +105,7 @@ mysqldump -u "$STAGING_USER" --password="$STAGING_PASS" "$STAGING_DB" | gzip > /
 PROD_BACKUP="/var/backups/production_backup_$(date +%Y%m%d_%H%M%S).sql.gz"
 
 # 4. Drop and recreate staging database
-mysql -u "$STAGING_USER" --password="$STAGING_PASS" -e "DROP DATABASE IF EXISTS $STAGING_DB; CREATE DATABASE $STAGING_DB;"
+mysql -u "$STAGING_USER" --password="$STAGING_PASS" -e "DROP DATABASE IF EXISTS \`$STAGING_DB\`; CREATE DATABASE \`$STAGING_DB\`;"
 
 # 5. Import production data to staging
 gunzip < $PROD_BACKUP | mysql -u "$STAGING_USER" --password="$STAGING_PASS" "$STAGING_DB"

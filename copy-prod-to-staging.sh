@@ -101,14 +101,15 @@ PROD_DUMP_FILE="$BACKUP_DIR/production_backup_$TIMESTAMP.sql.gz"
 echo "✓ Using production backup for import"
 
 echo ""
-echo "Step 5: Dropping existing STAGING tables..."
-mysql -u "$STAGING_DB_USER" --password="$STAGING_DB_PASS" "$STAGING_DB_NAME" -e "SET FOREIGN_KEY_CHECKS = 0;
-    SELECT CONCAT('DROP TABLE IF EXISTS \`', table_name, '\`;')
-    FROM information_schema.tables
-    WHERE table_schema = '$STAGING_DB_NAME';" \
-    | grep DROP | mysql -u "$STAGING_DB_USER" --password="$STAGING_DB_PASS" "$STAGING_DB_NAME"
+echo "Step 5: Dropping and recreating STAGING database..."
+mysql -u "$STAGING_DB_USER" --password="$STAGING_DB_PASS" -e "DROP DATABASE IF EXISTS \`$STAGING_DB_NAME\`; CREATE DATABASE \`$STAGING_DB_NAME\`;"
 
-echo "✓ Staging tables dropped"
+if [ $? -eq 0 ]; then
+    echo "✓ Staging database recreated"
+else
+    echo "❌ Failed to recreate staging database! Aborting."
+    exit 1
+fi
 
 echo ""
 echo "Step 6: Importing PRODUCTION data to STAGING..."
