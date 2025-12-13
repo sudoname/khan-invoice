@@ -53,6 +53,11 @@ echo "Step 8: Setting file permissions..."
 chown -R www-data:www-data /var/www/staging.kinvoice.ng
 chmod -R 755 /var/www/staging.kinvoice.ng
 chmod -R 775 /var/www/staging.kinvoice.ng/storage
+chmod -R 775 /var/www/staging.kinvoice.ng/storage/framework
+chmod -R 775 /var/www/staging.kinvoice.ng/storage/framework/cache
+chmod -R 775 /var/www/staging.kinvoice.ng/storage/framework/sessions
+chmod -R 775 /var/www/staging.kinvoice.ng/storage/framework/views
+chmod -R 775 /var/www/staging.kinvoice.ng/storage/logs
 chmod -R 775 /var/www/staging.kinvoice.ng/bootstrap/cache
 
 echo ""
