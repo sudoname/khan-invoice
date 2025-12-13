@@ -89,9 +89,9 @@ class InvoiceResource extends Resource
                                     ->toArray();
                             })
                             ->required()
-                            ->default('NGN')
+                            ->default('USD')
                             ->searchable()
-                            ->helperText('Select invoice currency'),
+                            ->helperText('Select invoice currency - 53+ currencies supported'),
                     ])
                     ->columns(3),
 

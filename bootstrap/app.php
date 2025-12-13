@@ -8,12 +8,14 @@ use Illuminate\Console\Scheduling\Schedule;
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
         web: __DIR__.'/../routes/web.php',
+        api: __DIR__.'/../routes/api.php',
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
             'admin' => \App\Http\Middleware\EnsureUserIsAdmin::class,
+            'api.rate.limit' => \App\Http\Middleware\ApiRateLimit::class,
         ]);
 
         $middleware->validateCsrfTokens(except: [
@@ -24,6 +26,12 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withSchedule(function (Schedule $schedule) {
         // Log performance metrics every hour
         $schedule->command('performance:log')->hourly();
+
+        // Send payment reminders daily at 9:00 AM
+        $schedule->command('reminders:send-payment')->dailyAt('09:00');
+
+        // Check for overdue invoices daily at 10:00 AM
+        $schedule->command('reminders:check-overdue')->dailyAt('10:00');
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

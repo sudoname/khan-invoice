@@ -7,13 +7,15 @@ use Filament\Panel;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable implements MustVerifyEmail, FilamentUser
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, HasApiTokens;
 
     /**
      * The attributes that are mass assignable.
@@ -29,6 +31,9 @@ class User extends Authenticatable implements MustVerifyEmail, FilamentUser
         'avatar',
         'role',
         'email_verified_at',
+        'api_enabled',
+        'api_rate_limit',
+        'api_last_used_at',
     ];
 
     /**
@@ -51,6 +56,8 @@ class User extends Authenticatable implements MustVerifyEmail, FilamentUser
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'api_enabled' => 'boolean',
+            'api_last_used_at' => 'datetime',
         ];
     }
 
@@ -76,6 +83,30 @@ class User extends Authenticatable implements MustVerifyEmail, FilamentUser
     public function invoices(): HasMany
     {
         return $this->hasMany(Invoice::class);
+    }
+
+    /**
+     * Get the notification preferences for the user.
+     */
+    public function notificationPreferences(): HasOne
+    {
+        return $this->hasOne(NotificationPreference::class);
+    }
+
+    /**
+     * Get the SMS logs for the user.
+     */
+    public function smsLogs(): HasMany
+    {
+        return $this->hasMany(SmsLog::class);
+    }
+
+    /**
+     * Get the WhatsApp logs for the user.
+     */
+    public function whatsAppLogs(): HasMany
+    {
+        return $this->hasMany(WhatsAppLog::class);
     }
 
     /**

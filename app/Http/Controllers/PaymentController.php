@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Invoice;
 use App\Models\Payment;
+use App\Notifications\PaymentReceivedNotification;
 use App\Services\PaystackService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -141,7 +142,7 @@ class PaymentController extends Controller
 
                 if (!$existingPayment) {
                     // Create payment record
-                    Payment::create([
+                    $payment = Payment::create([
                         'invoice_id' => $invoice->id,
                         'amount' => $amountPaid,
                         'payment_date' => now(),
@@ -149,20 +150,34 @@ class PaymentController extends Controller
                         'reference_number' => $reference,
                         'notes' => 'Payment via Paystack - Transaction ID: ' . ($data['id'] ?? $reference),
                     ]);
-                }
 
-                // Update invoice payment details
-                $invoice->update([
-                    'amount_paid' => $invoice->amount_paid + $amountPaid,
-                    'payment_status' => 'completed',
-                    'paid_at' => now(),
-                ]);
+                    // Update invoice payment details
+                    $invoice->update([
+                        'amount_paid' => $invoice->amount_paid + $amountPaid,
+                        'payment_status' => 'completed',
+                        'paid_at' => now(),
+                    ]);
 
-                // Update invoice status
-                if ($invoice->amount_paid >= $invoice->total_amount) {
-                    $invoice->update(['status' => 'paid']);
-                } else {
-                    $invoice->update(['status' => 'partially_paid']);
+                    // Update invoice status
+                    if ($invoice->amount_paid >= $invoice->total_amount) {
+                        $invoice->update(['status' => 'paid']);
+                    } else {
+                        $invoice->update(['status' => 'partially_paid']);
+                    }
+
+                    // Reload invoice with relationships
+                    $invoice->load('customer');
+
+                    // Send payment received notification to customer
+                    try {
+                        $invoice->customer->notify(new PaymentReceivedNotification($payment, $invoice));
+                        Log::info('Payment received notification queued for customer', [
+                            'invoice_id' => $invoice->id,
+                            'customer_id' => $invoice->customer->id,
+                        ]);
+                    } catch (\Exception $e) {
+                        Log::error('Failed to send payment notification: ' . $e->getMessage());
+                    }
                 }
 
                 return redirect()
@@ -215,7 +230,7 @@ class PaymentController extends Controller
 
                     if (!$existingPayment) {
                         // Create payment record
-                        Payment::create([
+                        $payment = Payment::create([
                             'invoice_id' => $invoice->id,
                             'amount' => $amountPaid,
                             'payment_date' => now(),
@@ -223,20 +238,34 @@ class PaymentController extends Controller
                             'reference_number' => $reference,
                             'notes' => 'Payment via Paystack Webhook - Transaction ID: ' . ($data['id'] ?? $reference),
                         ]);
-                    }
 
-                    // Update invoice payment details
-                    $invoice->update([
-                        'amount_paid' => $invoice->amount_paid + $amountPaid,
-                        'payment_status' => 'completed',
-                        'paid_at' => now(),
-                    ]);
+                        // Update invoice payment details
+                        $invoice->update([
+                            'amount_paid' => $invoice->amount_paid + $amountPaid,
+                            'payment_status' => 'completed',
+                            'paid_at' => now(),
+                        ]);
 
-                    // Update invoice status
-                    if ($invoice->amount_paid >= $invoice->total_amount) {
-                        $invoice->update(['status' => 'paid']);
-                    } else {
-                        $invoice->update(['status' => 'partially_paid']);
+                        // Update invoice status
+                        if ($invoice->amount_paid >= $invoice->total_amount) {
+                            $invoice->update(['status' => 'paid']);
+                        } else {
+                            $invoice->update(['status' => 'partially_paid']);
+                        }
+
+                        // Reload invoice with relationships
+                        $invoice->load('customer');
+
+                        // Send payment received notification to customer
+                        try {
+                            $invoice->customer->notify(new PaymentReceivedNotification($payment, $invoice));
+                            Log::info('Payment received notification queued for customer via webhook', [
+                                'invoice_id' => $invoice->id,
+                                'customer_id' => $invoice->customer->id,
+                            ]);
+                        } catch (\Exception $e) {
+                            Log::error('Failed to send payment notification via webhook: ' . $e->getMessage());
+                        }
                     }
 
                     Log::info('Webhook processed successfully for invoice: ' . $invoice->invoice_number);
