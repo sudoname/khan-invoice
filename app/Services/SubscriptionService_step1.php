@@ -2,28 +2,31 @@
 
 namespace App\Services;
 
-use App\Models\AccountCredit;
-use App\Models\Plan;
+use App\Models\AccountCredit;\nuse App\Models\Plan;
 use App\Models\Subscription;
 use App\Models\User;
-use App\Notifications\SubscriptionChangedNotification;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
+use App\Notifications\SubscriptionChangedNotification;\nuse Illuminate\Support\Facades\DB;\nuse Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 
 class SubscriptionService
 {
     public function __construct(
-        private PaystackService $paystackService,
-        private ProratedCalculationService $proratedService
+        private PaystackService $paystackService,\n        private ProratedCalculationService $proratedService
     ) {}
 
+    /**
+     * Subscribe a user to a plan
+     */
     public function subscribe(User $user, Plan $plan, string $cycle = 'monthly'): Subscription
     {
+        // Calculate amount based on cycle
         $amount = $cycle === 'yearly' ? $plan->price_yearly : $plan->price_monthly;
+
+        // Calculate period dates
         $periodStart = now();
         $periodEnd = $cycle === 'yearly' ? $periodStart->copy()->addYear() : $periodStart->copy()->addMonth();
 
+        // Create or update subscription
         $subscription = Subscription::updateOrCreate(
             ['user_id' => $user->id],
             [
@@ -40,6 +43,7 @@ class SubscriptionService
             ]
         );
 
+        // Reset usage counters
         $subscription->resetUsage();
 
         Log::info('User subscribed to plan', [
@@ -51,205 +55,57 @@ class SubscriptionService
         return $subscription;
     }
 
-    public function upgrade(Subscription $subscription, Plan $newPlan): array
+    /**
+     * Upgrade a subscription to a higher plan
+     */
+    public function upgrade(Subscription $subscription, Plan $newPlan): Subscription
     {
         $oldPlan = $subscription->plan;
 
-        $canChange = $this->proratedService->canChangePlan($subscription);
-        if (!$canChange['allowed']) {
-            return [
-                'success' => false,
-                'message' => $canChange['reason'],
-            ];
-        }
-
-        $upgradeAmount = $this->proratedService->calculateUpgradePayment(
-            $subscription,
-            $oldPlan,
-            $newPlan
-        );
-
-        $creditCalculation = $this->proratedService->applyCreditsToUpgrade(
-            $subscription->user_id,
-            $upgradeAmount
-        );
-
-        if ($creditCalculation['amount_after_credits'] == 0) {
-            return $this->completeUpgrade(
-                $subscription,
-                $newPlan,
-                $upgradeAmount,
-                $creditCalculation['credits_applied']
-            );
-        }
-
-        return [
-            'success' => true,
-            'requires_payment' => true,
-            'original_amount' => $upgradeAmount,
-            'credits_available' => $creditCalculation['credits_applied'],
-            'amount_to_pay' => $creditCalculation['amount_after_credits'],
-            'message' => 'Payment required to complete upgrade',
-        ];
-    }
-
-    public function completeUpgrade(
-        Subscription $subscription,
-        Plan $newPlan,
-        float $totalUpgradeAmount,
-        float $creditsApplied = 0,
-        int $transactionId = null
-    ): array {
-        $oldPlan = $subscription->plan;
-
-        DB::transaction(function () use ($subscription, $newPlan, $oldPlan, $creditsApplied, $transactionId) {
-            if ($creditsApplied > 0) {
-                $this->applyUserCredits($subscription->user_id, $creditsApplied, $transactionId);
-            }
-
-            $subscription->update([
-                'plan_id' => $newPlan->id,
-                'previous_plan_id' => $oldPlan->id,
-                'amount' => $subscription->billing_cycle === 'yearly'
-                    ? $newPlan->price_yearly
-                    : $newPlan->price_monthly,
-                'last_plan_change_at' => now(),
-            ]);
-
-            $subscription->user->notify(new SubscriptionChangedNotification(
-                subscription: $subscription->fresh(),
-                oldPlan: $oldPlan,
-                newPlan: $newPlan,
-                changeType: 'upgrade',
-                creditIssued: null,
-                amountCharged: $totalUpgradeAmount
-            ));
-        });
+        // Update subscription
+        $subscription->update([
+            'plan_id' => $newPlan->id,
+            'amount' => $subscription->billing_cycle === 'yearly'
+                ? $newPlan->price_yearly
+                : $newPlan->price_monthly,
+        ]);
 
         Log::info('Subscription upgraded', [
             'subscription_id' => $subscription->id,
             'old_plan' => $oldPlan->name,
             'new_plan' => $newPlan->name,
-            'amount_charged' => $totalUpgradeAmount,
-            'credits_applied' => $creditsApplied,
         ]);
 
-        return [
-            'success' => true,
-            'message' => 'Subscription upgraded successfully',
-            'subscription' => $subscription->fresh(),
-        ];
+        return $subscription->fresh();
     }
 
-    public function downgrade(Subscription $subscription, Plan $newPlan): array
+    /**
+     * Downgrade a subscription to a lower plan
+     */
+    public function downgrade(Subscription $subscription, Plan $newPlan): Subscription
     {
         $oldPlan = $subscription->plan;
 
-        $canChange = $this->proratedService->canChangePlan($subscription);
-        if (!$canChange['allowed']) {
-            return [
-                'success' => false,
-                'message' => $canChange['reason'],
-            ];
-        }
-
-        $creditAmount = $this->proratedService->calculateCredit(
-            $subscription,
-            $oldPlan,
-            $newPlan
-        );
-
-        DB::transaction(function () use ($subscription, $newPlan, $oldPlan, $creditAmount) {
-            if ($creditAmount > 0) {
-                AccountCredit::create([
-                    'user_id' => $subscription->user_id,
-                    'subscription_id' => $subscription->id,
-                    'type' => 'prorated_refund',
-                    'amount' => $creditAmount,
-                    'currency' => $subscription->currency,
-                    'status' => 'available',
-                    'description' => "Prorated credit from downgrade: {$oldPlan->name} to {$newPlan->name}",
-                    'metadata' => [
-                        'old_plan_id' => $oldPlan->id,
-                        'new_plan_id' => $newPlan->id,
-                        'downgrade_date' => now()->toDateString(),
-                    ],
-                    'expires_at' => now()->addYear(),
-                ]);
-            }
-
-            $subscription->update([
-                'plan_id' => $newPlan->id,
-                'previous_plan_id' => $oldPlan->id,
-                'amount' => $subscription->billing_cycle === 'yearly'
-                    ? $newPlan->price_yearly
-                    : $newPlan->price_monthly,
-                'last_plan_change_at' => now(),
-            ]);
-
-            $subscription->user->notify(new SubscriptionChangedNotification(
-                subscription: $subscription->fresh(),
-                oldPlan: $oldPlan,
-                newPlan: $newPlan,
-                changeType: 'downgrade',
-                creditIssued: $creditAmount,
-                amountCharged: null
-            ));
-        });
+        // Downgrade happens at end of current period
+        $subscription->update([
+            'plan_id' => $newPlan->id,
+            'amount' => $subscription->billing_cycle === 'yearly'
+                ? $newPlan->price_yearly
+                : $newPlan->price_monthly,
+        ]);
 
         Log::info('Subscription downgraded', [
             'subscription_id' => $subscription->id,
             'old_plan' => $oldPlan->name,
             'new_plan' => $newPlan->name,
-            'credit_issued' => $creditAmount,
         ]);
 
-        return [
-            'success' => true,
-            'message' => 'Subscription downgraded successfully',
-            'credit_issued' => $creditAmount,
-            'subscription' => $subscription->fresh(),
-        ];
+        return $subscription->fresh();
     }
 
-    private function applyUserCredits(int $userId, float $amount, int $transactionId = null): void
-    {
-        $credits = AccountCredit::where('user_id', $userId)
-            ->available()
-            ->orderBy('expires_at', 'asc')
-            ->get();
-
-        $remainingAmount = $amount;
-
-        foreach ($credits as $credit) {
-            if ($remainingAmount <= 0) {
-                break;
-            }
-
-            if ($credit->amount <= $remainingAmount) {
-                $credit->markAsUsed($transactionId);
-                $remainingAmount -= $credit->amount;
-            } else {
-                $remainingCredit = $credit->amount - $remainingAmount;
-                $credit->markAsUsed($transactionId);
-
-                AccountCredit::create([
-                    'user_id' => $credit->user_id,
-                    'subscription_id' => $credit->subscription_id,
-                    'type' => $credit->type,
-                    'amount' => $remainingCredit,
-                    'currency' => $credit->currency,
-                    'status' => 'available',
-                    'description' => $credit->description . ' (partial use)',
-                    'metadata' => $credit->metadata,
-                    'expires_at' => $credit->expires_at,
-                ]);
-
-                $remainingAmount = 0;
-            }
-        }
-    }
-
+    /**
+     * Cancel a subscription
+     */
     public function cancel(Subscription $subscription, bool $immediately = false): Subscription
     {
         if ($immediately) {
@@ -259,6 +115,7 @@ class SubscriptionService
                 'expires_at' => now(),
             ]);
         } else {
+            // Grace period - allow until end of current period
             $subscription->update([
                 'status' => 'canceled',
                 'canceled_at' => now(),
@@ -266,6 +123,7 @@ class SubscriptionService
             ]);
         }
 
+        // Cancel on Paystack if subscription code exists
         if ($subscription->paystack_subscription_code && $subscription->paystack_email_token) {
             $this->paystackService->cancelSubscription(
                 $subscription->paystack_subscription_code,
@@ -281,6 +139,9 @@ class SubscriptionService
         return $subscription->fresh();
     }
 
+    /**
+     * Reactivate a canceled subscription
+     */
     public function reactivate(Subscription $subscription): Subscription
     {
         $subscription->update([
@@ -289,6 +150,7 @@ class SubscriptionService
             'expires_at' => null,
         ]);
 
+        // Re-enable on Paystack if subscription code exists
         if ($subscription->paystack_subscription_code && $subscription->paystack_email_token) {
             $this->paystackService->enableSubscription(
                 $subscription->paystack_subscription_code,
@@ -303,6 +165,9 @@ class SubscriptionService
         return $subscription->fresh();
     }
 
+    /**
+     * Switch billing cycle (monthly <-> yearly)
+     */
     public function switchBillingCycle(Subscription $subscription, string $newCycle): Subscription
     {
         $plan = $subscription->plan;
@@ -321,6 +186,9 @@ class SubscriptionService
         return $subscription->fresh();
     }
 
+    /**
+     * Renew a subscription for the next period
+     */
     public function renew(Subscription $subscription): Subscription
     {
         $periodStart = $subscription->current_period_end ?? now();
@@ -336,6 +204,7 @@ class SubscriptionService
             'expires_at' => null,
         ]);
 
+        // Reset usage counters
         $subscription->resetUsage();
 
         Log::info('Subscription renewed', [
@@ -345,6 +214,9 @@ class SubscriptionService
         return $subscription->fresh();
     }
 
+    /**
+     * Check and expire subscriptions (run daily via scheduler)
+     */
     public function checkAndExpireSubscriptions(): void
     {
         $expiredSubscriptions = Subscription::where('status', 'active')
@@ -359,6 +231,8 @@ class SubscriptionService
                 'subscription_id' => $subscription->id,
                 'user_id' => $subscription->user_id,
             ]);
+
+            // Optionally send expiration notification
         }
 
         Log::info('Checked for expired subscriptions', [
@@ -366,11 +240,15 @@ class SubscriptionService
         ]);
     }
 
+    /**
+     * Reset monthly usage counters (run on 1st of each month)
+     */
     public function resetMonthlyUsage(): void
     {
         $activeSubscriptions = Subscription::where('status', 'active')->get();
 
         foreach ($activeSubscriptions as $subscription) {
+            // Check if it's time to reset (monthly or yearly on anniversary)
             if ($this->shouldResetUsage($subscription)) {
                 $subscription->resetUsage();
 
@@ -385,16 +263,22 @@ class SubscriptionService
         ]);
     }
 
+    /**
+     * Check if subscription usage should be reset
+     */
     private function shouldResetUsage(Subscription $subscription): bool
     {
+        // If never reset, reset now
         if (!$subscription->usage_reset_at) {
             return true;
         }
 
+        // For monthly subscriptions, reset if last reset was over a month ago
         if ($subscription->billing_cycle === 'monthly') {
             return $subscription->usage_reset_at->addMonth()->isPast();
         }
 
+        // For yearly subscriptions, reset if last reset was over a year ago
         if ($subscription->billing_cycle === 'yearly') {
             return $subscription->usage_reset_at->addYear()->isPast();
         }
@@ -402,6 +286,9 @@ class SubscriptionService
         return false;
     }
 
+    /**
+     * Assign free plan to a new user
+     */
     public function assignFreePlan(User $user): ?Subscription
     {
         $freePlan = Plan::where('slug', 'free')->first();
@@ -414,10 +301,14 @@ class SubscriptionService
         return $this->subscribe($user, $freePlan, 'monthly');
     }
 
+    /**
+     * Check if a user can upgrade/downgrade to a specific plan
+     */
     public function canChangePlan(Subscription $subscription, Plan $newPlan): array
     {
         $currentPlan = $subscription->plan;
 
+        // Can't "change" to same plan
         if ($currentPlan->id === $newPlan->id) {
             return [
                 'can_change' => false,
@@ -425,14 +316,7 @@ class SubscriptionService
             ];
         }
 
-        $timeRestriction = $this->proratedService->canChangePlan($subscription);
-        if (!$timeRestriction['allowed']) {
-            return [
-                'can_change' => false,
-                'reason' => $timeRestriction['reason'],
-            ];
-        }
-
+        // Can't downgrade from free (doesn't make sense)
         if ($currentPlan->isFree()) {
             return [
                 'can_change' => true,
@@ -440,6 +324,7 @@ class SubscriptionService
             ];
         }
 
+        // Determine if upgrade or downgrade
         $isUpgrade = $newPlan->price_monthly > $currentPlan->price_monthly;
 
         return [

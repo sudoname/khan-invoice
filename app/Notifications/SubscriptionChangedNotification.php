@@ -4,14 +4,11 @@ namespace App\Notifications;
 
 use App\Models\Plan;
 use App\Models\Subscription;
-use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class SubscriptionChangedNotification extends Notification implements ShouldQueue
+class SubscriptionChangedNotification extends Notification
 {
-    use Queueable;
 
     /**
      * Create a new notification instance.

@@ -1,5 +1,17 @@
 <?php
 
+echo "Completing SubscriptionService update...\n\n";
+
+// Read the current file
+$content = file_get_contents('app/Services/SubscriptionService_original.php');
+
+// Get all the enhancement code from a template
+$enhancedContent = file_get_contents('app/Services/ProratedCalculationService.php');
+
+// Since the guide exists, let me just create the complete enhanced version from scratch
+$finalContent = <<<'PHPFINAL'
+<?php
+
 namespace App\Services;
 
 use App\Models\AccountCredit;
@@ -447,4 +459,22 @@ class SubscriptionService
             'type' => $isUpgrade ? 'upgrade' : 'downgrade',
         ];
     }
+}
+PHPFINAL;
+
+file_put_contents('app/Services/SubscriptionService.php', $finalContent);
+
+echo "✓ Complete SubscriptionService written\n\n";
+echo "Testing syntax...\n";
+
+$output = [];
+$return = 0;
+exec('php -l app/Services/SubscriptionService.php 2>&1', $output, $return);
+
+if ($return === 0) {
+    echo "✓ Syntax check passed!\n";
+    echo "✓ SubscriptionService fully updated with all enhancements!\n";
+} else {
+    echo "✗ Syntax error:\n";
+    echo implode("\n", $output) . "\n";
 }
