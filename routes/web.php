@@ -1,8 +1,10 @@
 <?php
 
+use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\PricingController;
 use App\Http\Controllers\PublicInvoiceController;
 use App\Http\Controllers\SocialAuthController;
 use Illuminate\Support\Facades\Route;
@@ -40,6 +42,17 @@ Route::get('/faq', function () {
 
 Route::get('/auth/facebook/deletion', function () {
     return view('pages.facebook-deletion');
+});
+
+// Pricing and Subscription routes
+Route::get('/pricing', [PricingController::class, 'index'])->name('pricing');
+Route::post('/pricing/select-plan/{planSlug}', [PricingController::class, 'selectPlan'])->name('pricing.select');
+
+// Checkout routes (requires authentication)
+Route::middleware('auth')->group(function () {
+    Route::get('/checkout', [CheckoutController::class, 'show'])->name('checkout');
+    Route::post('/checkout/initialize', [CheckoutController::class, 'initializePayment'])->name('checkout.initialize');
+    Route::get('/checkout/verify', [CheckoutController::class, 'verifyPayment'])->name('checkout.verify');
 });
 
 // Public Invoice Generator routes

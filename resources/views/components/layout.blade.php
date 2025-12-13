@@ -32,6 +32,7 @@
                 </div>
                 <div class="flex items-center space-x-4">
                     <a href="/about" class="text-gray-700 hover:text-purple-600 px-3 py-2 rounded-md text-sm font-medium">About</a>
+                    <a href="{{ route('pricing') }}" class="text-gray-700 hover:text-purple-600 px-3 py-2 rounded-md text-sm font-medium">Pricing</a>
                     <a href="/faq" class="text-gray-700 hover:text-purple-600 px-3 py-2 rounded-md text-sm font-medium">FAQ</a>
                     <a href="{{ route('public-invoice.create') }}" class="text-gray-700 hover:text-purple-600 px-3 py-2 rounded-md text-sm font-medium">Generate Invoice</a>
                     <a href="/contact" class="text-gray-700 hover:text-purple-600 px-3 py-2 rounded-md text-sm font-medium">Contact</a>
