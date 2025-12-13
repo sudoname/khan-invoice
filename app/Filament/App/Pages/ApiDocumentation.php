@@ -98,21 +98,56 @@ class ApiDocumentation extends Page
         $html = $markdown;
 
         // Headers
-        $html = preg_replace('/^### (.*?)$/m', '<h3 class="text-lg font-semibold mt-6 mb-3">$1</h3>', $html);
-        $html = preg_replace('/^## (.*?)$/m', '<h2 class="text-xl font-bold mt-8 mb-4">$1</h2>', $html);
-        $html = preg_replace('/^# (.*?)$/m', '<h1 class="text-2xl font-bold mt-10 mb-6">$1</h1>', $html);
+        $html = preg_replace('/^### (.*?)$/m', '<h3 class="text-lg font-semibold mt-6 mb-3 text-gray-900 dark:text-gray-100">$1</h3>', $html);
+        $html = preg_replace('/^## (.*?)$/m', '<h2 class="text-xl font-bold mt-8 mb-4 text-gray-900 dark:text-gray-100">$1</h2>', $html);
+        $html = preg_replace('/^# (.*?)$/m', '<h1 class="text-2xl font-bold mt-10 mb-6 text-gray-900 dark:text-gray-100">$1</h1>', $html);
 
-        // Code blocks
-        $html = preg_replace('/```(\w+)?\n(.*?)\n```/s', '<pre class="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto my-4"><code>$2</code></pre>', $html);
+        // Code blocks with language and copy button
+        $html = preg_replace_callback(
+            '/```(\w+)?\n(.*?)\n```/s',
+            function ($matches) {
+                $language = $matches[1] ?? 'text';
+                $code = htmlspecialchars($matches[2], ENT_QUOTES, 'UTF-8');
+                $id = 'code-' . md5($code);
+
+                return sprintf(
+                    '<div class="relative my-4 group">
+                        <div class="flex items-center justify-between bg-gray-800 dark:bg-gray-900 px-4 py-2 rounded-t-lg">
+                            <span class="text-xs text-gray-400 uppercase font-semibold">%s</span>
+                            <button
+                                onclick="copyCode(\'%s\')"
+                                class="text-xs text-gray-400 hover:text-white transition px-2 py-1 rounded hover:bg-gray-700"
+                            >
+                                Copy
+                            </button>
+                        </div>
+                        <pre id="%s" class="bg-gray-900 dark:bg-black text-gray-100 p-4 rounded-b-lg overflow-x-auto language-%s"><code>%s</code></pre>
+                    </div>',
+                    $language,
+                    $id,
+                    $id,
+                    $language,
+                    $code
+                );
+            },
+            $html
+        );
 
         // Inline code
-        $html = preg_replace('/`([^`]+)`/', '<code class="bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded text-sm">$1</code>', $html);
+        $html = preg_replace('/`([^`]+)`/', '<code class="bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded text-sm font-mono text-primary-600 dark:text-primary-400">$1</code>', $html);
 
         // Bold
-        $html = preg_replace('/\*\*(.*?)\*\*/', '<strong>$1</strong>', $html);
+        $html = preg_replace('/\*\*(.*?)\*\*/', '<strong class="font-semibold">$1</strong>', $html);
 
         // Italic
-        $html = preg_replace('/\*(.*?)\*/', '<em>$1</em>', $html);
+        $html = preg_replace('/\*(.*?)\*/', '<em class="italic">$1</em>', $html);
+
+        // Lists
+        $html = preg_replace('/^\- (.+)$/m', '<li class="ml-4">$1</li>', $html);
+        $html = preg_replace('/(<li.*<\/li>)+/s', '<ul class="list-disc list-inside space-y-1 my-3">$0</ul>', $html);
+
+        // Links
+        $html = preg_replace('/\[([^\]]+)\]\(([^\)]+)\)/', '<a href="$2" class="text-primary-600 dark:text-primary-400 hover:underline">$1</a>', $html);
 
         // Line breaks
         $html = nl2br($html);

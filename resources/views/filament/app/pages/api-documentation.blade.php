@@ -94,14 +94,50 @@
     <style>
         /* Improve code block styling */
         pre {
-            white-space: pre-wrap;
-            word-wrap: break-word;
+            white-space: pre;
+            overflow-x: auto;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(156, 163, 175, 0.5) transparent;
+        }
+
+        pre::-webkit-scrollbar {
+            height: 8px;
+        }
+
+        pre::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        pre::-webkit-scrollbar-thumb {
+            background: rgba(156, 163, 175, 0.5);
+            border-radius: 4px;
+        }
+
+        pre::-webkit-scrollbar-thumb:hover {
+            background: rgba(156, 163, 175, 0.7);
         }
 
         pre code {
-            font-family: 'Courier New', monospace;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'Courier New', monospace;
             font-size: 0.875rem;
-            line-height: 1.5;
+            line-height: 1.6;
+            display: block;
+        }
+
+        /* JSON syntax highlighting */
+        .language-json pre code {
+            color: #e5e7eb;
+        }
+
+        /* Bash/Shell syntax highlighting */
+        .language-bash pre code,
+        .language-sh pre code {
+            color: #93c5fd;
+        }
+
+        /* HTTP syntax highlighting */
+        .language-http pre code {
+            color: #fbbf24;
         }
 
         /* Smooth scroll for anchor links */
@@ -161,7 +197,30 @@
             });
         }
 
-        // Copy button feedback
+        // Copy code block content
+        function copyCode(elementId) {
+            const codeBlock = document.getElementById(elementId);
+            const code = codeBlock.textContent;
+
+            navigator.clipboard.writeText(code).then(() => {
+                // Find the copy button for this code block
+                const button = codeBlock.parentElement.querySelector('button');
+                if (button) {
+                    const originalText = button.textContent;
+                    button.textContent = 'Copied!';
+                    button.classList.add('text-green-400');
+
+                    setTimeout(() => {
+                        button.textContent = originalText;
+                        button.classList.remove('text-green-400');
+                    }, 2000);
+                }
+            }).catch(err => {
+                console.error('Failed to copy code: ', err);
+            });
+        }
+
+        // Copy button feedback for API base URL
         document.addEventListener('DOMContentLoaded', function() {
             document.querySelectorAll('button[onclick*="clipboard"]').forEach(button => {
                 button.addEventListener('click', function() {
