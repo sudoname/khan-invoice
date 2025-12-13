@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Khan Invoice - Staging Deployment Script
-# Deploys latest changes to staging.kinvoice.com
+# Deploys latest changes to staging.kinvoice.ng
 
 set -e
 
@@ -11,7 +11,7 @@ echo "========================================="
 echo ""
 
 # Change to staging directory
-cd /var/www/staging.kinvoice.com
+cd /var/www/staging.kinvoice.ng
 
 echo "Step 1: Pulling latest changes from GitHub..."
 git pull origin main
@@ -50,10 +50,10 @@ php artisan optimize
 
 echo ""
 echo "Step 8: Setting file permissions..."
-chown -R www-data:www-data /var/www/staging.kinvoice.com
-chmod -R 755 /var/www/staging.kinvoice.com
-chmod -R 775 /var/www/staging.kinvoice.com/storage
-chmod -R 775 /var/www/staging.kinvoice.com/bootstrap/cache
+chown -R www-data:www-data /var/www/staging.kinvoice.ng
+chmod -R 755 /var/www/staging.kinvoice.ng
+chmod -R 775 /var/www/staging.kinvoice.ng/storage
+chmod -R 775 /var/www/staging.kinvoice.ng/bootstrap/cache
 
 echo ""
 echo "Step 9: Restarting PHP-FPM and Queue Worker..."
@@ -89,9 +89,9 @@ echo "  ✓ REST API with Sanctum Auth"
 echo "  ✓ Enhanced Reports"
 echo ""
 echo "URLs:"
-echo "  • Staging: https://staging.kinvoice.com"
-echo "  • Admin: https://staging.kinvoice.com/app"
-echo "  • API: https://staging.kinvoice.com/api/v1"
+echo "  • Staging: https://staging.kinvoice.ng"
+echo "  • Admin: https://staging.kinvoice.ng/app"
+echo "  • API: https://staging.kinvoice.ng/api/v1"
 echo ""
 echo "Next Steps:"
 echo "  1. Test multi-currency invoice creation"

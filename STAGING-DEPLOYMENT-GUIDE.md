@@ -8,10 +8,10 @@ SSH into your staging server and run:
 
 ```bash
 # SSH into staging server
-ssh your-user@staging.kinvoice.com
+ssh your-user@staging.kinvoice.ng
 
 # Navigate to the application directory
-cd /var/www/staging.kinvoice.com
+cd /var/www/staging.kinvoice.ng
 
 # Pull latest deployment script
 git pull origin main
@@ -42,8 +42,8 @@ If you prefer manual control, follow these steps:
 ### 1. SSH into Staging Server
 
 ```bash
-ssh your-user@staging.kinvoice.com
-cd /var/www/staging.kinvoice.com
+ssh your-user@staging.kinvoice.ng
+cd /var/www/staging.kinvoice.ng
 ```
 
 ### 2. Pull Latest Changes
@@ -99,10 +99,10 @@ php artisan optimize
 ### 8. Set Permissions
 
 ```bash
-sudo chown -R www-data:www-data /var/www/staging.kinvoice.com
-sudo chmod -R 755 /var/www/staging.kinvoice.com
-sudo chmod -R 775 /var/www/staging.kinvoice.com/storage
-sudo chmod -R 775 /var/www/staging.kinvoice.com/bootstrap/cache
+sudo chown -R www-data:www-data /var/www/staging.kinvoice.ng
+sudo chmod -R 755 /var/www/staging.kinvoice.ng
+sudo chmod -R 775 /var/www/staging.kinvoice.ng/storage
+sudo chmod -R 775 /var/www/staging.kinvoice.ng/bootstrap/cache
 ```
 
 ### 9. Restart Services
@@ -127,7 +127,7 @@ sudo systemctl restart laravel-scheduler
 Edit the `.env` file on staging:
 
 ```bash
-nano /var/www/staging.kinvoice.com/.env
+nano /var/www/staging.kinvoice.ng/.env
 ```
 
 Add the following API keys:
@@ -164,7 +164,7 @@ sudo crontab -e -u www-data
 Add this line:
 
 ```cron
-* * * * * cd /var/www/staging.kinvoice.com && php artisan schedule:run >> /dev/null 2>&1
+* * * * * cd /var/www/staging.kinvoice.ng && php artisan schedule:run >> /dev/null 2>&1
 ```
 
 This enables:
@@ -191,7 +191,7 @@ Type=simple
 User=www-data
 Group=www-data
 Restart=always
-ExecStart=/usr/bin/php /var/www/staging.kinvoice.com/artisan queue:work --tries=3
+ExecStart=/usr/bin/php /var/www/staging.kinvoice.ng/artisan queue:work --tries=3
 
 [Install]
 WantedBy=multi-user.target
@@ -214,13 +214,13 @@ After deployment, verify everything works:
 ### 1. Check Website Loads
 
 ```bash
-curl -I https://staging.kinvoice.com
+curl -I https://staging.kinvoice.ng
 # Should return: HTTP/2 200
 ```
 
 ### 2. Test Admin Panel
 
-Visit: https://staging.kinvoice.com/app
+Visit: https://staging.kinvoice.ng/app
 - ✅ Login works
 - ✅ Dashboard loads
 - ✅ Navigation menu shows new items
@@ -248,7 +248,7 @@ Visit: https://staging.kinvoice.com/app
 
 ```bash
 # Create token
-curl -X POST https://staging.kinvoice.com/api/v1/auth/token \
+curl -X POST https://staging.kinvoice.ng/api/v1/auth/token \
   -H "Content-Type: application/json" \
   -d '{
     "email": "admin@example.com",
@@ -257,7 +257,7 @@ curl -X POST https://staging.kinvoice.com/api/v1/auth/token \
   }'
 
 # Test invoice endpoint
-curl https://staging.kinvoice.com/api/v1/invoices \
+curl https://staging.kinvoice.ng/api/v1/invoices \
   -H "Authorization: Bearer YOUR_TOKEN_HERE" \
   -H "Accept: application/json"
 ```
@@ -281,7 +281,7 @@ php artisan tinker
 ### 7. Check Logs for Errors
 
 ```bash
-tail -f /var/www/staging.kinvoice.com/storage/logs/laravel.log
+tail -f /var/www/staging.kinvoice.ng/storage/logs/laravel.log
 ```
 
 ---
@@ -291,7 +291,7 @@ tail -f /var/www/staging.kinvoice.com/storage/logs/laravel.log
 If something goes wrong, rollback to previous version:
 
 ```bash
-cd /var/www/staging.kinvoice.com
+cd /var/www/staging.kinvoice.ng
 
 # View commit history
 git log --oneline -10
@@ -333,9 +333,9 @@ php artisan migrate
 
 **Solution:**
 ```bash
-sudo chown -R www-data:www-data /var/www/staging.kinvoice.com
-sudo chmod -R 775 /var/www/staging.kinvoice.com/storage
-sudo chmod -R 775 /var/www/staging.kinvoice.com/bootstrap/cache
+sudo chown -R www-data:www-data /var/www/staging.kinvoice.ng
+sudo chmod -R 775 /var/www/staging.kinvoice.ng/storage
+sudo chmod -R 775 /var/www/staging.kinvoice.ng/bootstrap/cache
 ```
 
 ### Issue 3: API Returns 500 Error
@@ -496,4 +496,4 @@ php artisan tinker
 
 **Deployment Date:** December 12, 2025
 **Version:** v2.0.0
-**Environment:** Staging (staging.kinvoice.com)
+**Environment:** Staging (staging.kinvoice.ng)
