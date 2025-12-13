@@ -61,7 +61,8 @@ class ApiSettings extends Page implements HasForms, HasTable
                             ->maxValue(1000)
                             ->default(60)
                             ->helperText('Maximum number of API requests allowed per minute')
-                            ->disabled(fn ($get) => !$get('api_enabled')),
+                            ->disabled(fn ($get) => !$get('api_enabled'))
+                            ->dehydrated(true),
 
                         Placeholder::make('api_last_used')
                             ->label('Last API Usage')
@@ -148,8 +149,8 @@ class ApiSettings extends Page implements HasForms, HasTable
         $data = $this->form->getState();
 
         auth()->user()->update([
-            'api_enabled' => $data['api_enabled'],
-            'api_rate_limit' => $data['api_rate_limit'],
+            'api_enabled' => $data['api_enabled'] ?? false,
+            'api_rate_limit' => $data['api_rate_limit'] ?? 60,
         ]);
 
         Notification::make()
