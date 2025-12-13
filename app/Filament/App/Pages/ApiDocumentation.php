@@ -14,17 +14,79 @@ class ApiDocumentation extends Page
     protected static ?int $navigationSort = 96;
 
     /**
-     * Get the API documentation content
+     * Get the API documentation content parsed into sections
      */
-    public function getApiDocumentation(): string
+    public function getApiDocumentation(): array
     {
         $docPath = base_path('API-DOCUMENTATION.md');
 
-        if (file_exists($docPath)) {
-            return file_get_contents($docPath);
+        if (!file_exists($docPath)) {
+            return [];
         }
 
-        return '# API Documentation\n\nAPI documentation not found.';
+        $content = file_get_contents($docPath);
+
+        // Split content by main headers (##)
+        $sections = [];
+        $lines = explode("\n", $content);
+        $currentSection = null;
+        $currentContent = [];
+
+        foreach ($lines as $line) {
+            // Main section header (##)
+            if (preg_match('/^## (.+)$/', $line, $matches)) {
+                // Save previous section
+                if ($currentSection !== null) {
+                    $sections[] = [
+                        'title' => $currentSection,
+                        'content' => implode("\n", $currentContent),
+                        'icon' => $this->getSectionIcon($currentSection),
+                    ];
+                }
+                // Start new section
+                $currentSection = trim($matches[1]);
+                $currentContent = [];
+            } else {
+                $currentContent[] = $line;
+            }
+        }
+
+        // Save last section
+        if ($currentSection !== null) {
+            $sections[] = [
+                'title' => $currentSection,
+                'content' => implode("\n", $currentContent),
+                'icon' => $this->getSectionIcon($currentSection),
+            ];
+        }
+
+        return $sections;
+    }
+
+    /**
+     * Get icon for section based on title
+     */
+    private function getSectionIcon(string $title): string
+    {
+        $iconMap = [
+            'Authentication' => 'heroicon-o-key',
+            'Base URL' => 'heroicon-o-globe-alt',
+            'Invoices API' => 'heroicon-o-document-text',
+            'Customers API' => 'heroicon-o-users',
+            'Payments API' => 'heroicon-o-banknotes',
+            'Reports API' => 'heroicon-o-chart-bar',
+            'Rate Limiting' => 'heroicon-o-shield-check',
+            'Error Handling' => 'heroicon-o-exclamation-circle',
+            'Best Practices' => 'heroicon-o-light-bulb',
+        ];
+
+        foreach ($iconMap as $keyword => $icon) {
+            if (stripos($title, $keyword) !== false) {
+                return $icon;
+            }
+        }
+
+        return 'heroicon-o-document';
     }
 
     /**

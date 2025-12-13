@@ -164,14 +164,20 @@ class ApiSettings extends Page implements HasForms, HasTable
             'newTokenName' => 'required|string|max:255',
         ]);
 
-        if (!auth()->user()->api_enabled) {
+        // Check if email is verified
+        if (!auth()->user()->hasVerifiedEmail()) {
             Notification::make()
-                ->title('API access is disabled')
-                ->body('Please enable API access before creating tokens')
+                ->title('Email verification required')
+                ->body('Please verify your email address before creating API tokens')
                 ->warning()
                 ->send();
 
             return;
+        }
+
+        // Auto-enable API access when creating first token
+        if (!auth()->user()->api_enabled) {
+            auth()->user()->update(['api_enabled' => true]);
         }
 
         $token = auth()->user()->createToken($this->newTokenName);
