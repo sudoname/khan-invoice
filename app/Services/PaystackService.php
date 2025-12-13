@@ -282,4 +282,205 @@ class PaystackService
 
         return null;
     }
+
+    /**
+     * Create a subscription plan on Paystack
+     */
+    public function createSubscriptionPlan(array $data): array
+    {
+        try {
+            $response = Http::withHeaders([
+                'Authorization' => 'Bearer ' . $this->secretKey,
+                'Content-Type' => 'application/json',
+            ])->post($this->baseUrl . '/plan', [
+                'name' => $data['name'],
+                'amount' => $data['amount'] * 100, // Convert to kobo
+                'interval' => $data['interval'], // daily, weekly, monthly, annually
+                'description' => $data['description'] ?? '',
+                'currency' => $data['currency'] ?? 'NGN',
+            ]);
+
+            if ($response->successful()) {
+                return [
+                    'status' => true,
+                    'message' => 'Subscription plan created successfully',
+                    'data' => $response->json('data'),
+                ];
+            }
+
+            return [
+                'status' => false,
+                'message' => $response->json('message') ?? 'Failed to create subscription plan',
+                'data' => null,
+            ];
+        } catch (\Exception $e) {
+            Log::error('Paystack create subscription plan error: ' . $e->getMessage());
+            return [
+                'status' => false,
+                'message' => 'An error occurred while creating subscription plan',
+                'data' => null,
+            ];
+        }
+    }
+
+    /**
+     * Subscribe a customer to a plan
+     */
+    public function subscribeCustomer(array $data): array
+    {
+        try {
+            $response = Http::withHeaders([
+                'Authorization' => 'Bearer ' . $this->secretKey,
+                'Content-Type' => 'application/json',
+            ])->post($this->baseUrl . '/subscription', [
+                'customer' => $data['customer'], // Customer email or code
+                'plan' => $data['plan'], // Plan code
+                'authorization' => $data['authorization'] ?? null, // Authorization code from previous transaction
+            ]);
+
+            if ($response->successful()) {
+                return [
+                    'status' => true,
+                    'message' => 'Customer subscribed successfully',
+                    'data' => $response->json('data'),
+                ];
+            }
+
+            return [
+                'status' => false,
+                'message' => $response->json('message') ?? 'Failed to subscribe customer',
+                'data' => null,
+            ];
+        } catch (\Exception $e) {
+            Log::error('Paystack subscribe customer error: ' . $e->getMessage());
+            return [
+                'status' => false,
+                'message' => 'An error occurred while subscribing customer',
+                'data' => null,
+            ];
+        }
+    }
+
+    /**
+     * Disable/Cancel a subscription
+     */
+    public function cancelSubscription(string $code, string $token): array
+    {
+        try {
+            $response = Http::withHeaders([
+                'Authorization' => 'Bearer ' . $this->secretKey,
+                'Content-Type' => 'application/json',
+            ])->post($this->baseUrl . '/subscription/disable', [
+                'code' => $code,
+                'token' => $token,
+            ]);
+
+            if ($response->successful()) {
+                return [
+                    'status' => true,
+                    'message' => 'Subscription cancelled successfully',
+                    'data' => $response->json('data'),
+                ];
+            }
+
+            return [
+                'status' => false,
+                'message' => $response->json('message') ?? 'Failed to cancel subscription',
+                'data' => null,
+            ];
+        } catch (\Exception $e) {
+            Log::error('Paystack cancel subscription error: ' . $e->getMessage());
+            return [
+                'status' => false,
+                'message' => 'An error occurred while cancelling subscription',
+                'data' => null,
+            ];
+        }
+    }
+
+    /**
+     * Enable a subscription
+     */
+    public function enableSubscription(string $code, string $token): array
+    {
+        try {
+            $response = Http::withHeaders([
+                'Authorization' => 'Bearer ' . $this->secretKey,
+                'Content-Type' => 'application/json',
+            ])->post($this->baseUrl . '/subscription/enable', [
+                'code' => $code,
+                'token' => $token,
+            ]);
+
+            if ($response->successful()) {
+                return [
+                    'status' => true,
+                    'message' => 'Subscription enabled successfully',
+                    'data' => $response->json('data'),
+                ];
+            }
+
+            return [
+                'status' => false,
+                'message' => $response->json('message') ?? 'Failed to enable subscription',
+                'data' => null,
+            ];
+        } catch (\Exception $e) {
+            Log::error('Paystack enable subscription error: ' . $e->getMessage());
+            return [
+                'status' => false,
+                'message' => 'An error occurred while enabling subscription',
+                'data' => null,
+            ];
+        }
+    }
+
+    /**
+     * Get subscription details
+     */
+    public function getSubscription(string $subscriptionCode): array
+    {
+        try {
+            $response = Http::withHeaders([
+                'Authorization' => 'Bearer ' . $this->secretKey,
+            ])->get($this->baseUrl . '/subscription/' . $subscriptionCode);
+
+            if ($response->successful()) {
+                return [
+                    'status' => true,
+                    'message' => 'Subscription retrieved successfully',
+                    'data' => $response->json('data'),
+                ];
+            }
+
+            return [
+                'status' => false,
+                'message' => $response->json('message') ?? 'Failed to retrieve subscription',
+                'data' => null,
+            ];
+        } catch (\Exception $e) {
+            Log::error('Paystack get subscription error: ' . $e->getMessage());
+            return [
+                'status' => false,
+                'message' => 'An error occurred while retrieving subscription',
+                'data' => null,
+            ];
+        }
+    }
+
+    /**
+     * Verify webhook signature
+     */
+    public function verifyWebhookSignature(string $input, string $signature): bool
+    {
+        return hash_hmac('sha512', $input, $this->secretKey) === $signature;
+    }
+
+    /**
+     * Get public key for frontend integration
+     */
+    public function getPublicKey(): string
+    {
+        return $this->publicKey;
+    }
 }
