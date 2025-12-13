@@ -16,6 +16,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'admin' => \App\Http\Middleware\EnsureUserIsAdmin::class,
             'api.rate.limit' => \App\Http\Middleware\ApiRateLimit::class,
+            'subscription.limit' => \App\Http\Middleware\EnforceSubscriptionLimits::class,
         ]);
 
         $middleware->validateCsrfTokens(except: [

@@ -264,7 +264,7 @@ class UsageTracker
 
 ---
 
-## 📋 Phase 7: Plan Enforcement Middleware (TODO)
+## ✅ Phase 7: Plan Enforcement Middleware (COMPLETED)
 
 ### Create Middleware:
 ```bash
@@ -423,11 +423,34 @@ public static function canCreate(): bool
 ### Phase 3:
 - `database/seeders/PlansSeeder.php`
 
+### Phase 4:
+- `app/Services/PaystackService.php` (enhanced with subscription methods)
+- `app/Http/Controllers/PaystackWebhookController.php`
+- `routes/api.php` (webhook route)
+
+### Phase 5:
+- `app/Services/SubscriptionService.php`
+- `app/Console/Commands/CheckExpiredSubscriptions.php`
+- `app/Console/Commands/ResetSubscriptionUsage.php`
+- `bootstrap/app.php` (scheduler registration)
+
+### Phase 6:
+- `app/Services/UsageTracker.php`
+
+### Phase 7:
+- `app/Http/Middleware/EnforceSubscriptionLimits.php`
+- `app/Exceptions/SubscriptionLimitException.php`
+- `bootstrap/app.php` (middleware registration)
+
 ## Implementation Status:
 ✅ Phase 1: Database Foundation (100%)
 ✅ Phase 2: Models & Relationships (100%)
 ✅ Phase 3: Subscription Seeder (100%)
-⏳ Phase 4-10: In Progress (0%)
+✅ Phase 4: Paystack Integration (100%)
+✅ Phase 5: Subscription Management Service (100%)
+✅ Phase 6: Usage Tracking (100%)
+✅ Phase 7: Plan Enforcement Middleware (100%)
+⏳ Phase 8-10: In Progress (0%)
 
 ---
 
