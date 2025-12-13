@@ -35,6 +35,104 @@ The script will automatically:
 
 ---
 
+## Copying Production Database to Staging
+
+If you need to copy production data to staging for testing:
+
+### Using the Database Copy Script
+
+```bash
+# SSH into staging server
+ssh your-user@staging.kinvoice.ng
+
+# Navigate to application directory
+cd /var/www/staging.kinvoice.ng
+
+# Pull latest scripts
+git pull origin main
+
+# Make script executable
+chmod +x copy-prod-to-staging.sh
+
+# Run database copy (with automatic backup)
+sudo bash copy-prod-to-staging.sh
+```
+
+**What the script does:**
+1. ✅ **Backs up PRODUCTION database** (safety first!)
+2. ✅ **Backs up STAGING database** (double safety!)
+3. ✅ Drops staging tables
+4. ✅ Imports production data to staging
+5. ✅ Updates environment-specific data
+6. ✅ Runs any new migrations
+7. ✅ Clears caches
+
+**Both databases are backed up before any changes!**
+
+### Manual Database Copy (Alternative)
+
+If you prefer manual control:
+
+```bash
+# 1. Backup PRODUCTION database first (safety!)
+mysqldump -u kinvoice_user -p kinvoice_production | gzip > /var/backups/production_backup_$(date +%Y%m%d_%H%M%S).sql.gz
+
+# 2. Backup STAGING database (double safety!)
+mysqldump -u kinvoice_staging_user -p kinvoice_staging | gzip > /var/backups/staging_backup_$(date +%Y%m%d_%H%M%S).sql.gz
+
+# 3. Use the production backup for import
+PROD_BACKUP="/var/backups/production_backup_$(date +%Y%m%d_%H%M%S).sql.gz"
+
+# 4. Drop and recreate staging database
+mysql -u kinvoice_staging_user -p -e "DROP DATABASE IF EXISTS kinvoice_staging; CREATE DATABASE kinvoice_staging;"
+
+# 5. Import production data to staging
+gunzip < $PROD_BACKUP | mysql -u kinvoice_staging_user -p kinvoice_staging
+
+# 6. Run migrations and clear cache
+cd /var/www/staging.kinvoice.ng
+php artisan migrate --force
+php artisan optimize:clear
+```
+
+### Important Notes
+
+⚠️ **Before copying database:**
+- **BOTH production and staging databases are backed up automatically**
+- Production data may contain sensitive information
+- Test notifications won't affect production customers (different .env settings)
+- Backup location: `/var/backups/khan-invoice/`
+- Both backups are timestamped and compressed
+
+💡 **After copying database:**
+- Update `.env` for staging-specific settings
+- Verify notification settings don't send to real customers
+- Test with dummy data if possible
+- All backups are timestamped for easy restoration
+
+### Restore from Backups
+
+If something goes wrong, both databases can be restored:
+
+```bash
+# List available backups
+ls -lh /var/backups/khan-invoice/
+
+# Restore STAGING from backup
+gunzip < /var/backups/khan-invoice/staging_backup_TIMESTAMP.sql.gz | mysql -u kinvoice_staging_user -p kinvoice_staging
+
+# Restore PRODUCTION from backup (if needed)
+gunzip < /var/backups/khan-invoice/production_backup_TIMESTAMP.sql.gz | mysql -u kinvoice_user -p kinvoice_production
+
+# Clear cache after restore
+cd /var/www/staging.kinvoice.ng
+php artisan optimize:clear
+```
+
+**Note:** Both databases are backed up before the copy, so both can be restored if needed.
+
+---
+
 ## Option 2: Manual Deployment Steps
 
 If you prefer manual control, follow these steps:
