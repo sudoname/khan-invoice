@@ -59,35 +59,56 @@ sudo bash copy-prod-to-staging.sh
 ```
 
 **What the script does:**
-1. ✅ **Backs up PRODUCTION database** (safety first!)
-2. ✅ **Backs up STAGING database** (double safety!)
-3. ✅ Drops staging tables
-4. ✅ Imports production data to staging
-5. ✅ Updates environment-specific data
-6. ✅ Runs any new migrations
-7. ✅ Clears caches
+1. ✅ **Reads database credentials from .env files** (no hardcoded values!)
+2. ✅ **Backs up PRODUCTION database** (safety first!)
+3. ✅ **Backs up STAGING database** (double safety!)
+4. ✅ Drops staging tables
+5. ✅ Imports production data to staging
+6. ✅ Updates environment-specific data
+7. ✅ Runs any new migrations
+8. ✅ Clears caches
 
-**Both databases are backed up before any changes!**
+**Features:**
+- Automatically reads `DB_DATABASE`, `DB_USERNAME`, and `DB_PASSWORD` from:
+  - Production: `/var/www/kinvoice.ng/.env`
+  - Staging: `/var/www/staging.kinvoice.ng/.env`
+- Both databases backed up before any changes
+- No manual configuration needed!
 
 ### Manual Database Copy (Alternative)
 
-If you prefer manual control:
+If you prefer manual control, read credentials from .env files:
 
 ```bash
+# Helper function to read .env values
+get_env_value() {
+    grep "^${2}=" "$1" | cut -d '=' -f2- | tr -d '"' | tr -d "'"
+}
+
+# Read production database credentials
+PROD_DB=$(get_env_value "/var/www/kinvoice.ng/.env" "DB_DATABASE")
+PROD_USER=$(get_env_value "/var/www/kinvoice.ng/.env" "DB_USERNAME")
+PROD_PASS=$(get_env_value "/var/www/kinvoice.ng/.env" "DB_PASSWORD")
+
+# Read staging database credentials
+STAGING_DB=$(get_env_value "/var/www/staging.kinvoice.ng/.env" "DB_DATABASE")
+STAGING_USER=$(get_env_value "/var/www/staging.kinvoice.ng/.env" "DB_USERNAME")
+STAGING_PASS=$(get_env_value "/var/www/staging.kinvoice.ng/.env" "DB_PASSWORD")
+
 # 1. Backup PRODUCTION database first (safety!)
-mysqldump -u kinvoice_user -p kinvoice_production | gzip > /var/backups/production_backup_$(date +%Y%m%d_%H%M%S).sql.gz
+mysqldump -u "$PROD_USER" --password="$PROD_PASS" "$PROD_DB" | gzip > /var/backups/production_backup_$(date +%Y%m%d_%H%M%S).sql.gz
 
 # 2. Backup STAGING database (double safety!)
-mysqldump -u kinvoice_staging_user -p kinvoice_staging | gzip > /var/backups/staging_backup_$(date +%Y%m%d_%H%M%S).sql.gz
+mysqldump -u "$STAGING_USER" --password="$STAGING_PASS" "$STAGING_DB" | gzip > /var/backups/staging_backup_$(date +%Y%m%d_%H%M%S).sql.gz
 
 # 3. Use the production backup for import
 PROD_BACKUP="/var/backups/production_backup_$(date +%Y%m%d_%H%M%S).sql.gz"
 
 # 4. Drop and recreate staging database
-mysql -u kinvoice_staging_user -p -e "DROP DATABASE IF EXISTS kinvoice_staging; CREATE DATABASE kinvoice_staging;"
+mysql -u "$STAGING_USER" --password="$STAGING_PASS" -e "DROP DATABASE IF EXISTS $STAGING_DB; CREATE DATABASE $STAGING_DB;"
 
 # 5. Import production data to staging
-gunzip < $PROD_BACKUP | mysql -u kinvoice_staging_user -p kinvoice_staging
+gunzip < $PROD_BACKUP | mysql -u "$STAGING_USER" --password="$STAGING_PASS" "$STAGING_DB"
 
 # 6. Run migrations and clear cache
 cd /var/www/staging.kinvoice.ng
@@ -112,24 +133,38 @@ php artisan optimize:clear
 
 ### Restore from Backups
 
-If something goes wrong, both databases can be restored:
+If something goes wrong, both databases can be restored. The script reads credentials from .env files, so you should too:
 
 ```bash
+# Helper function to read .env values
+get_env_value() {
+    grep "^${2}=" "$1" | cut -d '=' -f2- | tr -d '"' | tr -d "'"
+}
+
 # List available backups
 ls -lh /var/backups/khan-invoice/
 
+# Read credentials from .env files
+PROD_DB=$(get_env_value "/var/www/kinvoice.ng/.env" "DB_DATABASE")
+PROD_USER=$(get_env_value "/var/www/kinvoice.ng/.env" "DB_USERNAME")
+PROD_PASS=$(get_env_value "/var/www/kinvoice.ng/.env" "DB_PASSWORD")
+
+STAGING_DB=$(get_env_value "/var/www/staging.kinvoice.ng/.env" "DB_DATABASE")
+STAGING_USER=$(get_env_value "/var/www/staging.kinvoice.ng/.env" "DB_USERNAME")
+STAGING_PASS=$(get_env_value "/var/www/staging.kinvoice.ng/.env" "DB_PASSWORD")
+
 # Restore STAGING from backup
-gunzip < /var/backups/khan-invoice/staging_backup_TIMESTAMP.sql.gz | mysql -u kinvoice_staging_user -p kinvoice_staging
+gunzip < /var/backups/khan-invoice/staging_backup_TIMESTAMP.sql.gz | mysql -u "$STAGING_USER" --password="$STAGING_PASS" "$STAGING_DB"
 
 # Restore PRODUCTION from backup (if needed)
-gunzip < /var/backups/khan-invoice/production_backup_TIMESTAMP.sql.gz | mysql -u kinvoice_user -p kinvoice_production
+gunzip < /var/backups/khan-invoice/production_backup_TIMESTAMP.sql.gz | mysql -u "$PROD_USER" --password="$PROD_PASS" "$PROD_DB"
 
 # Clear cache after restore
 cd /var/www/staging.kinvoice.ng
 php artisan optimize:clear
 ```
 
-**Note:** Both databases are backed up before the copy, so both can be restored if needed.
+**Note:** Both databases are backed up before the copy, so both can be restored if needed. Credentials are always read from .env files.
 
 ---
 
