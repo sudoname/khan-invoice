@@ -109,7 +109,18 @@ class ApiSettings extends Page implements HasForms, HasTable
                 TextColumn::make('abilities')
                     ->label('Abilities')
                     ->badge()
-                    ->formatStateUsing(fn ($state) => empty($state) ? 'Full Access' : implode(', ', $state)),
+                    ->formatStateUsing(function ($state) {
+                        if (empty($state)) {
+                            return 'Full Access';
+                        }
+
+                        // Handle JSON string or array
+                        $abilities = is_string($state) ? json_decode($state, true) : $state;
+
+                        return is_array($abilities) && !empty($abilities)
+                            ? implode(', ', $abilities)
+                            : 'Full Access';
+                    }),
 
                 TextColumn::make('last_used_at')
                     ->label('Last Used')
