@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Models\Subscription;
-use App\Models\SubscriptionPlan;
+use App\Models\Plan;
 use Illuminate\Http\Request;
 
 class SubscriptionController extends Controller
@@ -64,7 +64,7 @@ class SubscriptionController extends Controller
      */
     public function plans(Request $request)
     {
-        $plans = SubscriptionPlan::where('is_active', true)
+        $plans = Plan::where('is_active', true)
             ->orderBy('order')
             ->get()
             ->map(function ($plan) {
