@@ -3,56 +3,51 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
-use App\Models\Payment;
-use App\Models\Invoice;
+use App\Http\Resources\Api\V1\PaymentResource;
+use App\Models\PaymentTransaction;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class PaymentController extends Controller
 {
+    /**
+     * Get payment transaction history for the authenticated user.
+     */
     public function index(Request $request)
     {
-        $query = Payment::query()
-            ->whereHas('invoice', function ($q) use ($request) {
-                $q->where('user_id', $request->user()->id);
-            })
-            ->with('invoice');
+        $query = PaymentTransaction::where('user_id', $request->user()->id)
+            ->with(['subscription.plan']);
 
-        if ($request->has('invoice_id')) {
-            $query->where('invoice_id', $request->invoice_id);
+        // Filter by status
+        if ($request->has('status')) {
+            $query->where('status', $request->status);
         }
 
-        $payments = $query->latest()
-            ->paginate(min($request->get('per_page', 15), 100));
+        // Filter by type
+        if ($request->has('type')) {
+            $query->where('type', $request->type);
+        }
 
-        return response()->json($payments);
+        // Filter by date range
+        if ($request->has('start_date') && $request->has('end_date')) {
+            $query->whereBetween('created_at', [$request->start_date, $request->end_date]);
+        }
+
+        $perPage = min($request->get('per_page', 15), 100);
+        $payments = $query->latest()->paginate($perPage);
+
+        return PaymentResource::collection($payments);
     }
 
-    public function store(Request $request)
+    /**
+     * Get a specific payment transaction.
+     */
+    public function show(Request $request, string $id)
     {
-        $validated = $request->validate([
-            'invoice_id' => 'required|exists:invoices,id',
-            'amount' => 'required|numeric|min:0',
-            'payment_date' => 'required|date',
-            'payment_method' => 'required|string|max:50',
-            'reference_number' => 'required|string|max:255',
-            'notes' => 'nullable|string',
-        ]);
+        $payment = PaymentTransaction::where('user_id', $request->user()->id)
+            ->with(['subscription.plan'])
+            ->findOrFail($id);
 
-        // Ensure invoice belongs to the user
-        $invoice = Invoice::where('user_id', $request->user()->id)
-            ->findOrFail($validated['invoice_id']);
-
-        $payment = Payment::create($validated);
-
-        // Update invoice payment status
-        $invoice->amount_paid += $validated['amount'];
-        if ($invoice->amount_paid >= $invoice->total_amount) {
-            $invoice->status = 'paid';
-        } else {
-            $invoice->status = 'partially_paid';
-        }
-        $invoice->save();
-
-        return response()->json($payment->load('invoice'), 201);
+        return new PaymentResource($payment);
     }
 }

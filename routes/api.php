@@ -43,7 +43,7 @@ Route::prefix('v1')->middleware(['auth:sanctum', 'api.rate.limit'])->group(funct
 
     // Payments
     Route::get('/payments', [PaymentController::class, 'index']);
-    Route::post('/payments', [PaymentController::class, 'store']);
+    Route::get('/payments/{id}', [PaymentController::class, 'show']);
 
     // Reports
     Route::get('/reports/sales', [ReportController::class, 'sales']);

@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\Api\V1\CustomerResource;
 use App\Models\Customer;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class CustomerController extends Controller
 {
@@ -14,7 +16,7 @@ class CustomerController extends Controller
             ->latest()
             ->paginate(min($request->get('per_page', 15), 100));
 
-        return response()->json($customers);
+        return CustomerResource::collection($customers);
     }
 
     public function show(Request $request, string $id)
@@ -22,7 +24,7 @@ class CustomerController extends Controller
         $customer = Customer::where('user_id', $request->user()->id)
             ->findOrFail($id);
 
-        return response()->json($customer);
+        return new CustomerResource($customer);
     }
 
     public function store(Request $request)
@@ -43,7 +45,14 @@ class CustomerController extends Controller
 
         $customer = Customer::create($validated);
 
-        return response()->json($customer, 201);
+        Log::info('Customer created via API', [
+            'user_id' => $request->user()->id,
+            'customer_id' => $customer->id,
+        ]);
+
+        return (new CustomerResource($customer))
+            ->response()
+            ->setStatusCode(201);
     }
 
     public function update(Request $request, string $id)
@@ -64,13 +73,23 @@ class CustomerController extends Controller
 
         $customer->update($validated);
 
-        return response()->json($customer);
+        Log::info('Customer updated via API', [
+            'user_id' => $request->user()->id,
+            'customer_id' => $customer->id,
+        ]);
+
+        return new CustomerResource($customer);
     }
 
     public function destroy(Request $request, string $id)
     {
         $customer = Customer::where('user_id', $request->user()->id)->findOrFail($id);
         $customer->delete();
+
+        Log::info('Customer deleted via API', [
+            'user_id' => $request->user()->id,
+            'customer_id' => $id,
+        ]);
 
         return response()->json(['message' => 'Customer deleted successfully']);
     }
