@@ -5,9 +5,11 @@ namespace App\Providers;
 use App\Models\Payment;
 use App\Models\Invoice;
 use App\Models\InvoiceItem;
+use App\Models\User;
 use App\Observers\PaymentObserver;
 use App\Observers\InvoiceObserver;
 use App\Observers\InvoiceItemObserver;
+use App\Observers\UserObserver;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -25,6 +27,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Register User observer for automatic API access when email is verified
+        User::observe(UserObserver::class);
+
         // Register Payment observer for automatic invoice status updates
         Payment::observe(PaymentObserver::class);
 
