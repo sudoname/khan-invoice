@@ -80,7 +80,15 @@ class PaymentTransaction extends Model
      */
     public function getFormattedAmountAttribute(): string
     {
-        return $this->currency . ' ' . number_format($this->amount, 2);
+        $symbol = match($this->currency) {
+            'NGN' => '₦',
+            'USD' => '$',
+            'EUR' => '€',
+            'GBP' => '£',
+            default => $this->currency,
+        };
+
+        return $symbol . number_format($this->amount, 2);
     }
 
     /**
