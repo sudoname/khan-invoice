@@ -12,6 +12,88 @@ use Illuminate\Validation\ValidationException;
 class AuthController extends Controller
 {
     /**
+     * Login user and create token.
+     */
+    public function login(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email',
+            'password' => 'required',
+        ]);
+
+        $user = \App\Models\User::where('email', $request->email)->first();
+
+        if (!$user || !Hash::check($request->password, $user->password)) {
+            throw ValidationException::withMessages([
+                'email' => ['The provided credentials are incorrect.'],
+            ]);
+        }
+
+        // Check if API is enabled for this user
+        if (!$user->api_enabled) {
+            return response()->json([
+                'message' => 'API access is not enabled for this account. Please enable API access in your settings.',
+            ], 403);
+        }
+
+        // Create token
+        $tokenName = 'mobile-app-' . now()->timestamp;
+        $token = $user->createToken($tokenName);
+
+        // Update last used timestamp
+        $user->update(['api_last_used_at' => now()]);
+
+        Log::info('User logged in via API', [
+            'user_id' => $user->id,
+        ]);
+
+        return response()->json([
+            'message' => 'Login successful',
+            'token' => $token->plainTextToken,
+            'user' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'role' => $user->role,
+            ],
+        ], 200);
+    }
+
+    /**
+     * Get authenticated user information.
+     */
+    public function user(Request $request)
+    {
+        $user = $request->user();
+
+        return response()->json([
+            'id' => $user->id,
+            'name' => $user->name,
+            'email' => $user->email,
+            'role' => $user->role,
+            'email_verified_at' => $user->email_verified_at,
+            'api_enabled' => $user->api_enabled,
+        ]);
+    }
+
+    /**
+     * Logout user and revoke current token.
+     */
+    public function logout(Request $request)
+    {
+        // Revoke current token
+        $request->user()->currentAccessToken()->delete();
+
+        Log::info('User logged out via API', [
+            'user_id' => $request->user()->id,
+        ]);
+
+        return response()->json([
+            'message' => 'Logged out successfully',
+        ]);
+    }
+
+    /**
      * Create a new API token for the user.
      */
     public function createToken(Request $request)
