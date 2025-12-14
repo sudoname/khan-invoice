@@ -15,8 +15,8 @@
                                 {{ $subscription->plan->name }} Plan
                             </h2>
                             <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
-                                {{ ucfirst($subscription->billing_cycle) }} billing
-                                " {{ $subscription->plan->currency }} {{ number_format($subscription->amount, 0) }}/{{ $subscription->billing_cycle === 'yearly' ? 'year' : 'month' }}
+                                {{ ucfirst($subscription->billing_cycle) }} billing â€¢
+                                {{ $subscription->plan->currency }} {{ number_format($subscription->amount, 0) }}/{{ $subscription->billing_cycle === 'yearly' ? 'year' : 'month' }}
                             </p>
                         </div>
                         <div class="text-right">
@@ -70,7 +70,7 @@
                         @if($subscription->status === 'active')
                             <button wire:click="cancelSubscription"
                                     wire:confirm="Are you sure you want to cancel your subscription? You will continue to have access until the end of your billing period."
-                                    class="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
+                                    class="inline-flex items-center px-4 py-2 border-2 border-red-300 dark:border-red-600 rounded-md shadow-sm text-sm font-semibold text-red-700 dark:text-red-400 bg-white dark:bg-gray-800 hover:bg-red-50 dark:hover:bg-red-950/30">
                                 Cancel Subscription
                             </button>
                         @elseif($subscription->status === 'canceled')
@@ -277,7 +277,7 @@
                     <div class="mt-4">
                         <a href="{{ route('filament.app.pages.payment-history') }}"
                            class="text-sm font-medium text-primary-600 hover:text-primary-700">
-                            View all payments ’
+                            View all payments ï¿½
                         </a>
                     </div>
                 @else

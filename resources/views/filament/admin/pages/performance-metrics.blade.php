@@ -24,16 +24,16 @@
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <!-- Query Time Chart -->
-                <div class="bg-white p-3 rounded-lg border border-gray-200">
-                    <h4 class="text-xs font-semibold text-gray-700 mb-2">Database Query Time</h4>
+                <div class="bg-white dark:bg-gray-800 p-3 rounded-lg border border-gray-200 dark:border-gray-700">
+                    <h4 class="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-2">Database Query Time</h4>
                     <div style="height: 200px;">
                         <canvas id="queryTimeChart"></canvas>
                     </div>
                 </div>
 
                 <!-- Cache Write/Read Time Chart -->
-                <div class="bg-white p-3 rounded-lg border border-gray-200">
-                    <h4 class="text-xs font-semibold text-gray-700 mb-2">Cache Write/Read Time</h4>
+                <div class="bg-white dark:bg-gray-800 p-3 rounded-lg border border-gray-200 dark:border-gray-700">
+                    <h4 class="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-2">Cache Write/Read Time</h4>
                     <div style="height: 200px;">
                         <canvas id="cacheTimeChart"></canvas>
                     </div>
@@ -147,8 +147,16 @@
             </x-slot>
 
             <div class="p-8 text-center">
-                <p class="text-gray-600 mb-4">No performance data available yet. Performance metrics are logged hourly.</p>
-                <p class="text-sm text-gray-500">Run <code class="bg-gray-100 px-2 py-1 rounded">php artisan performance:log</code> to manually log metrics now.</p>
+                <svg class="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+                <p class="text-gray-600 dark:text-gray-400 mb-4 font-medium">No performance data available yet</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">Performance metrics are logged automatically every hour via scheduled task</p>
+                <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 max-w-2xl mx-auto">
+                    <p class="text-sm text-blue-800 dark:text-blue-300 mb-2 font-semibold">To start collecting metrics immediately:</p>
+                    <code class="block bg-gray-800 dark:bg-gray-900 text-green-400 px-4 py-2 rounded font-mono text-sm">php artisan performance:log</code>
+                    <p class="text-xs text-blue-600 dark:text-blue-400 mt-2">Metrics will appear here once the command runs successfully</p>
+                </div>
             </div>
         </x-filament::section>
         @endif
@@ -164,22 +172,22 @@
             </x-slot>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div class="bg-gray-50 rounded-lg p-4">
-                    <h4 class="text-sm font-semibold text-gray-600 mb-2">Connection</h4>
-                    <p class="text-lg font-bold text-gray-900">{{ $metrics['database']['connection'] }}</p>
+                <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
+                    <h4 class="text-sm font-semibold text-gray-600 dark:text-gray-400 mb-2">Connection</h4>
+                    <p class="text-lg font-bold text-gray-900 dark:text-white">{{ $metrics['database']['connection'] }}</p>
                 </div>
-                <div class="bg-gray-50 rounded-lg p-4">
-                    <h4 class="text-sm font-semibold text-gray-600 mb-2">Query Time</h4>
-                    <p class="text-lg font-bold text-gray-900">{{ $metrics['database']['query_time'] }}</p>
+                <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
+                    <h4 class="text-sm font-semibold text-gray-600 dark:text-gray-400 mb-2">Query Time</h4>
+                    <p class="text-lg font-bold text-gray-900 dark:text-white">{{ $metrics['database']['query_time'] }}</p>
                 </div>
-                <div class="bg-gray-50 rounded-lg p-4">
-                    <h4 class="text-sm font-semibold text-gray-600 mb-2">Total Tables</h4>
-                    <p class="text-lg font-bold text-gray-900">{{ count($metrics['database']['table_counts']) }}</p>
+                <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
+                    <h4 class="text-sm font-semibold text-gray-600 dark:text-gray-400 mb-2">Total Tables</h4>
+                    <p class="text-lg font-bold text-gray-900 dark:text-white">{{ count($metrics['database']['table_counts']) }}</p>
                 </div>
             </div>
 
             <div class="mt-4">
-                <h4 class="text-sm font-semibold text-gray-700 mb-3">Table Record Counts</h4>
+                <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Table Record Counts</h4>
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
                     @foreach($metrics['database']['table_counts'] as $table => $count)
                         @php
@@ -189,9 +197,9 @@
                                 default => ucwords(str_replace('_', ' ', $table))
                             };
                         @endphp
-                        <div class="bg-white border border-gray-200 rounded-lg p-3">
-                            <p class="text-xs text-gray-500">{{ $label }}</p>
-                            <p class="text-xl font-bold text-purple-600">{{ is_numeric($count) ? number_format($count) : $count }}</p>
+                        <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-3">
+                            <p class="text-xs text-gray-500 dark:text-gray-400">{{ $label }}</p>
+                            <p class="text-xl font-bold text-purple-600 dark:text-purple-400">{{ is_numeric($count) ? number_format($count) : $count }}</p>
                         </div>
                     @endforeach
                 </div>
@@ -209,17 +217,17 @@
             </x-slot>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div class="bg-gray-50 rounded-lg p-4">
-                    <h4 class="text-sm font-semibold text-gray-600 mb-2">Cache Driver</h4>
-                    <p class="text-lg font-bold text-gray-900">{{ $metrics['cache']['driver'] }}</p>
+                <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
+                    <h4 class="text-sm font-semibold text-gray-600 dark:text-gray-400 mb-2">Cache Driver</h4>
+                    <p class="text-lg font-bold text-gray-900 dark:text-white">{{ $metrics['cache']['driver'] }}</p>
                 </div>
-                <div class="bg-gray-50 rounded-lg p-4">
-                    <h4 class="text-sm font-semibold text-gray-600 mb-2">Write/Read Time</h4>
-                    <p class="text-lg font-bold text-gray-900">{{ $metrics['cache']['write_read_time'] }}</p>
+                <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
+                    <h4 class="text-sm font-semibold text-gray-600 dark:text-gray-400 mb-2">Write/Read Time</h4>
+                    <p class="text-lg font-bold text-gray-900 dark:text-white">{{ $metrics['cache']['write_read_time'] }}</p>
                 </div>
-                <div class="bg-gray-50 rounded-lg p-4">
-                    <h4 class="text-sm font-semibold text-gray-600 mb-2">Status</h4>
-                    <p class="text-lg font-bold @if($metrics['cache']['status'] === 'Working') text-green-600 @else text-red-600 @endif">
+                <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
+                    <h4 class="text-sm font-semibold text-gray-600 dark:text-gray-400 mb-2">Status</h4>
+                    <p class="text-lg font-bold @if($metrics['cache']['status'] === 'Working') text-green-600 dark:text-green-400 @else text-red-600 dark:text-red-400 @endif">
                         {{ $metrics['cache']['status'] }}
                     </p>
                 </div>
@@ -238,9 +246,9 @@
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 @foreach($metrics['application'] as $key => $value)
-                    <div class="bg-gray-50 rounded-lg p-4">
-                        <h4 class="text-sm font-semibold text-gray-600 mb-2">{{ ucwords(str_replace('_', ' ', $key)) }}</h4>
-                        <p class="text-lg font-bold text-gray-900">{{ $value }}</p>
+                    <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
+                        <h4 class="text-sm font-semibold text-gray-600 dark:text-gray-400 mb-2">{{ ucwords(str_replace('_', ' ', $key)) }}</h4>
+                        <p class="text-lg font-bold text-gray-900 dark:text-white">{{ $value }}</p>
                     </div>
                 @endforeach
             </div>

@@ -11,13 +11,13 @@
                         <p class="text-sm text-primary-700 dark:text-primary-300">
                             Billing: {{ ucfirst($currentSubscription->billing_cycle) }}
                             @if($currentSubscription->current_period_end)
-                                " Renews on {{ $currentSubscription->current_period_end->format('M d, Y') }}
+                                â€¢ Renews on {{ $currentSubscription->current_period_end->format('M d, Y') }}
                             @endif
                         </p>
                     </div>
                     <a href="{{ route('filament.app.pages.my-subscription') }}"
                        class="text-sm font-medium text-primary-600 hover:text-primary-700 dark:text-primary-400">
-                        Manage Subscription ’
+                        Manage Subscription ï¿½
                     </a>
                 </div>
             </div>
@@ -74,8 +74,8 @@
 
                     {{-- Popular Badge --}}
                     @if($plan->is_popular)
-                        <div class="absolute -top-3 left-1/2 -translate-x-1/2">
-                            <span class="bg-gradient-to-r from-primary-500 to-primary-600 text-white text-xs font-bold px-3 py-1 rounded-full shadow-md">
+                        <div class="absolute -top-3 left-1/2 -translate-x-1/2 z-10">
+                            <span class="bg-gradient-to-r from-primary-500 to-primary-600 text-white text-xs font-bold px-4 py-1.5 rounded-full shadow-lg whitespace-nowrap">
                                 MOST POPULAR
                             </span>
                         </div>
@@ -194,15 +194,15 @@
                         <div class="pt-4">
                             @if($currentSubscription && $currentSubscription->plan_id === $plan->id)
                                 <button disabled
-                                        class="w-full py-2 px-4 rounded-lg font-medium bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-not-allowed">
+                                        class="w-full py-3 px-4 rounded-lg font-semibold bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-not-allowed">
                                     Current Plan
                                 </button>
                             @else
                                 <button wire:click="selectPlan({{ $plan->id }}, cycle)"
-                                        class="w-full py-2 px-4 rounded-lg font-medium transition-colors
+                                        class="w-full py-3 px-4 rounded-lg font-semibold transition-all
                                                {{ $plan->is_popular
-                                                  ? 'bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white'
-                                                  : 'bg-primary-600 hover:bg-primary-700 text-white' }}">
+                                                  ? 'bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white shadow-md hover:shadow-lg'
+                                                  : 'bg-primary-600 hover:bg-primary-700 text-white shadow-sm hover:shadow-md' }}">
                                     {{ $plan->isFree() ? 'Get Started Free' : 'Select Plan' }}
                                 </button>
                             @endif
@@ -214,7 +214,7 @@
 
         {{-- Help Text --}}
         <div class="text-center text-sm text-gray-600 dark:text-gray-400 mt-8">
-            Need help choosing a plan? <a href="mailto:support@kinvoice.ng" class="text-primary-600 hover:text-primary-700 font-medium">Contact us</a>
+            Need help choosing a plan? <a href="{{ route('filament.app.pages.contact') }}" class="text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 font-medium underline">Contact us</a>
         </div>
     </div>
 
