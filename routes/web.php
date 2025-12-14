@@ -7,6 +7,7 @@ use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\PricingController;
 use App\Http\Controllers\PublicInvoiceController;
 use App\Http\Controllers\SocialAuthController;
+use App\Http\Controllers\SubscriptionUpgradeController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -53,6 +54,14 @@ Route::middleware('auth')->group(function () {
     Route::get('/checkout', [CheckoutController::class, 'show'])->name('checkout');
     Route::post('/checkout/initialize', [CheckoutController::class, 'initializePayment'])->name('checkout.initialize');
     Route::get('/checkout/verify', [CheckoutController::class, 'verifyPayment'])->name('checkout.verify');
+
+    // Subscription upgrade/downgrade routes
+    Route::post('/subscription/upgrade', [SubscriptionUpgradeController::class, 'initiate'])
+        ->name('subscription.upgrade.initiate');
+    Route::get('/subscription/upgrade/verify', [SubscriptionUpgradeController::class, 'verify'])
+        ->name('subscription.upgrade.verify');
+    Route::post('/subscription/downgrade', [SubscriptionUpgradeController::class, 'downgrade'])
+        ->name('subscription.downgrade');
 });
 
 // Public Invoice Generator routes

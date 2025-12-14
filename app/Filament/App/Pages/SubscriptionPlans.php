@@ -26,6 +26,13 @@ class SubscriptionPlans extends Page
         return auth()->user()->subscription;
     }
 
+    public function getAvailableCredits()
+    {
+        return \App\Models\AccountCredit::where('user_id', auth()->id())
+            ->available()
+            ->sum('amount');
+    }
+
     public function selectPlan(int $planId, string $billingCycle = 'monthly')
     {
         $plan = Plan::findOrFail($planId);
@@ -63,35 +70,65 @@ class SubscriptionPlans extends Page
 
             // Upgrade or downgrade
             if ($canChange['type'] === 'upgrade') {
-                $subscriptionService->upgrade($currentSubscription, $plan);
+                $result = $subscriptionService->upgrade($currentSubscription, $plan);
 
+                if (!$result['success']) {
+                    Notification::make()
+                        ->title('Upgrade Failed')
+                        ->body($result['message'] ?? 'Failed to process upgrade')
+                        ->danger()
+                        ->send();
+                    return;
+                }
+
+                // If payment is required, redirect to payment
+                if (isset($result['requires_payment']) && $result['requires_payment']) {
+                    // Store upgrade info and redirect via JavaScript
+                    $url = route('subscription.upgrade.initiate');
+                    $this->dispatch('redirect-to-upgrade', [
+                        'url' => $url,
+                        'planSlug' => $plan->slug,
+                        'amount' => $result['amount_to_pay'],
+                        'credits' => $result['credits_available'] ?? 0
+                    ]);
+                    return;
+                }
+
+                // If no payment needed (covered by credits)
                 Notification::make()
                     ->title('Plan Upgraded')
-                    ->body("Successfully upgraded to {$plan->name} plan!")
+                    ->body("Successfully upgraded to {$plan->name} plan using your account credits!")
                     ->success()
                     ->send();
+
+                return redirect()->route('filament.app.pages.my-subscription');
+
             } else {
-                $subscriptionService->downgrade($currentSubscription, $plan);
+                $result = $subscriptionService->downgrade($currentSubscription, $plan);
+
+                if (!$result['success']) {
+                    Notification::make()
+                        ->title('Downgrade Failed')
+                        ->body($result['message'] ?? 'Failed to process downgrade')
+                        ->danger()
+                        ->send();
+                    return;
+                }
+
+                $creditIssued = $result['credit_issued'] ?? 0;
+                $message = "Successfully downgraded to {$plan->name} plan!";
+                if ($creditIssued > 0) {
+                    $message .= " A credit of ₦" . number_format($creditIssued, 2) . " has been added to your account.";
+                }
 
                 Notification::make()
-                    ->title('Plan Changed')
-                    ->body("Plan will be changed to {$plan->name} at the end of your current billing period.")
+                    ->title('Plan Downgraded')
+                    ->body($message)
                     ->success()
                     ->send();
+
+                return redirect()->route('filament.app.pages.my-subscription');
             }
-
-            // Switch billing cycle if different
-            if ($billingCycle !== $currentSubscription->billing_cycle) {
-                $subscriptionService->switchBillingCycle($currentSubscription, $billingCycle);
-
-                Notification::make()
-                    ->title('Billing Cycle Updated')
-                    ->body("Billing cycle changed to {$billingCycle}.")
-                    ->info()
-                    ->send();
-            }
-
-            return redirect()->route('filament.app.pages.my-subscription');
 
         } catch (\Exception $e) {
             Notification::make()

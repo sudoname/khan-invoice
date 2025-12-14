@@ -119,6 +119,21 @@ class MySubscription extends Page
         }
     }
 
+    public function getAvailableCredits()
+    {
+        return \App\Models\AccountCredit::where('user_id', auth()->id())
+            ->available()
+            ->sum('amount');
+    }
+
+    public function getCreditHistory()
+    {
+        return \App\Models\AccountCredit::where('user_id', auth()->id())
+            ->orderBy('created_at', 'desc')
+            ->limit(5)
+            ->get();
+    }
+
     public function getPaymentTransactions()
     {
         return auth()->user()

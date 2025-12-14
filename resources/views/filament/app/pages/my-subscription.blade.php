@@ -83,6 +83,68 @@
                 </div>
             </div>
 
+            {{-- Account Credits --}}
+            @php
+                $availableCredits = $this->getAvailableCredits();
+                $creditHistory = $this->getCreditHistory();
+            @endphp
+            @if($availableCredits > 0 || $creditHistory->count() > 0)
+                <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Account Credits</h3>
+
+                    @if($availableCredits > 0)
+                        <div class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4 mb-4">
+                            <div class="flex items-center gap-3">
+                                <svg class="w-8 h-8 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                <div class="flex-1">
+                                    <h4 class="text-2xl font-bold text-green-900 dark:text-green-100">
+                                        ₦{{ number_format($availableCredits, 2) }}
+                                    </h4>
+                                    <p class="text-sm text-green-700 dark:text-green-300">
+                                        Available credit balance
+                                    </p>
+                                </div>
+                            </div>
+                            <p class="mt-3 text-xs text-green-700 dark:text-green-300">
+                                Your credits will be automatically applied to your next subscription upgrade or renewal.
+                            </p>
+                        </div>
+                    @endif
+
+                    @if($creditHistory->count() > 0)
+                        <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Credit History</h4>
+                        <div class="space-y-2">
+                            @foreach($creditHistory as $credit)
+                                <div class="flex items-center justify-between py-2 border-b border-gray-200 dark:border-gray-700 last:border-b-0">
+                                    <div class="flex-1">
+                                        <p class="text-sm font-medium text-gray-900 dark:text-white">
+                                            {{ $credit->description }}
+                                        </p>
+                                        <p class="text-xs text-gray-600 dark:text-gray-400">
+                                            {{ $credit->created_at->format('M d, Y') }}
+                                            @if($credit->expires_at)
+                                                &middot; Expires {{ $credit->expires_at->format('M d, Y') }}
+                                            @endif
+                                        </p>
+                                    </div>
+                                    <div class="text-right">
+                                        <p class="text-sm font-semibold {{ $credit->status === 'available' ? 'text-green-600 dark:text-green-400' : 'text-gray-500 dark:text-gray-400' }}">
+                                            ₦{{ number_format($credit->amount, 2) }}
+                                        </p>
+                                        <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium
+                                            {{ $credit->status === 'available' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300' }}">
+                                            {{ ucfirst($credit->status) }}
+                                        </span>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    @endif
+                </div>
+            @endif
+
             {{-- Usage Statistics --}}
             <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
                 <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Current Usage</h3>
