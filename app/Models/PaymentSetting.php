@@ -79,4 +79,25 @@ class PaymentSetting extends Model
             'total_with_fees' => $amount + $paystackFee + $serviceCharge,
         ];
     }
+
+    /**
+     * Calculate net amount business will receive after fees are deducted
+     * (Business absorbs all fees - customer pays only invoice amount)
+     */
+    public static function calculateNetAmountReceived(float $invoiceAmount): array
+    {
+        $paystackFee = self::calculatePaystackFee($invoiceAmount);
+        $serviceCharge = self::calculateServiceCharge($invoiceAmount);
+        $totalFees = $paystackFee + $serviceCharge;
+        $netAmount = $invoiceAmount - $totalFees;
+
+        return [
+            'invoice_amount' => $invoiceAmount,
+            'paystack_fee' => $paystackFee,
+            'service_charge' => $serviceCharge,
+            'total_fees' => $totalFees,
+            'net_amount_received' => max(0, $netAmount), // Ensure non-negative
+            'customer_pays' => $invoiceAmount, // Customer pays only invoice amount
+        ];
+    }
 }

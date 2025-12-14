@@ -193,7 +193,10 @@ class PublicInvoiceController extends Controller
                                 return response()->json(['message' => 'Invoice already paid'], 200);
                             }
 
-                            $amountPaid = $data['amount'] / 100; // Convert from kobo to naira
+                            $amountPaid = $data['amount'] / 100; // Convert from kobo to naira (customer paid amount)
+
+                            // Calculate what business actually receives (after fees)
+                            $netCalculation = \App\Models\PaymentSetting::calculateNetAmountReceived($amountPaid);
 
                             // Update invoice payment details
                             $invoice->update([
@@ -204,7 +207,12 @@ class PublicInvoiceController extends Controller
 
                             Log::info('Public invoice payment processed: ' . $invoice->invoice_number, [
                                 'reference' => $reference,
-                                'amount' => $amountPaid,
+                                'customer_paid' => $amountPaid,
+                                'paystack_fee_deducted' => $netCalculation['paystack_fee'],
+                                'service_charge_deducted' => $netCalculation['service_charge'],
+                                'total_fees_deducted' => $netCalculation['total_fees'],
+                                'net_amount_business_receives' => $netCalculation['net_amount_received'],
+                                'fee_model' => 'business_absorbs_fees',
                                 'receiver_bank' => $invoice->from_bank_name,
                                 'receiver_account' => $invoice->from_account_number,
                                 'receiver_account_name' => $invoice->from_account_name,

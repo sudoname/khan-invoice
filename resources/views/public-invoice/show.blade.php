@@ -230,10 +230,10 @@
 
             <form id="paymentForm">
                 <div class="space-y-4">
-                    <!-- Amount Display with Fee Breakdown -->
+                    <!-- Amount Display (Customer pays only invoice amount) -->
                     @php
                         $invoiceAmount = $invoice->total_amount;
-                        $fees = \App\Models\PaymentSetting::calculateTotalFees($invoiceAmount);
+                        $netCalculation = \App\Models\PaymentSetting::calculateNetAmountReceived($invoiceAmount);
                     @endphp
                     <div class="bg-purple-50 p-4 rounded-lg">
                         <div class="space-y-2">
@@ -241,17 +241,12 @@
                                 <span>Invoice Amount</span>
                                 <span class="font-semibold">₦{{ number_format($invoiceAmount, 2) }}</span>
                             </div>
-                            <div class="flex justify-between text-sm text-blue-600">
-                                <span>Paystack Processing Fee</span>
-                                <span class="font-semibold">₦{{ number_format($fees['paystack_fee'], 2) }}</span>
-                            </div>
-                            <div class="flex justify-between text-sm text-purple-600">
-                                <span>Service Charge</span>
-                                <span class="font-semibold">₦{{ number_format($fees['service_charge'], 2) }}</span>
-                            </div>
                             <div class="border-t border-purple-200 pt-2 flex justify-between">
                                 <span class="text-sm font-medium text-gray-700">Total to Pay</span>
-                                <span class="text-2xl font-bold text-purple-600">₦{{ number_format($fees['total_with_fees'], 2) }}</span>
+                                <span class="text-2xl font-bold text-purple-600">₦{{ number_format($invoiceAmount, 2) }}</span>
+                            </div>
+                            <div class="text-xs text-gray-500 text-center mt-2">
+                                Processing fees are absorbed by the merchant
                             </div>
                         </div>
                     </div>
@@ -325,33 +320,32 @@
             // Generate reference for this payment
             const reference = 'KI_PUBLIC_{{ $invoice->public_id }}_' + Date.now();
 
-            // Get fee breakdown from backend
+            // Customer pays only invoice amount (business absorbs fees)
             const invoiceAmount = {{ $invoice->total_amount }};
-            const paystackFee = {{ $fees['paystack_fee'] }};
-            const serviceCharge = {{ $fees['service_charge'] }};
-            const totalFees = {{ $fees['total_fees'] }};
-            const totalWithFees = {{ $fees['total_with_fees'] }};
+            const netCalculation = {!! json_encode($netCalculation) !!};
 
             // Initialize Paystack payment
             const handler = PaystackPop.setup({
                 key: '{{ config("services.paystack.public_key") }}',
                 email: payerEmail,
-                amount: Math.round(totalWithFees * 100), // Convert to kobo
+                amount: Math.round(invoiceAmount * 100), // Customer pays ONLY invoice amount (in kobo)
                 currency: 'NGN',
                 ref: reference,
                 @if($invoice->paystack_subaccount_code)
                 subaccount: '{{ $invoice->paystack_subaccount_code }}',
-                transaction_charge: Math.round((totalFees) * 100), // Platform keeps the fees (in kobo)
-                bearer: 'account', // Customer bears ALL fees (Paystack + Platform)
+                transaction_charge: Math.round(netCalculation.service_charge * 100), // Platform keeps service charge (in kobo)
+                bearer: 'account', // Subaccount (business) bears the charge - deducted from their portion
                 @endif
                 metadata: {
                     invoice_id: '{{ $invoice->public_id }}',
                     invoice_number: "{{ $invoice->invoice_number }}",
                     invoice_amount: invoiceAmount.toFixed(2),
-                    paystack_fee: paystackFee.toFixed(2),
-                    service_charge: serviceCharge.toFixed(2),
-                    total_fees: totalFees.toFixed(2),
-                    total_charged: totalWithFees.toFixed(2),
+                    customer_pays: invoiceAmount.toFixed(2),
+                    paystack_fee: netCalculation.paystack_fee.toFixed(2),
+                    service_charge: netCalculation.service_charge.toFixed(2),
+                    total_fees: netCalculation.total_fees.toFixed(2),
+                    net_amount_received: netCalculation.net_amount_received.toFixed(2),
+                    fee_model: 'business_absorbs_fees',
                     payer_name: payerName,
                     receiver_name: "{{ $invoice->from_name }}",
                     receiver_email: "{{ $invoice->from_email ?? '' }}",
@@ -366,13 +360,10 @@
                     // Payment successful
                     closePaymentModal();
 
-                    // Show success message
+                    // Show success message (customer paid only invoice amount)
                     alert('Payment Successful!\n\n' +
                           'Transaction Reference: ' + response.reference + '\n' +
-                          'Invoice Amount: ₦' + invoiceAmount.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',') + '\n' +
-                          'Paystack Fee: ₦' + paystackFee.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',') + '\n' +
-                          'Service Charge: ₦' + serviceCharge.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',') + '\n' +
-                          'Total Paid: ₦' + totalWithFees.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',') + '\n\n' +
+                          'Amount Paid: ₦' + invoiceAmount.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',') + '\n\n' +
                           'Thank you for your payment!');
 
                     // Reload page to show updated payment status
