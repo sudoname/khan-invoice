@@ -26,6 +26,35 @@ class PublicInvoiceController extends Controller
     {
         $data = $this->validateAndPrepareData($request);
 
+        // Check for duplicate invoice in the last 5 minutes
+        $fiveMinutesAgo = now()->subMinutes(5);
+        $existingInvoice = PublicInvoice::where('from_name', $data['from_name'])
+            ->where('to_name', $data['to_name'])
+            ->where('total_amount', $data['total_amount'])
+            ->where('created_at', '>=', $fiveMinutesAgo)
+            ->first();
+
+        if ($existingInvoice) {
+            // Check if this is an API/AJAX request (from mobile app)
+            if ($request->wantsJson() || $request->header('X-Requested-With') === 'XMLHttpRequest') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'This invoice already exists. An invoice with the same details was created recently.',
+                    'existing_invoice' => [
+                        'public_id' => $existingInvoice->public_id,
+                        'invoice_url' => route('public-invoice.show', $existingInvoice->public_id),
+                        'created_at' => $existingInvoice->created_at->diffForHumans(),
+                    ],
+                ], 422);
+            }
+
+            // For web requests, redirect back with error
+            return back()->withErrors([
+                'duplicate' => 'This invoice already exists. An invoice with the same details was created ' .
+                    $existingInvoice->created_at->diffForHumans() . '.'
+            ])->withInput();
+        }
+
         // Handle logo upload if present
         $logoPath = null;
         if ($request->hasFile('company_logo')) {
