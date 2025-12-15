@@ -22,6 +22,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->validateCsrfTokens(except: [
             'payment/webhook',
             'webhook/public-invoice/paystack',
+            'invoice-generator/preview',
         ]);
     })
     ->withSchedule(function (Schedule $schedule) {
