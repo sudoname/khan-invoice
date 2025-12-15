@@ -27,8 +27,8 @@ class DashboardController extends Controller
 
         // Financial statistics
         $totalAmount = (clone $invoices)->sum('total_amount');
-        $paidAmount = (clone $invoices)->sum('amount_paid');
-        $pendingAmount = $totalAmount - $paidAmount;
+        $paidAmount = (clone $invoices)->where('payment_status', 'paid')->sum('total_amount');
+        $pendingAmount = (clone $invoices)->whereIn('payment_status', ['pending', 'sent', 'overdue'])->sum('total_amount');
 
         // Customer statistics
         $totalCustomers = Customer::where('user_id', $user->id)->count();

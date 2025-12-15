@@ -16,7 +16,7 @@ class InvoiceController extends Controller
     public function index(Request $request)
     {
         $query = Invoice::where('user_id', $request->user()->id)
-            ->with(['customer', 'items']);
+            ->with(['customer', 'items', 'businessProfile']);
 
         // Apply filters
         if ($request->has('status')) {
@@ -43,7 +43,7 @@ class InvoiceController extends Controller
     public function show(Request $request, string $id)
     {
         $invoice = Invoice::where('user_id', $request->user()->id)
-            ->with(['customer', 'items', 'payments'])
+            ->with(['customer', 'items', 'payments', 'businessProfile'])
             ->findOrFail($id);
 
         return new InvoiceResource($invoice);

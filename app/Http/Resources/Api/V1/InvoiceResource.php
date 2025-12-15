@@ -54,6 +54,17 @@ class InvoiceResource extends JsonResource
             'notes' => $this->notes,
             'footer' => $this->footer,
 
+            // Business/Bank account info (when business_profile is loaded)
+            'business_profile' => $this->whenLoaded('businessProfile', function () {
+                return [
+                    'business_name' => $this->businessProfile->business_name,
+                    'bank_name' => $this->businessProfile->bank_name,
+                    'bank_account_name' => $this->businessProfile->bank_account_name,
+                    'bank_account_number' => $this->businessProfile->bank_account_number,
+                    'bank_account_type' => $this->businessProfile->bank_account_type,
+                ];
+            }),
+
             // Line items (when loaded)
             'items' => $this->whenLoaded('items', function () {
                 return $this->items->map(function ($item) {
