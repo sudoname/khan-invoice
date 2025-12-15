@@ -90,7 +90,19 @@ class PublicInvoiceController extends Controller
             'payment_status' => 'sent', // Invoice is sent when created
         ]);
 
-        // Redirect to the invoice show page
+        // Check if this is an API/AJAX request (from mobile app)
+        if ($request->wantsJson() || $request->header('X-Requested-With') === 'XMLHttpRequest') {
+            // Return JSON response for mobile app
+            return response()->json([
+                'success' => true,
+                'message' => 'Invoice created successfully',
+                'public_id' => $publicInvoice->public_id,
+                'invoice_url' => route('public-invoice.show', $publicInvoice->public_id),
+                'download_url' => route('public-invoice.download', $publicInvoice->public_id),
+            ]);
+        }
+
+        // Redirect to the invoice show page (for web browsers)
         return redirect()->route('public-invoice.show', $publicInvoice->public_id);
     }
 
