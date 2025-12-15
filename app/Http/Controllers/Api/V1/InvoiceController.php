@@ -56,32 +56,59 @@ class InvoiceController extends Controller
     {
         $validated = $request->validate([
             'customer_id' => 'required|exists:customers,id',
-            'business_profile_id' => 'required|exists:business_profiles,id',
+            'business_profile_id' => 'nullable|exists:business_profiles,id',
             'invoice_number' => 'nullable|string|unique:invoices',
             'issue_date' => 'required|date',
             'due_date' => 'required|date|after_or_equal:issue_date',
-            'currency' => 'required|string|max:3',
+            'currency' => 'nullable|string|max:3',
             'status' => 'nullable|string|in:draft,sent,paid,partially_paid,overdue,cancelled',
-            'sub_total' => 'required|numeric|min:0',
+            'sub_total' => 'nullable|numeric|min:0',
             'discount_total' => 'nullable|numeric|min:0',
             'vat_rate' => 'nullable|numeric|min:0|max:100',
             'wht_rate' => 'nullable|numeric|min:0|max:100',
             'notes' => 'nullable|string',
             'footer' => 'nullable|string',
-            'items' => 'nullable|array',
+            'items' => 'required|array|min:1',
+            'items.*.description' => 'required|string',
+            'items.*.quantity' => 'required|numeric|min:0.01',
+            'items.*.unit_price' => 'required|numeric|min:0',
         ]);
 
         // Ensure customer belongs to the user
         $customer = $request->user()->customers()->findOrFail($validated['customer_id']);
 
-        // Ensure business profile belongs to the user
-        $businessProfile = $request->user()->businessProfiles()->findOrFail($validated['business_profile_id']);
+        // Get business profile (use provided one or user's first profile)
+        if (isset($validated['business_profile_id'])) {
+            $businessProfile = $request->user()->businessProfiles()->findOrFail($validated['business_profile_id']);
+        } else {
+            $businessProfile = $request->user()->businessProfiles()->first();
+            if (!$businessProfile) {
+                return response()->json([
+                    'message' => 'Please create a business profile first',
+                    'errors' => ['business_profile' => ['No business profile found. Please create one in settings.']]
+                ], 422);
+            }
+            $validated['business_profile_id'] = $businessProfile->id;
+        }
 
         $validated['user_id'] = $request->user()->id;
         $validated['status'] = $validated['status'] ?? 'draft';
+        $validated['currency'] = $validated['currency'] ?? $businessProfile->default_currency ?? 'NGN';
+
+        // Calculate sub_total from items if not provided
+        if (!isset($validated['sub_total']) || $validated['sub_total'] == 0) {
+            $subTotal = 0;
+            foreach ($validated['items'] as $item) {
+                $total = $item['quantity'] * $item['unit_price'];
+                $item['total'] = $total;
+                $subTotal += $total;
+            }
+            $validated['sub_total'] = $subTotal;
+        } else {
+            $subTotal = $validated['sub_total'];
+        }
 
         // Calculate amounts
-        $subTotal = $validated['sub_total'];
         $vatAmount = $subTotal * (($validated['vat_rate'] ?? 0) / 100);
         $whtAmount = $subTotal * (($validated['wht_rate'] ?? 0) / 100);
         $discountTotal = $validated['discount_total'] ?? 0;
@@ -93,11 +120,14 @@ class InvoiceController extends Controller
 
         $invoice = Invoice::create($validated);
 
-        // Create items if provided
-        if (isset($validated['items'])) {
-            foreach ($validated['items'] as $item) {
-                $invoice->items()->create($item);
-            }
+        // Create items
+        foreach ($validated['items'] as $item) {
+            $invoice->items()->create([
+                'description' => $item['description'],
+                'quantity' => $item['quantity'],
+                'unit_price' => $item['unit_price'],
+                'total' => $item['quantity'] * $item['unit_price'],
+            ]);
         }
 
         Log::info('Invoice created via API', [
