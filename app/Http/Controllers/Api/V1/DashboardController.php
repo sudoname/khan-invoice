@@ -70,11 +70,16 @@ class DashboardController extends Controller
             });
 
         // Monthly revenue (last 6 months)
+        // Use appropriate date format function based on database driver
+        $dateFormat = DB::getDriverName() === 'sqlite'
+            ? 'strftime("%Y-%m", paid_at)'
+            : 'DATE_FORMAT(paid_at, "%Y-%m")';
+
         $monthlyRevenue = Invoice::where('user_id', $user->id)
             ->where('payment_status', 'paid')
             ->where('paid_at', '>=', now()->subMonths(6))
             ->select(
-                DB::raw('strftime("%Y-%m", paid_at) as month'),
+                DB::raw($dateFormat . ' as month'),
                 DB::raw('SUM(total_amount) as revenue')
             )
             ->groupBy('month')
