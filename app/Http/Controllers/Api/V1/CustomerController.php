@@ -12,9 +12,33 @@ class CustomerController extends Controller
 {
     public function index(Request $request)
     {
-        $customers = Customer::where('user_id', $request->user()->id)
+        $userId = $request->user()->id;
+        $userEmail = $request->user()->email;
+
+        Log::info('Customers API called', [
+            'user_id' => $userId,
+            'user_email' => $userEmail,
+        ]);
+
+        $customers = Customer::where('user_id', $userId)
             ->latest()
             ->paginate(min($request->get('per_page', 15), 100));
+
+        Log::info('Customers API result', [
+            'user_id' => $userId,
+            'total_customers' => $customers->total(),
+            'returned_count' => $customers->count(),
+        ]);
+
+        // Debug: Check if there are ANY customers in the database
+        $totalCustomersInDb = Customer::count();
+        $customersForOtherUsers = Customer::where('user_id', '!=', $userId)->count();
+
+        Log::info('Customer database stats', [
+            'total_in_db' => $totalCustomersInDb,
+            'for_other_users' => $customersForOtherUsers,
+            'for_this_user' => $customers->total(),
+        ]);
 
         return CustomerResource::collection($customers);
     }
