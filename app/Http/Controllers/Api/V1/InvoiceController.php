@@ -15,8 +15,15 @@ class InvoiceController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Invoice::where('user_id', $request->user()->id)
-            ->with(['customer', 'items', 'businessProfile']);
+        $user = $request->user();
+        $query = Invoice::query();
+
+        // Admin users see all invoices, regular users see only their own
+        if (!$user->isAdmin()) {
+            $query->where('user_id', $user->id);
+        }
+
+        $query->with(['customer', 'items', 'businessProfile']);
 
         // Apply filters
         if ($request->has('status')) {
@@ -42,8 +49,14 @@ class InvoiceController extends Controller
      */
     public function show(Request $request, string $id)
     {
-        $invoice = Invoice::where('user_id', $request->user()->id)
-            ->with(['customer', 'items', 'payments', 'businessProfile'])
+        $query = Invoice::query();
+
+        // Admin users can view all invoices, regular users only their own
+        if (!$request->user()->isAdmin()) {
+            $query->where('user_id', $request->user()->id);
+        }
+
+        $invoice = $query->with(['customer', 'items', 'payments', 'businessProfile'])
             ->findOrFail($id);
 
         return new InvoiceResource($invoice);

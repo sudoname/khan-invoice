@@ -12,9 +12,15 @@ class BusinessProfileController extends Controller
 {
     public function index(Request $request)
     {
-        $profiles = BusinessProfile::where('user_id', $request->user()->id)
-            ->latest()
-            ->get();
+        $user = $request->user();
+        $query = BusinessProfile::query();
+
+        // Admin users see all business profiles, regular users see only their own
+        if (!$user->isAdmin()) {
+            $query->where('user_id', $user->id);
+        }
+
+        $profiles = $query->latest()->get();
 
         return BusinessProfileResource::collection($profiles);
     }

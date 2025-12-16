@@ -17,9 +17,13 @@ class DashboardController extends Controller
     public function index(Request $request)
     {
         $user = $request->user();
+        $isAdmin = $user->isAdmin();
 
-        // Invoice statistics
-        $invoices = Invoice::where('user_id', $user->id);
+        // Invoice statistics - admin sees all, regular users see only their own
+        $invoices = Invoice::query();
+        if (!$isAdmin) {
+            $invoices->where('user_id', $user->id);
+        }
         $totalInvoices = $invoices->count();
         $paidInvoices = (clone $invoices)->where('payment_status', 'paid')->count();
         $pendingInvoices = (clone $invoices)->whereIn('payment_status', ['pending', 'sent'])->count();
@@ -30,11 +34,19 @@ class DashboardController extends Controller
         $paidAmount = (clone $invoices)->where('payment_status', 'paid')->sum('total_amount');
         $pendingAmount = (clone $invoices)->whereIn('payment_status', ['pending', 'sent', 'overdue'])->sum('total_amount');
 
-        // Customer statistics
-        $totalCustomers = Customer::where('user_id', $user->id)->count();
+        // Customer statistics - admin sees all, regular users see only their own
+        $totalCustomers = Customer::query();
+        if (!$isAdmin) {
+            $totalCustomers->where('user_id', $user->id);
+        }
+        $totalCustomers = $totalCustomers->count();
 
         // Recent invoices
-        $recentInvoices = Invoice::where('user_id', $user->id)
+        $recentInvoicesQuery = Invoice::query();
+        if (!$isAdmin) {
+            $recentInvoicesQuery->where('user_id', $user->id);
+        }
+        $recentInvoices = $recentInvoicesQuery
             ->with(['customer'])
             ->latest()
             ->limit(5)
@@ -53,8 +65,12 @@ class DashboardController extends Controller
                 ];
             });
 
-        // Recent payments
-        $recentPayments = PaymentTransaction::where('user_id', $user->id)
+        // Recent payments - admin sees all, regular users see only their own
+        $recentPaymentsQuery = PaymentTransaction::query();
+        if (!$isAdmin) {
+            $recentPaymentsQuery->where('user_id', $user->id);
+        }
+        $recentPayments = $recentPaymentsQuery
             ->latest()
             ->limit(5)
             ->get()
@@ -75,7 +91,11 @@ class DashboardController extends Controller
             ? 'strftime("%Y-%m", paid_at)'
             : 'DATE_FORMAT(paid_at, "%Y-%m")';
 
-        $monthlyRevenue = Invoice::where('user_id', $user->id)
+        $monthlyRevenueQuery = Invoice::query();
+        if (!$isAdmin) {
+            $monthlyRevenueQuery->where('user_id', $user->id);
+        }
+        $monthlyRevenue = $monthlyRevenueQuery
             ->where('payment_status', 'paid')
             ->where('paid_at', '>=', now()->subMonths(6))
             ->select(

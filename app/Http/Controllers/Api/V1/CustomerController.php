@@ -12,32 +12,32 @@ class CustomerController extends Controller
 {
     public function index(Request $request)
     {
-        $userId = $request->user()->id;
-        $userEmail = $request->user()->email;
+        $user = $request->user();
+        $userId = $user->id;
+        $userEmail = $user->email;
+        $isAdmin = $user->isAdmin();
 
         Log::info('Customers API called', [
             'user_id' => $userId,
             'user_email' => $userEmail,
+            'is_admin' => $isAdmin,
         ]);
 
-        $customers = Customer::where('user_id', $userId)
-            ->latest()
+        // Admin users see all customers, regular users see only their own
+        $query = Customer::query();
+
+        if (!$isAdmin) {
+            $query->where('user_id', $userId);
+        }
+
+        $customers = $query->latest()
             ->paginate(min($request->get('per_page', 15), 100));
 
         Log::info('Customers API result', [
             'user_id' => $userId,
+            'is_admin' => $isAdmin,
             'total_customers' => $customers->total(),
             'returned_count' => $customers->count(),
-        ]);
-
-        // Debug: Check if there are ANY customers in the database
-        $totalCustomersInDb = Customer::count();
-        $customersForOtherUsers = Customer::where('user_id', '!=', $userId)->count();
-
-        Log::info('Customer database stats', [
-            'total_in_db' => $totalCustomersInDb,
-            'for_other_users' => $customersForOtherUsers,
-            'for_this_user' => $customers->total(),
         ]);
 
         return CustomerResource::collection($customers);
@@ -45,8 +45,14 @@ class CustomerController extends Controller
 
     public function show(Request $request, string $id)
     {
-        $customer = Customer::where('user_id', $request->user()->id)
-            ->findOrFail($id);
+        $query = Customer::query();
+
+        // Admin users can view all customers, regular users only their own
+        if (!$request->user()->isAdmin()) {
+            $query->where('user_id', $request->user()->id);
+        }
+
+        $customer = $query->findOrFail($id);
 
         return new CustomerResource($customer);
     }
