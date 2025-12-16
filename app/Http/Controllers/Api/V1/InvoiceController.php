@@ -87,14 +87,28 @@ class InvoiceController extends Controller
             'items.*.unit_price' => 'required|numeric|min:0',
         ]);
 
-        // Ensure customer belongs to the user
-        $customer = $request->user()->customers()->findOrFail($validated['customer_id']);
+        // Ensure customer exists (admin can use any customer, regular users only their own)
+        $customerQuery = Customer::query();
+        if (!$request->user()->isAdmin()) {
+            $customerQuery->where('user_id', $request->user()->id);
+        }
+        $customer = $customerQuery->findOrFail($validated['customer_id']);
 
         // Get business profile (use provided one or user's first profile)
         if (isset($validated['business_profile_id'])) {
-            $businessProfile = $request->user()->businessProfiles()->findOrFail($validated['business_profile_id']);
+            $businessProfileQuery = BusinessProfile::query();
+            if (!$request->user()->isAdmin()) {
+                $businessProfileQuery->where('user_id', $request->user()->id);
+            }
+            $businessProfile = $businessProfileQuery->findOrFail($validated['business_profile_id']);
         } else {
-            $businessProfile = $request->user()->businessProfiles()->first();
+            // Get user's first business profile, or any profile if admin
+            $businessProfileQuery = BusinessProfile::query();
+            if (!$request->user()->isAdmin()) {
+                $businessProfileQuery->where('user_id', $request->user()->id);
+            }
+            $businessProfile = $businessProfileQuery->first();
+
             if (!$businessProfile) {
                 return response()->json([
                     'message' => 'Please create a business profile first',
