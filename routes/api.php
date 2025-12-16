@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\V1\AuthController;
+use App\Http\Controllers\Api\V1\BusinessProfileController;
 use App\Http\Controllers\Api\V1\DashboardController;
 use App\Http\Controllers\Api\V1\InvoiceController;
 use App\Http\Controllers\Api\V1\CustomerController;
@@ -45,6 +46,9 @@ Route::prefix('v1')->middleware(['auth:sanctum', 'api.rate.limit'])->group(funct
 
     // Customers
     Route::apiResource('customers', CustomerController::class);
+
+    // Business Profiles
+    Route::apiResource('business-profiles', BusinessProfileController::class);
 
     // Payments
     Route::get('/payments', [PaymentController::class, 'index']);
