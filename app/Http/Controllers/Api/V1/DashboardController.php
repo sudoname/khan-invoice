@@ -25,14 +25,14 @@ class DashboardController extends Controller
             $invoices->where('user_id', $user->id);
         }
         $totalInvoices = $invoices->count();
-        $paidInvoices = (clone $invoices)->where('payment_status', 'paid')->count();
-        $pendingInvoices = (clone $invoices)->whereIn('payment_status', ['pending', 'sent'])->count();
-        $overdueInvoices = (clone $invoices)->where('payment_status', 'overdue')->count();
+        $paidInvoices = (clone $invoices)->where('status', 'paid')->count();
+        $pendingInvoices = (clone $invoices)->whereIn('status', ['draft', 'sent'])->count();
+        $overdueInvoices = (clone $invoices)->where('status', 'overdue')->count();
 
         // Financial statistics
         $totalAmount = (clone $invoices)->sum('total_amount');
-        $paidAmount = (clone $invoices)->where('payment_status', 'paid')->sum('total_amount');
-        $pendingAmount = (clone $invoices)->whereIn('payment_status', ['pending', 'sent', 'overdue'])->sum('total_amount');
+        $paidAmount = (clone $invoices)->sum('amount_paid');
+        $pendingAmount = (clone $invoices)->whereIn('status', ['draft', 'sent', 'overdue'])->sum('total_amount');
 
         // Customer statistics - admin sees all, regular users see only their own
         $totalCustomers = Customer::query();
@@ -97,11 +97,11 @@ class DashboardController extends Controller
             $monthlyRevenueQuery->where('user_id', $user->id);
         }
         $monthlyRevenue = $monthlyRevenueQuery
-            ->where('payment_status', 'paid')
+            ->where('status', 'paid')
             ->where('paid_at', '>=', now()->subMonths(6))
             ->select(
                 DB::raw($dateFormat . ' as month'),
-                DB::raw('SUM(total_amount) as revenue')
+                DB::raw('SUM(amount_paid) as revenue')
             )
             ->groupBy('month')
             ->orderBy('month', 'desc')
