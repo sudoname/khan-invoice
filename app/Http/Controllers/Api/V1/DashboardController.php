@@ -59,7 +59,7 @@ class DashboardController extends Controller
                     'customer_name' => $invoice->customer?->name,
                     'total_amount' => (float) $invoice->total_amount,
                     'formatted_total' => $invoice->currency . ' ' . number_format($invoice->total_amount, 2),
-                    'payment_status' => $invoice->payment_status,
+                    'payment_status' => $invoice->status, // Use status field instead of payment_status
                     'status' => $invoice->status,
                     'due_date' => $invoice->due_date?->format('Y-m-d'),
                     'created_at' => $invoice->created_at->format('Y-m-d'),
