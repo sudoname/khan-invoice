@@ -19,7 +19,7 @@ class InvoiceResource extends JsonResource
             'invoice_number' => $this->invoice_number,
             'public_id' => $this->public_id,
             'status' => $this->status,
-            'payment_status' => $this->payment_status,
+            'payment_status' => $this->status, // Use status field for display
 
             // Customer info
             'customer_id' => $this->customer_id,
