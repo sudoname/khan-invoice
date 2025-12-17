@@ -69,6 +69,12 @@ class InvoiceController extends Controller
      */
     public function store(Request $request)
     {
+        Log::info('Invoice creation attempt', [
+            'user_id' => $request->user()->id,
+            'user_email' => $request->user()->email,
+            'request_data' => $request->all(),
+        ]);
+
         $validated = $request->validate([
             'customer_id' => 'required|exists:customers,id',
             'business_profile_id' => 'nullable|exists:business_profiles,id',
@@ -94,7 +100,18 @@ class InvoiceController extends Controller
         if (!$request->user()->isAdmin()) {
             $customerQuery->where('user_id', $request->user()->id);
         }
-        $customer = $customerQuery->findOrFail($validated['customer_id']);
+        $customer = $customerQuery->find($validated['customer_id']);
+
+        if (!$customer) {
+            Log::error('Customer not found for invoice creation', [
+                'user_id' => $request->user()->id,
+                'customer_id' => $validated['customer_id'],
+            ]);
+            return response()->json([
+                'message' => 'Customer not found or does not belong to you',
+                'errors' => ['customer_id' => ['The selected customer does not exist or you do not have access to it.']]
+            ], 404);
+        }
 
         // Get business profile (use provided one or user's first profile)
         if (isset($validated['business_profile_id'])) {
@@ -102,7 +119,18 @@ class InvoiceController extends Controller
             if (!$request->user()->isAdmin()) {
                 $businessProfileQuery->where('user_id', $request->user()->id);
             }
-            $businessProfile = $businessProfileQuery->findOrFail($validated['business_profile_id']);
+            $businessProfile = $businessProfileQuery->find($validated['business_profile_id']);
+
+            if (!$businessProfile) {
+                Log::error('Business profile not found for invoice creation', [
+                    'user_id' => $request->user()->id,
+                    'business_profile_id' => $validated['business_profile_id'],
+                ]);
+                return response()->json([
+                    'message' => 'Business profile not found or does not belong to you',
+                    'errors' => ['business_profile_id' => ['The selected business profile does not exist or you do not have access to it.']]
+                ], 404);
+            }
         } else {
             // Get user's first business profile, or any profile if admin
             $businessProfileQuery = BusinessProfile::query();
@@ -112,6 +140,9 @@ class InvoiceController extends Controller
             $businessProfile = $businessProfileQuery->first();
 
             if (!$businessProfile) {
+                Log::error('No business profile found for user', [
+                    'user_id' => $request->user()->id,
+                ]);
                 return response()->json([
                     'message' => 'Please create a business profile first',
                     'errors' => ['business_profile' => ['No business profile found. Please create one in settings.']]

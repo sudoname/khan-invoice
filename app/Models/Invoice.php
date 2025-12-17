@@ -65,6 +65,32 @@ class Invoice extends Model
                 $invoice->invoice_number = static::generateInvoiceNumber();
             }
         });
+
+        static::updating(function ($invoice) {
+            // When payment_status changes to 'paid', automatically create a payment record
+            if ($invoice->isDirty('payment_status') && $invoice->payment_status === 'paid') {
+                // Check if a payment for the full amount already exists
+                $existingFullPayment = $invoice->payments()
+                    ->where('amount', $invoice->total_amount)
+                    ->exists();
+
+                if (!$existingFullPayment) {
+                    // Create a payment record for the full invoice amount
+                    Payment::create([
+                        'invoice_id' => $invoice->id,
+                        'amount' => $invoice->total_amount,
+                        'payment_date' => now(),
+                        'payment_method' => $invoice->payment_gateway ?? 'manual',
+                        'reference_number' => $invoice->payment_reference ?? 'MANUAL-' . time(),
+                        'notes' => 'Automatically recorded when invoice was marked as paid',
+                    ]);
+
+                    // Update amount_paid to reflect full payment
+                    $invoice->amount_paid = $invoice->total_amount;
+                    $invoice->paid_at = now();
+                }
+            }
+        });
     }
 
     /**
