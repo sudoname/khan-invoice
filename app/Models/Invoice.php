@@ -67,8 +67,8 @@ class Invoice extends Model
         });
 
         static::updating(function ($invoice) {
-            // When payment_status changes to 'paid', automatically create a payment record
-            if ($invoice->isDirty('payment_status') && $invoice->payment_status === 'paid') {
+            // When status changes to 'paid', automatically record payment
+            if ($invoice->isDirty('status') && $invoice->status === 'paid') {
                 // Check if a payment for the full amount already exists
                 $existingFullPayment = $invoice->payments()
                     ->where('amount', $invoice->total_amount)
@@ -85,9 +85,17 @@ class Invoice extends Model
                         'notes' => 'Automatically recorded when invoice was marked as paid',
                     ]);
 
-                    // Update amount_paid to reflect full payment
+                    // Update amount_paid and payment_status to reflect full payment
                     $invoice->amount_paid = $invoice->total_amount;
                     $invoice->paid_at = now();
+                    $invoice->payment_status = 'completed';
+                }
+            }
+
+            // When payment_status changes to 'completed', sync status to 'paid'
+            if ($invoice->isDirty('payment_status') && $invoice->payment_status === 'completed') {
+                if ($invoice->amount_paid >= $invoice->total_amount) {
+                    $invoice->status = 'paid';
                 }
             }
         });

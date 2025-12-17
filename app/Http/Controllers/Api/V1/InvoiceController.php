@@ -153,6 +153,7 @@ class InvoiceController extends Controller
 
         $validated['user_id'] = $request->user()->id;
         $validated['status'] = $validated['status'] ?? 'draft';
+        $validated['payment_status'] = 'pending'; // Initialize payment status
         $validated['currency'] = $validated['currency'] ?? $businessProfile->default_currency ?? 'NGN';
 
         // Calculate sub_total from items if not provided
