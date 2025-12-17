@@ -54,6 +54,7 @@ class DashboardController extends Controller
             ->map(function ($invoice) {
                 return [
                     'id' => $invoice->id,
+                    'public_id' => $invoice->public_id,
                     'invoice_number' => $invoice->invoice_number,
                     'customer_name' => $invoice->customer?->name,
                     'total_amount' => (float) $invoice->total_amount,
