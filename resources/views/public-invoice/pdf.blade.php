@@ -20,7 +20,7 @@
             padding: 20px;
         }
         .header {
-            background: linear-gradient(to right, #9333ea, #2563eb);
+            background-color: #7c3aed; /* Purple-600 - closest solid color to the gradient */
             color: white;
             padding: 15px 20px;
             margin: -20px -20px 15px -20px;
@@ -123,7 +123,7 @@
             border: none;
         }
         .total-row {
-            background: linear-gradient(to right, #f3e8ff, #dbeafe);
+            background-color: #f3e8ff; /* Light purple */
             font-weight: bold;
             font-size: 11pt;
         }

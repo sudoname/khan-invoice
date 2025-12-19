@@ -341,6 +341,13 @@ class PublicInvoiceController extends Controller
         $discount = $subtotal * ($validated['discount_percentage'] ?? 0) / 100;
         $total = $subtotal + $vat - $wht - $discount;
 
+        // Validate that total amount is greater than 0
+        if ($total <= 0) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'items' => ['The total invoice amount must be greater than ₦0.00. Please adjust your items, quantities, or discounts.']
+            ]);
+        }
+
         $validated['subtotal'] = $subtotal;
         $validated['vat_amount'] = $vat;
         $validated['wht_amount'] = $wht;

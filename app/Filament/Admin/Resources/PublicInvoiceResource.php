@@ -150,7 +150,15 @@ class PublicInvoiceResource extends Resource
                                 'partially_paid' => 'Partially Paid',
                                 'overdue' => 'Overdue',
                             ])
-                            ->default('pending'),
+                            ->default('pending')
+                            ->live()
+                            ->afterStateUpdated(function ($state, callable $get, callable $set) {
+                                // When status changes to 'paid', automatically set amount_paid to total_amount
+                                if ($state === 'paid') {
+                                    $totalAmount = $get('total_amount') ?? 0;
+                                    $set('amount_paid', $totalAmount);
+                                }
+                            }),
                         Forms\Components\TextInput::make('amount_paid')
                             ->label('Amount Paid')
                             ->prefix('₦')
