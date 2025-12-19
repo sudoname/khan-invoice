@@ -26,7 +26,8 @@ class PaymentsRelationManager extends RelationManager
                     ->numeric()
                     ->prefix('₦')
                     ->minValue(0.01)
-                    ->default(fn ($livewire) => $livewire->ownerRecord->total_amount - $livewire->ownerRecord->amount_paid),
+                    ->default(fn ($livewire) => $livewire->ownerRecord->total_amount)
+                    ->helperText(fn ($livewire) => 'Remaining balance: ₦' . number_format($livewire->ownerRecord->total_amount - $livewire->ownerRecord->amount_paid, 2)),
 
                 Forms\Components\DatePicker::make('payment_date')
                     ->label('Payment Date')
@@ -45,7 +46,7 @@ class PaymentsRelationManager extends RelationManager
                         'other' => 'Other',
                     ])
                     ->required()
-                    ->default('bank_transfer'),
+                    ->default('other'),
 
                 Forms\Components\TextInput::make('reference_number')
                     ->label('Reference Number')
@@ -54,6 +55,7 @@ class PaymentsRelationManager extends RelationManager
                 Forms\Components\Textarea::make('notes')
                     ->label('Payment Notes')
                     ->rows(2)
+                    ->default(fn ($livewire) => 'Payment recorded for Invoice ' . $livewire->ownerRecord->invoice_number)
                     ->columnSpanFull(),
             ]);
     }
