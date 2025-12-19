@@ -80,7 +80,16 @@ class InvoiceResource extends Resource
                                 'overdue' => 'Overdue',
                                 'cancelled' => 'Cancelled',
                             ])
-                            ->default('draft'),
+                            ->default('draft')
+                            ->live()
+                            ->afterStateUpdated(function ($state, callable $get, callable $set, $record) {
+                                // When status changes to 'paid', automatically set amount_paid to total_amount
+                                if ($state === 'paid') {
+                                    // Get total from record if editing, otherwise try from form state
+                                    $totalAmount = $record?->total_amount ?? $get('total_amount') ?? 0;
+                                    $set('amount_paid', $totalAmount);
+                                }
+                            }),
                         Forms\Components\Select::make('currency')
                             ->label('Currency')
                             ->options(function () {
