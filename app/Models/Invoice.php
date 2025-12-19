@@ -80,9 +80,9 @@ class Invoice extends Model
                         'invoice_id' => $invoice->id,
                         'amount' => $invoice->total_amount,
                         'payment_date' => now(),
-                        'payment_method' => $invoice->payment_gateway ?? 'manual',
-                        'reference_number' => $invoice->payment_reference ?? 'MANUAL-' . time(),
-                        'notes' => 'Automatically recorded when invoice was marked as paid',
+                        'payment_method' => $invoice->payment_gateway ?? 'other',
+                        'reference_number' => $invoice->payment_reference ?? 'PAY-' . time(),
+                        'notes' => 'Payment recorded for Invoice ' . $invoice->invoice_number,
                     ]);
 
                     // Update amount_paid and payment_status to reflect full payment
