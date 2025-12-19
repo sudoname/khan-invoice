@@ -20,7 +20,7 @@
             padding: 20px;
         }
         .header {
-            background-color: #7c3aed;
+            background: linear-gradient(to right, #9333ea, #2563eb);
             color: white;
             padding: 15px 20px;
             margin: -20px -20px 15px -20px;
@@ -123,7 +123,7 @@
             border: none;
         }
         .total-row {
-            background-color: #f9f5ff;
+            background: linear-gradient(to right, #f3e8ff, #dbeafe);
             font-weight: bold;
             font-size: 11pt;
         }
