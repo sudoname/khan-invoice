@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\V1\PaymentController;
 use App\Http\Controllers\Api\V1\ReportController;
 use App\Http\Controllers\Api\V1\SubscriptionController;
 use App\Http\Controllers\Api\V1\SocialAuthController;
+use App\Http\Controllers\ContactController;
 use App\Http\Controllers\PaystackWebhookController;
 use Illuminate\Support\Facades\Route;
 
@@ -30,6 +31,9 @@ Route::prefix('v1')->group(function () {
     // Social Authentication (mobile)
     Route::post('/auth/google', [SocialAuthController::class, 'googleLogin']);
     Route::post('/auth/facebook', [SocialAuthController::class, 'facebookLogin']);
+
+    // Contact form (public - no auth required)
+    Route::post('/contact', [ContactController::class, 'store']);
 
     // Protected auth routes
     Route::middleware('auth:sanctum')->group(function () {
