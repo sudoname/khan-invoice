@@ -1,6 +1,37 @@
 <x-layout>
     <x-slot name="title">Invoice {{ $invoice->invoice_number }} - Khan Invoice</x-slot>
 
+    <style>
+        /* Mobile optimizations */
+        @media (max-width: 768px) {
+            body {
+                font-size: 14px;
+            }
+            .invoice-container {
+                padding: 8px !important;
+            }
+            table {
+                font-size: 12px;
+            }
+        }
+
+        /* Print styles - hide UI elements */
+        @media print {
+            nav, .action-buttons, button, a.button {
+                display: none !important;
+            }
+            .invoice-container {
+                box-shadow: none !important;
+                border: none !important;
+            }
+        }
+
+        /* Ensure text is readable on mobile */
+        body {
+            -webkit-text-size-adjust: 100%;
+        }
+    </style>
+
     <!-- Paystack Inline JS -->
     <script src="https://js.paystack.co/v1/inline.js"></script>
 
@@ -28,7 +59,7 @@
     <!-- Preview and Actions -->
     <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <!-- Action Buttons -->
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 mb-6">
+        <div class="action-buttons grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 mb-6">
             <!-- Print -->
             <button onclick="window.print()" class="bg-blue-600 text-white px-3 py-3 rounded-lg font-semibold hover:bg-blue-700 transition flex items-center justify-center gap-2 text-xs sm:text-sm">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -38,7 +69,10 @@
             </button>
 
             <!-- Download -->
-            <a href="{{ route('public-invoice.download', $invoice->public_id) }}" target="_blank"
+            <a href="{{ route('public-invoice.download', $invoice->public_id) }}"
+                download="invoice-{{ $invoice->invoice_number }}.pdf"
+                target="_blank"
+                onclick="handleDownload(event, this.href)"
                 class="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-3 py-3 rounded-lg font-semibold hover:from-purple-700 hover:to-blue-700 transition flex items-center justify-center gap-2 text-xs sm:text-sm">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
@@ -64,7 +98,7 @@
         </div>
 
         <!-- Invoice Preview -->
-        <div class="bg-white rounded-xl shadow-2xl overflow-hidden border-2 border-gray-200">
+        <div class="invoice-container bg-white rounded-xl shadow-2xl overflow-hidden border-2 border-gray-200">
             <!-- Header -->
             <div class="bg-gradient-to-r from-purple-600 to-blue-600 text-white p-4 sm:p-6">
                 <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
@@ -278,9 +312,35 @@
     </div>
 
     <script>
+        // Detect if running in mobile app WebView
+        function isInAppBrowser() {
+            const ua = navigator.userAgent || navigator.vendor || window.opera;
+            return (ua.indexOf('wv') > -1) || (ua.indexOf('WebView') > -1);
+        }
+
+        // Handle PDF download
+        function handleDownload(event, url) {
+            // For mobile devices, just let the default behavior work
+            // The download attribute and target="_blank" should handle it
+            console.log('Downloading PDF from:', url);
+
+            // Show a brief message
+            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            if (isMobile) {
+                // Give feedback that download is starting
+                setTimeout(() => {
+                    console.log('Download should have started');
+                }, 500);
+            }
+
+            // Let the default link behavior proceed
+            return true;
+        }
+
         // WhatsApp Share Function - Mobile friendly
         function shareWhatsApp() {
             const url = "{{ route('public-invoice.show', $invoice->public_id) }}";
+            const invoiceText = `Invoice {{ $invoice->invoice_number }} - Amount: ₦{{ number_format($invoice->total_amount, 2) }}`;
             const message = `*INVOICE: {{ $invoice->invoice_number }}*\n\n` +
                            `From: {{ $invoice->from_name }}\n` +
                            `To: {{ $invoice->to_name }}\n` +
@@ -288,16 +348,19 @@
                            `Due Date: {{ $invoice->due_date->format('M d, Y') }}\n\n` +
                            `View and pay invoice: ${url}`;
 
-            // Try Web Share API first (works in mobile apps/browsers)
+            // Try Web Share API first (works best in mobile apps/browsers)
             if (navigator.share) {
                 navigator.share({
-                    title: 'Invoice {{ $invoice->invoice_number }}',
-                    text: message,
-                    url: url
+                    title: invoiceText,
+                    text: message
+                }).then(() => {
+                    console.log('Share successful');
                 }).catch((error) => {
-                    console.log('Share failed:', error);
-                    // Fallback to WhatsApp Web
-                    fallbackToWhatsApp(message);
+                    console.log('Share failed or cancelled:', error);
+                    // Only fallback if not cancelled
+                    if (error.name !== 'AbortError') {
+                        fallbackToWhatsApp(message);
+                    }
                 });
             } else {
                 // Fallback for browsers without Web Share API
@@ -306,8 +369,16 @@
         }
 
         function fallbackToWhatsApp(message) {
+            // Use WhatsApp Web URL
             const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
-            window.open(whatsappUrl, '_blank');
+
+            // Try to open in new window/tab
+            const newWindow = window.open(whatsappUrl, '_blank');
+
+            // If popup blocked, provide alternative
+            if (!newWindow || newWindow.closed || typeof newWindow.closed === 'undefined') {
+                alert('Please allow popups to share via WhatsApp, or copy the link manually.');
+            }
         }
 
         // Payment Modal Functions
