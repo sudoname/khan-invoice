@@ -163,7 +163,7 @@
 <body>
     <div class="container">
         <!-- Header -->
-        <div class="header">
+        <div class="header" style="background-color: #7c3aed; color: white; padding: 15px 20px; margin: -20px -20px 15px -20px;">
             <div class="header-content">
                 <div class="header-left">
                     <h1>INVOICE</h1>
