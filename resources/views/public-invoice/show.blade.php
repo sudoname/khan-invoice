@@ -838,6 +838,7 @@
                 transaction_charge: Math.round(netCalculation.service_charge * 100), // Platform keeps service charge (in kobo)
                 bearer: 'account', // Subaccount (business) bears the charge - deducted from their portion
                 @endif
+                callback_url: '{{ route("public-invoice.show", $invoice->public_id) }}',
                 metadata: {
                     invoice_id: '{{ $invoice->public_id }}',
                     invoice_number: "{{ $invoice->invoice_number }}",
