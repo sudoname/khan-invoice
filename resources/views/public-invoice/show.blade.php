@@ -617,13 +617,36 @@
                                 <span class="font-semibold">₦{{ number_format($invoiceAmount, 2) }}</span>
                             </div>
                             <div class="border-t border-purple-200 pt-2 flex justify-between">
-                                <span class="text-sm font-medium text-gray-700">Total to Pay</span>
+                                <span class="text-sm font-medium text-gray-700">You Pay</span>
                                 <span class="text-2xl font-bold text-purple-600">₦{{ number_format($invoiceAmount, 2) }}</span>
                             </div>
-                            <div class="text-xs text-gray-500 text-center mt-2">
-                                Processing fees are absorbed by the merchant
+                        </div>
+                    </div>
+
+                    <!-- Fee Breakdown (Merchant bears these costs) -->
+                    <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                        <h4 class="text-sm font-semibold text-gray-900 mb-3">Fee Breakdown (Absorbed by Merchant)</h4>
+                        <div class="space-y-2 text-sm">
+                            <div class="flex justify-between text-gray-600">
+                                <span>Paystack Fee</span>
+                                <span>₦{{ number_format($netCalculation['paystack_fee'], 2) }}</span>
+                            </div>
+                            <div class="flex justify-between text-gray-600">
+                                <span>Service Charge</span>
+                                <span>₦{{ number_format($netCalculation['service_charge'], 2) }}</span>
+                            </div>
+                            <div class="border-t border-gray-300 pt-2 flex justify-between font-semibold text-gray-700">
+                                <span>Total Fees</span>
+                                <span>₦{{ number_format($netCalculation['total_fees'], 2) }}</span>
+                            </div>
+                            <div class="border-t border-gray-300 pt-2 flex justify-between font-bold text-green-700">
+                                <span>Merchant Receives</span>
+                                <span>₦{{ number_format($netCalculation['net_amount_received'], 2) }}</span>
                             </div>
                         </div>
+                        <p class="text-xs text-gray-500 mt-3 italic">
+                            Customer pays only the invoice amount. All processing fees are deducted from the merchant's portion.
+                        </p>
                     </div>
 
                     <!-- Payer Information -->
