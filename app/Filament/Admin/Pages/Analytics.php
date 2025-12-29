@@ -15,9 +15,14 @@ class Analytics extends Page
 
     protected static ?string $navigationLabel = 'Analytics';
 
-    protected static ?string $navigationGroup = 'Reports';
+    protected static ?string $navigationGroup = 'System';
 
-    protected static ?int $navigationSort = 1;
+    protected static ?int $navigationSort = 3;
+
+    public static function canAccess(): bool
+    {
+        return true; // Allow all authenticated admin users
+    }
 
     public string $dateRange = '7';
 
