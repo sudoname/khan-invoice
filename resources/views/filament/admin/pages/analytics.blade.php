@@ -29,9 +29,25 @@
 
         <div class="bg-white rounded-lg shadow p-6">
             <div class="flex items-center justify-between">
-                <div>
+                <div class="flex-1">
                     <p class="text-sm font-medium text-gray-600">Total Events</p>
-                    <p class="text-3xl font-bold text-gray-900">{{ number_format($stats['total_events']) }}</p>
+                    <p class="text-3xl font-bold text-gray-900 mt-1">{{ number_format($stats['total_events']) }}</p>
+                    @if($stats['total_events_change'] != 0)
+                        <div class="flex items-center mt-2">
+                            @if($stats['total_events_change'] > 0)
+                                <svg class="w-4 h-4 text-green-600 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path>
+                                </svg>
+                                <span class="text-sm font-semibold text-green-600">{{ abs($stats['total_events_change']) }}%</span>
+                            @else
+                                <svg class="w-4 h-4 text-red-600 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+                                </svg>
+                                <span class="text-sm font-semibold text-red-600">{{ abs($stats['total_events_change']) }}%</span>
+                            @endif
+                            <span class="text-xs text-gray-500 ml-1">vs previous period</span>
+                        </div>
+                    @endif
                 </div>
                 <div class="p-3 bg-blue-100 rounded-full">
                     <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -43,9 +59,25 @@
 
         <div class="bg-white rounded-lg shadow p-6">
             <div class="flex items-center justify-between">
-                <div>
+                <div class="flex-1">
                     <p class="text-sm font-medium text-gray-600">Unique Sessions</p>
-                    <p class="text-3xl font-bold text-gray-900">{{ number_format($stats['unique_sessions']) }}</p>
+                    <p class="text-3xl font-bold text-gray-900 mt-1">{{ number_format($stats['unique_sessions']) }}</p>
+                    @if($stats['unique_sessions_change'] != 0)
+                        <div class="flex items-center mt-2">
+                            @if($stats['unique_sessions_change'] > 0)
+                                <svg class="w-4 h-4 text-green-600 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path>
+                                </svg>
+                                <span class="text-sm font-semibold text-green-600">{{ abs($stats['unique_sessions_change']) }}%</span>
+                            @else
+                                <svg class="w-4 h-4 text-red-600 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+                                </svg>
+                                <span class="text-sm font-semibold text-red-600">{{ abs($stats['unique_sessions_change']) }}%</span>
+                            @endif
+                            <span class="text-xs text-gray-500 ml-1">vs previous period</span>
+                        </div>
+                    @endif
                 </div>
                 <div class="p-3 bg-green-100 rounded-full">
                     <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -57,9 +89,25 @@
 
         <div class="bg-white rounded-lg shadow p-6">
             <div class="flex items-center justify-between">
-                <div>
+                <div class="flex-1">
                     <p class="text-sm font-medium text-gray-600">Registered Users</p>
-                    <p class="text-3xl font-bold text-gray-900">{{ number_format($stats['unique_users']) }}</p>
+                    <p class="text-3xl font-bold text-gray-900 mt-1">{{ number_format($stats['unique_users']) }}</p>
+                    @if($stats['unique_users_change'] != 0)
+                        <div class="flex items-center mt-2">
+                            @if($stats['unique_users_change'] > 0)
+                                <svg class="w-4 h-4 text-green-600 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path>
+                                </svg>
+                                <span class="text-sm font-semibold text-green-600">{{ abs($stats['unique_users_change']) }}%</span>
+                            @else
+                                <svg class="w-4 h-4 text-red-600 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+                                </svg>
+                                <span class="text-sm font-semibold text-red-600">{{ abs($stats['unique_users_change']) }}%</span>
+                            @endif
+                            <span class="text-xs text-gray-500 ml-1">vs previous period</span>
+                        </div>
+                    @endif
                 </div>
                 <div class="p-3 bg-purple-100 rounded-full">
                     <svg class="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -72,66 +120,72 @@
 
     <!-- Conversion Funnel -->
     <div class="bg-white rounded-lg shadow p-6 mb-6">
-        <h3 class="text-lg font-semibold text-gray-900 mb-4">FREE User Funnel</h3>
+        <h3 class="text-lg font-semibold text-gray-900 mb-6">FREE User Funnel</h3>
         @php $funnel = $this->getConversionFunnel(); @endphp
 
-        <div class="space-y-3">
-            <div class="flex items-center">
-                <div class="w-48 text-sm font-medium text-gray-700">Landing Page Views</div>
-                <div class="flex-1 bg-gray-200 rounded-full h-8 relative">
-                    <div class="bg-blue-600 h-8 rounded-full flex items-center justify-end px-3 text-white text-sm font-semibold" style="width: 100%">
-                        {{ number_format($funnel['landing_views']) }}
-                    </div>
+        <div class="space-y-4">
+            <div>
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-sm font-medium text-gray-700">Landing Page Views</span>
+                    <span class="text-sm font-bold text-gray-900">{{ number_format($funnel['landing_views']) }}</span>
+                </div>
+                <div class="w-full bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg h-12 flex items-center justify-center shadow-sm">
+                    <span class="text-white font-semibold text-sm">100% · {{ number_format($funnel['landing_views']) }} visitors</span>
                 </div>
             </div>
 
-            <div class="flex items-center">
-                <div class="w-48 text-sm font-medium text-gray-700">Generator Views</div>
-                <div class="flex-1 bg-gray-200 rounded-full h-8 relative">
-                    @php $pct = $funnel['landing_views'] > 0 ? ($funnel['generator_views'] / $funnel['landing_views']) * 100 : 0; @endphp
-                    <div class="bg-green-600 h-8 rounded-full flex items-center justify-end px-3 text-white text-sm font-semibold" style="width: {{ min($pct, 100) }}%">
-                        {{ number_format($funnel['generator_views']) }} ({{ number_format($pct, 1) }}%)
-                    </div>
+            <div>
+                @php $pct = $funnel['landing_views'] > 0 ? ($funnel['generator_views'] / $funnel['landing_views']) * 100 : 0; @endphp
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-sm font-medium text-gray-700">Generator Views</span>
+                    <span class="text-sm font-bold text-gray-900">{{ number_format($funnel['generator_views']) }} <span class="text-xs text-gray-500">({{ number_format($pct, 1) }}%)</span></span>
+                </div>
+                <div class="w-full bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-lg h-12 flex items-center justify-center shadow-sm">
+                    <span class="text-white font-semibold text-sm">{{ number_format($pct, 1) }}% · {{ number_format($funnel['generator_views']) }} started</span>
                 </div>
             </div>
 
-            <div class="flex items-center">
-                <div class="w-48 text-sm font-medium text-gray-700">Invoices Generated</div>
-                <div class="flex-1 bg-gray-200 rounded-full h-8 relative">
-                    @php $pct = $funnel['generator_views'] > 0 ? ($funnel['invoices_generated'] / $funnel['generator_views']) * 100 : 0; @endphp
-                    <div class="bg-purple-600 h-8 rounded-full flex items-center justify-end px-3 text-white text-sm font-semibold" style="width: {{ min($pct, 100) }}%">
-                        {{ number_format($funnel['invoices_generated']) }} ({{ number_format($pct, 1) }}%)
-                    </div>
+            <div>
+                @php $pct = $funnel['generator_views'] > 0 ? ($funnel['invoices_generated'] / $funnel['generator_views']) * 100 : 0; @endphp
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-sm font-medium text-gray-700">Invoices Generated</span>
+                    <span class="text-sm font-bold text-gray-900">{{ number_format($funnel['invoices_generated']) }} <span class="text-xs text-gray-500">({{ number_format($pct, 1) }}%)</span></span>
+                </div>
+                <div class="w-full bg-gradient-to-r from-purple-500 to-purple-600 rounded-lg h-12 flex items-center justify-center shadow-sm">
+                    <span class="text-white font-semibold text-sm">{{ number_format($pct, 1) }}% · {{ number_format($funnel['invoices_generated']) }} invoices</span>
                 </div>
             </div>
 
-            <div class="flex items-center">
-                <div class="w-48 text-sm font-medium text-gray-700">PDF Downloads</div>
-                <div class="flex-1 bg-gray-200 rounded-full h-8 relative">
-                    @php $pct = $funnel['invoices_generated'] > 0 ? ($funnel['pdf_downloads'] / $funnel['invoices_generated']) * 100 : 0; @endphp
-                    <div class="bg-yellow-600 h-8 rounded-full flex items-center justify-end px-3 text-white text-sm font-semibold" style="width: {{ min($pct, 100) }}%">
-                        {{ number_format($funnel['pdf_downloads']) }} ({{ number_format($pct, 1) }}%)
-                    </div>
+            <div>
+                @php $pct = $funnel['invoices_generated'] > 0 ? ($funnel['pdf_downloads'] / $funnel['invoices_generated']) * 100 : 0; @endphp
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-sm font-medium text-gray-700">PDF Downloads</span>
+                    <span class="text-sm font-bold text-gray-900">{{ number_format($funnel['pdf_downloads']) }} <span class="text-xs text-gray-500">({{ number_format($pct, 1) }}%)</span></span>
+                </div>
+                <div class="w-full bg-gradient-to-r from-amber-500 to-amber-600 rounded-lg h-12 flex items-center justify-center shadow-sm">
+                    <span class="text-white font-semibold text-sm">{{ number_format($pct, 1) }}% · {{ number_format($funnel['pdf_downloads']) }} downloads</span>
                 </div>
             </div>
 
-            <div class="flex items-center">
-                <div class="w-48 text-sm font-medium text-gray-700">Signup Prompts Shown</div>
-                <div class="flex-1 bg-gray-200 rounded-full h-8 relative">
-                    @php $pct = $funnel['invoices_generated'] > 0 ? ($funnel['signup_prompt_shown'] / $funnel['invoices_generated']) * 100 : 0; @endphp
-                    <div class="bg-indigo-600 h-8 rounded-full flex items-center justify-end px-3 text-white text-sm font-semibold" style="width: {{ min($pct, 100) }}%">
-                        {{ number_format($funnel['signup_prompt_shown']) }} ({{ number_format($pct, 1) }}%)
-                    </div>
+            <div>
+                @php $pct = $funnel['invoices_generated'] > 0 ? ($funnel['signup_prompt_shown'] / $funnel['invoices_generated']) * 100 : 0; @endphp
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-sm font-medium text-gray-700">Signup Prompts Shown</span>
+                    <span class="text-sm font-bold text-gray-900">{{ number_format($funnel['signup_prompt_shown']) }} <span class="text-xs text-gray-500">({{ number_format($pct, 1) }}%)</span></span>
+                </div>
+                <div class="w-full bg-gradient-to-r from-indigo-500 to-indigo-600 rounded-lg h-12 flex items-center justify-center shadow-sm">
+                    <span class="text-white font-semibold text-sm">{{ number_format($pct, 1) }}% · {{ number_format($funnel['signup_prompt_shown']) }} prompts</span>
                 </div>
             </div>
 
-            <div class="flex items-center">
-                <div class="w-48 text-sm font-medium text-gray-700">Signup Clicks</div>
-                <div class="flex-1 bg-gray-200 rounded-full h-8 relative">
-                    @php $pct = $funnel['signup_prompt_shown'] > 0 ? ($funnel['signup_prompt_clicked'] / $funnel['signup_prompt_shown']) * 100 : 0; @endphp
-                    <div class="bg-pink-600 h-8 rounded-full flex items-center justify-end px-3 text-white text-sm font-semibold" style="width: {{ min($pct, 100) }}%">
-                        {{ number_format($funnel['signup_prompt_clicked']) }} ({{ number_format($pct, 1) }}%)
-                    </div>
+            <div>
+                @php $pct = $funnel['signup_prompt_shown'] > 0 ? ($funnel['signup_prompt_clicked'] / $funnel['signup_prompt_shown']) * 100 : 0; @endphp
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-sm font-medium text-gray-700">Signup Clicks</span>
+                    <span class="text-sm font-bold text-gray-900">{{ number_format($funnel['signup_prompt_clicked']) }} <span class="text-xs text-gray-500">({{ number_format($pct, 1) }}%)</span></span>
+                </div>
+                <div class="w-full bg-gradient-to-r from-pink-500 to-pink-600 rounded-lg h-12 flex items-center justify-center shadow-sm">
+                    <span class="text-white font-semibold text-sm">{{ number_format($pct, 1) }}% · {{ number_format($funnel['signup_prompt_clicked']) }} clicked</span>
                 </div>
             </div>
         </div>

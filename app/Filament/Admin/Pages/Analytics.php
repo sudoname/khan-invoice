@@ -37,22 +37,42 @@ class Analytics extends Page
     public function getStats(): array
     {
         $days = (int) $this->dateRange;
-        $startDate = now()->subDays($days);
+        $currentStart = now()->subDays($days);
+        $previousStart = now()->subDays($days * 2);
+        $previousEnd = $currentStart;
 
-        $baseQuery = AnalyticsEvent::where('occurred_at', '>=', $startDate);
-
+        // Current period
+        $currentQuery = AnalyticsEvent::where('occurred_at', '>=', $currentStart);
         if ($this->eventFilter) {
-            $baseQuery = $baseQuery->where('name', $this->eventFilter);
+            $currentQuery = $currentQuery->where('name', $this->eventFilter);
         }
 
-        $totalEvents = (clone $baseQuery)->count();
-        $uniqueSessions = (clone $baseQuery)->whereNotNull('session_id')->distinct()->count('session_id');
-        $uniqueUsers = (clone $baseQuery)->whereNotNull('user_id')->distinct()->count('user_id');
+        $totalEvents = (clone $currentQuery)->count();
+        $uniqueSessions = (clone $currentQuery)->whereNotNull('session_id')->distinct()->count('session_id');
+        $uniqueUsers = (clone $currentQuery)->whereNotNull('user_id')->distinct()->count('user_id');
+
+        // Previous period
+        $previousQuery = AnalyticsEvent::whereBetween('occurred_at', [$previousStart, $previousEnd]);
+        if ($this->eventFilter) {
+            $previousQuery = $previousQuery->where('name', $this->eventFilter);
+        }
+
+        $prevTotalEvents = (clone $previousQuery)->count();
+        $prevUniqueSessions = (clone $previousQuery)->whereNotNull('session_id')->distinct()->count('session_id');
+        $prevUniqueUsers = (clone $previousQuery)->whereNotNull('user_id')->distinct()->count('user_id');
+
+        // Calculate percentage changes
+        $eventsChange = $prevTotalEvents > 0 ? (($totalEvents - $prevTotalEvents) / $prevTotalEvents) * 100 : 0;
+        $sessionsChange = $prevUniqueSessions > 0 ? (($uniqueSessions - $prevUniqueSessions) / $prevUniqueSessions) * 100 : 0;
+        $usersChange = $prevUniqueUsers > 0 ? (($uniqueUsers - $prevUniqueUsers) / $prevUniqueUsers) * 100 : 0;
 
         return [
             'total_events' => $totalEvents,
+            'total_events_change' => round($eventsChange, 1),
             'unique_sessions' => $uniqueSessions,
+            'unique_sessions_change' => round($sessionsChange, 1),
             'unique_users' => $uniqueUsers,
+            'unique_users_change' => round($usersChange, 1),
         ];
     }
 
