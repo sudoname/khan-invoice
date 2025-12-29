@@ -958,7 +958,7 @@
         // Copy Payment Message for WhatsApp (A2)
         function copyPaymentMessage() {
             const hasBankDetails = {{ ($invoice->from_bank_name && $invoice->from_account_number) ? 'true' : 'false' }};
-            const context = {{ session('invoice_just_created') ? "'post_generate'" : "'shared_view'" }};
+            const context = {!! session('invoice_just_created') ? "'post_generate'" : "'shared_view'" !!};
 
             // Build the message
             let message = "Hello,\n\n";
