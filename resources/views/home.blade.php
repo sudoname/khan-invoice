@@ -7,7 +7,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
                 <div>
                     <h1 class="text-4xl md:text-5xl font-bold mb-4">
-                        Create professional invoices in minutes — built for Nigerian businesses
+                        Create professional invoices in minutes — <span class="text-3xl md:text-4xl">built for Nigerian businesses</span>
                     </h1>
                     <p class="text-xl mb-6 text-purple-100">
                         Add VAT/WHT, share via WhatsApp, and get paid faster with Paystack

@@ -131,6 +131,9 @@ class PublicInvoiceController extends Controller
             ]);
         }
 
+        // Set session flag for post-invoice conversion prompt
+        session()->flash('invoice_just_created', true);
+
         // Redirect to the invoice show page (for web browsers)
         return redirect()->route('public-invoice.show', $publicInvoice->public_id);
     }

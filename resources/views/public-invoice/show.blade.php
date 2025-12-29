@@ -58,6 +58,57 @@
 
     <!-- Preview and Actions -->
     <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Post-Invoice Conversion Banner (session-based) -->
+        @if(session('invoice_just_created'))
+        <div id="conversionBanner" class="bg-gradient-to-r from-green-50 to-blue-50 border-2 border-green-400 rounded-xl p-4 sm:p-6 mb-6 shadow-lg" style="display: none;">
+            <div class="flex items-start justify-between">
+                <div class="flex-1">
+                    <div class="flex items-center mb-2">
+                        <svg class="w-6 h-6 text-green-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <h3 class="text-lg sm:text-xl font-bold text-gray-900">Invoice created successfully!</h3>
+                    </div>
+                    <p class="text-sm sm:text-base text-gray-700 mb-4">
+                        Create a free account to <strong>save invoices, reuse customers, and track payments</strong>.
+                    </p>
+                    <div class="flex flex-col sm:flex-row gap-3">
+                        <a href="{{ route('filament.app.auth.register') }}"
+                            class="inline-flex items-center justify-center bg-gradient-to-r from-purple-600 to-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:from-purple-700 hover:to-blue-700 transition shadow-md text-sm sm:text-base">
+                            Create Free Account
+                        </a>
+                        <button onclick="dismissConversionBanner()"
+                            class="inline-flex items-center justify-center bg-white text-gray-700 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition border-2 border-gray-300 text-sm sm:text-base">
+                            Not now
+                        </button>
+                    </div>
+                </div>
+                <button onclick="dismissConversionBanner()" class="ml-4 text-gray-400 hover:text-gray-600 flex-shrink-0">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <script>
+            // Show conversion banner if not dismissed in this session
+            if (!sessionStorage.getItem('conversionBannerDismissed')) {
+                document.getElementById('conversionBanner').style.display = 'block';
+
+                // Log event
+                console.log('[Event] post_invoice_signup_prompt_shown');
+
+                // Optional: Send to analytics endpoint if you have one
+                // fetch('/api/events/log', { method: 'POST', body: JSON.stringify({ event: 'post_invoice_signup_prompt_shown' }) });
+            }
+
+            function dismissConversionBanner() {
+                sessionStorage.setItem('conversionBannerDismissed', 'true');
+                document.getElementById('conversionBanner').style.display = 'none';
+            }
+        </script>
+        @endif
+
         <!-- Action Buttons -->
         <div class="action-buttons grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 mb-6">
             <!-- Print -->
@@ -80,12 +131,12 @@
                 <span class="hidden sm:inline">Download</span>
             </a>
 
-            <!-- Share -->
-            <button onclick="shareWhatsApp()" class="bg-green-600 text-white px-3 py-3 rounded-lg font-semibold hover:bg-green-700 transition flex items-center justify-center gap-2 text-xs sm:text-sm">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path>
+            <!-- Share via WhatsApp -->
+            <button onclick="openWhatsAppTemplateModal()" class="bg-green-600 text-white px-3 py-3 rounded-lg font-semibold hover:bg-green-700 transition flex items-center justify-center gap-2 text-xs sm:text-sm">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
                 </svg>
-                <span class="hidden sm:inline">Share</span>
+                <span class="hidden sm:inline">WhatsApp</span>
             </button>
 
             <!-- Pay Now -->
@@ -297,6 +348,82 @@
         </div>
     </div>
 
+    <!-- WhatsApp Template Modal -->
+    <div id="whatsappModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl max-w-lg w-full p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-2xl font-bold text-gray-900 flex items-center">
+                    <svg class="w-6 h-6 text-green-600 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+                    </svg>
+                    Share via WhatsApp
+                </h3>
+                <button onclick="closeWhatsAppModal()" class="text-gray-500 hover:text-gray-700">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <p class="text-sm text-gray-600 mb-4">Choose a message template or customize your own:</p>
+
+            <!-- Message Templates -->
+            <div class="space-y-3 mb-4">
+                <div class="border-2 border-gray-200 rounded-lg p-3 hover:border-purple-500 cursor-pointer transition" onclick="selectTemplate(1)">
+                    <label class="flex items-start cursor-pointer">
+                        <input type="radio" name="template" value="1" class="mt-1 mr-3">
+                        <div>
+                            <p class="font-semibold text-gray-900 text-sm">Professional</p>
+                            <p class="text-sm text-gray-600" id="template1">Hi, please find my invoice attached. Thank you.</p>
+                        </div>
+                    </label>
+                </div>
+                <div class="border-2 border-gray-200 rounded-lg p-3 hover:border-purple-500 cursor-pointer transition" onclick="selectTemplate(2)">
+                    <label class="flex items-start cursor-pointer">
+                        <input type="radio" name="template" value="2" class="mt-1 mr-3">
+                        <div>
+                            <p class="font-semibold text-gray-900 text-sm">Formal</p>
+                            <p class="text-sm text-gray-600" id="template2">Hello, kindly see invoice for your records.</p>
+                        </div>
+                    </label>
+                </div>
+                <div class="border-2 border-gray-200 rounded-lg p-3 hover:border-purple-500 cursor-pointer transition" onclick="selectTemplate(3)">
+                    <label class="flex items-start cursor-pointer">
+                        <input type="radio" name="template" value="3" class="mt-1 mr-3">
+                        <div>
+                            <p class="font-semibold text-gray-900 text-sm">Friendly</p>
+                            <p class="text-sm text-gray-600" id="template3">Good day, this is the invoice for the service provided.</p>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Editable Message -->
+            <div class="mb-4">
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Edit your message:</label>
+                <textarea id="whatsappMessage" rows="4"
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    placeholder="Type your message here..."></textarea>
+                <p class="text-xs text-gray-500 mt-1">The invoice link will be automatically added at the end</p>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex gap-3">
+                <button onclick="sendWhatsApp()"
+                    class="flex-1 bg-green-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-700 transition flex items-center justify-center gap-2">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+                    </svg>
+                    Send via WhatsApp
+                </button>
+                <button onclick="closeWhatsAppModal()"
+                    class="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300 transition">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Payment Modal -->
     <div id="paymentModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
         <div class="bg-white rounded-xl max-w-md w-full p-6">
@@ -385,49 +512,75 @@
             return true;
         }
 
-        // WhatsApp Share Function - Mobile friendly
-        function shareWhatsApp() {
-            const url = "{{ route('public-invoice.show', $invoice->public_id) }}";
-            const invoiceText = `Invoice {{ $invoice->invoice_number }} - Amount: ₦{{ number_format($invoice->total_amount, 2) }}`;
-            const message = `*INVOICE: {{ $invoice->invoice_number }}*\n\n` +
-                           `From: {{ $invoice->from_name }}\n` +
-                           `To: {{ $invoice->to_name }}\n` +
-                           `Amount: ₦{{ number_format($invoice->total_amount, 2) }}\n` +
-                           `Due Date: {{ $invoice->due_date->format('M d, Y') }}\n\n` +
-                           `View and pay invoice: ${url}`;
+        // WhatsApp Template Selection - Nigerian market optimized
+        const whatsappTemplates = {
+            1: "Hi, please find my invoice attached. Thank you.",
+            2: "Hello, kindly see invoice for your records.",
+            3: "Good day, this is the invoice for the service provided."
+        };
 
-            // Try Web Share API first (works best in mobile apps/browsers)
-            if (navigator.share) {
-                navigator.share({
-                    title: invoiceText,
-                    text: message
-                }).then(() => {
-                    console.log('Share successful');
-                }).catch((error) => {
-                    console.log('Share failed or cancelled:', error);
-                    // Only fallback if not cancelled
-                    if (error.name !== 'AbortError') {
-                        fallbackToWhatsApp(message);
-                    }
-                });
-            } else {
-                // Fallback for browsers without Web Share API
-                fallbackToWhatsApp(message);
-            }
+        function openWhatsAppTemplateModal() {
+            document.getElementById('whatsappModal').classList.remove('hidden');
+            // Pre-select first template
+            document.querySelector('input[name="template"][value="1"]').checked = true;
+            selectTemplate(1);
         }
 
-        function fallbackToWhatsApp(message) {
-            // Use WhatsApp Web URL
-            const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
+        function closeWhatsAppModal() {
+            document.getElementById('whatsappModal').classList.add('hidden');
+        }
 
-            // Try to open in new window/tab
+        function selectTemplate(templateNum) {
+            const message = whatsappTemplates[templateNum];
+            document.getElementById('whatsappMessage').value = message;
+            document.querySelector(`input[name="template"][value="${templateNum}"]`).checked = true;
+        }
+
+        function sendWhatsApp() {
+            const url = "{{ route('public-invoice.show', $invoice->public_id) }}";
+            const customMessage = document.getElementById('whatsappMessage').value.trim();
+
+            if (!customMessage) {
+                alert('Please enter a message to send');
+                return;
+            }
+
+            // Build invoice details
+            const invoiceDetails = `*INVOICE: {{ $invoice->invoice_number }}*\n` +
+                                  `Amount: ₦{{ number_format($invoice->total_amount, 2) }}\n` +
+                                  `Due: {{ $invoice->due_date->format('M d, Y') }}\n\n`;
+
+            // Combine custom message with invoice details and link
+            const fullMessage = `${customMessage}\n\n${invoiceDetails}View invoice: ${url}`;
+
+            // Generate WhatsApp link (wa.me format - works on mobile and desktop)
+            const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(fullMessage)}`;
+
+            console.log('[WhatsApp] Generated link:', whatsappUrl);
+
+            // Try to open WhatsApp
             const newWindow = window.open(whatsappUrl, '_blank');
 
-            // If popup blocked, provide alternative
+            // Handle popup blocking gracefully
             if (!newWindow || newWindow.closed || typeof newWindow.closed === 'undefined') {
-                alert('Please allow popups to share via WhatsApp, or copy the link manually.');
+                // Fallback: Try direct navigation
+                if (confirm('Unable to open WhatsApp in a new window. Open in this tab?')) {
+                    window.location.href = whatsappUrl;
+                } else {
+                    alert('Please allow popups to share via WhatsApp, or copy the invoice link manually.');
+                }
+            } else {
+                // Success - close modal
+                closeWhatsAppModal();
             }
         }
+
+        // Close modal when clicking outside
+        document.getElementById('whatsappModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeWhatsAppModal();
+            }
+        });
 
         // Payment Modal Functions
         function openPaymentModal() {
