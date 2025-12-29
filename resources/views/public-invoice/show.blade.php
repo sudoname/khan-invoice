@@ -324,6 +324,138 @@
             </div>
         </div>
 
+        <!-- Prominent Payment Section (A1) -->
+        <div class="mt-8 bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-400 rounded-xl p-6 sm:p-8 shadow-lg">
+            <div class="text-center mb-6">
+                <div class="inline-flex items-center justify-center bg-green-600 text-white px-4 py-2 rounded-full text-sm font-bold mb-3">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
+                    </svg>
+                    PAYMENT INFORMATION
+                </div>
+                <div class="text-4xl sm:text-5xl font-bold text-gray-900 mb-2">₦{{ number_format($invoice->total_amount, 2) }}</div>
+                <p class="text-sm text-gray-600">
+                    Due Date: <span class="font-semibold">{{ $invoice->due_date->format('M d, Y') }}</span>
+                    @if($invoice->status === 'overdue')
+                        <span class="text-red-600 font-bold ml-2">⚠️ OVERDUE</span>
+                    @elseif($invoice->status === 'paid')
+                        <span class="text-green-600 font-bold ml-2">✓ PAID</span>
+                    @endif
+                </p>
+            </div>
+
+            <!-- Payment Options -->
+            <div class="space-y-4">
+                <!-- Paystack Option -->
+                @if($invoice->paystack_subaccount_code)
+                <div class="bg-white rounded-lg p-4 border-2 border-green-500">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h4 class="font-bold text-gray-900 mb-1">Pay Online with Card</h4>
+                            <p class="text-sm text-gray-600">Fast & secure payment via Paystack</p>
+                        </div>
+                        <button onclick="openPaymentModal(); trackAnalytics('invoice_pay_now_clicked', {has_bank_details: {{ $invoice->from_bank_name ? 'true' : 'false' }}});"
+                            class="bg-green-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-700 transition whitespace-nowrap">
+                            Pay Now
+                        </button>
+                    </div>
+                </div>
+                @endif
+
+                <!-- Bank Transfer Option -->
+                @if($invoice->from_bank_name && $invoice->from_account_number)
+                <div class="bg-white rounded-lg p-4 sm:p-6 border border-gray-300">
+                    <h4 class="font-bold text-gray-900 mb-4 text-center sm:text-left">Bank Transfer Details</h4>
+                    <div class="space-y-3">
+                        <!-- Account Number -->
+                        <div class="flex items-center justify-between bg-gray-50 p-3 rounded-lg">
+                            <div class="flex-1">
+                                <p class="text-xs text-gray-600 mb-1">Account Number</p>
+                                <p class="font-bold text-gray-900" id="account-number">{{ $invoice->from_account_number }}</p>
+                            </div>
+                            <button onclick="copyToClipboard('{{ $invoice->from_account_number }}', 'account_number'); trackAnalytics('invoice_bank_details_copied', {field: 'account_number'});"
+                                class="ml-3 bg-purple-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-purple-700 transition flex items-center gap-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                                </svg>
+                                <span class="hidden sm:inline">Copy</span>
+                            </button>
+                        </div>
+
+                        <!-- Bank Name -->
+                        <div class="flex items-center justify-between bg-gray-50 p-3 rounded-lg">
+                            <div class="flex-1">
+                                <p class="text-xs text-gray-600 mb-1">Bank Name</p>
+                                <p class="font-bold text-gray-900">{{ $invoice->from_bank_name }}</p>
+                            </div>
+                        </div>
+
+                        <!-- Account Name -->
+                        @if($invoice->from_account_name)
+                        <div class="flex items-center justify-between bg-gray-50 p-3 rounded-lg">
+                            <div class="flex-1">
+                                <p class="text-xs text-gray-600 mb-1">Account Name</p>
+                                <p class="font-bold text-gray-900">{{ $invoice->from_account_name }}</p>
+                            </div>
+                        </div>
+                        @endif
+
+                        <!-- Amount to Pay -->
+                        <div class="flex items-center justify-between bg-purple-50 p-3 rounded-lg border-2 border-purple-300">
+                            <div class="flex-1">
+                                <p class="text-xs text-gray-600 mb-1">Amount to Transfer</p>
+                                <p class="text-2xl font-bold text-purple-600">₦{{ number_format($invoice->total_amount, 2) }}</p>
+                            </div>
+                            <button onclick="copyToClipboard('{{ $invoice->total_amount }}', 'amount'); trackAnalytics('invoice_bank_details_copied', {field: 'amount'});"
+                                class="ml-3 bg-purple-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-purple-700 transition flex items-center gap-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                                </svg>
+                                <span class="hidden sm:inline">Copy</span>
+                            </button>
+                        </div>
+
+                        <!-- Reference/Narration -->
+                        <div class="flex items-center justify-between bg-gray-50 p-3 rounded-lg">
+                            <div class="flex-1">
+                                <p class="text-xs text-gray-600 mb-1">Payment Reference</p>
+                                <p class="font-bold text-gray-900">{{ $invoice->invoice_number }}</p>
+                            </div>
+                            <button onclick="copyToClipboard('{{ $invoice->invoice_number }}', 'reference'); trackAnalytics('invoice_bank_details_copied', {field: 'narration'});"
+                                class="ml-3 bg-purple-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-purple-700 transition flex items-center gap-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                                </svg>
+                                <span class="hidden sm:inline">Copy</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <p class="text-xs text-gray-500 text-center mt-4">💡 Use the reference number when making payment</p>
+                </div>
+                @endif
+
+                <!-- If no payment methods -->
+                @if(!$invoice->paystack_subaccount_code && (!$invoice->from_bank_name || !$invoice->from_account_number))
+                <div class="bg-white rounded-lg p-6 border border-gray-300 text-center">
+                    <p class="text-gray-600">Payment details will be shared separately by the merchant.</p>
+                </div>
+                @endif
+            </div>
+
+            <!-- Copy Payment Message Button (A2) -->
+            <div class="mt-4">
+                <button onclick="copyPaymentMessage()"
+                    class="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-4 rounded-lg font-semibold hover:from-blue-700 hover:to-purple-700 transition flex items-center justify-center gap-2 shadow-lg">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path>
+                    </svg>
+                    Copy Payment Message for WhatsApp
+                </button>
+                <p class="text-xs text-gray-600 text-center mt-2">💬 Ready-to-send payment reminder with all details</p>
+            </div>
+        </div>
+
         <!-- Enhanced CTA Section -->
         <div class="mt-8 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-xl p-8 sm:p-10 shadow-2xl border-2 border-purple-400">
             <div class="max-w-3xl mx-auto text-center">
@@ -723,5 +855,156 @@
                 closePaymentModal();
             }
         });
+
+        // Copy to Clipboard Helper (A1)
+        function copyToClipboard(text, label) {
+            if (navigator.clipboard && window.isSecureContext) {
+                // Use Clipboard API if available
+                navigator.clipboard.writeText(text).then(function() {
+                    showCopyFeedback(label);
+                }).catch(function(err) {
+                    fallbackCopyToClipboard(text, label);
+                });
+            } else {
+                // Fallback for older browsers or non-HTTPS
+                fallbackCopyToClipboard(text, label);
+            }
+        }
+
+        function fallbackCopyToClipboard(text, label) {
+            const textArea = document.createElement('textarea');
+            textArea.value = text;
+            textArea.style.position = 'fixed';
+            textArea.style.top = '0';
+            textArea.style.left = '0';
+            textArea.style.width = '2em';
+            textArea.style.height = '2em';
+            textArea.style.padding = '0';
+            textArea.style.border = 'none';
+            textArea.style.outline = 'none';
+            textArea.style.boxShadow = 'none';
+            textArea.style.background = 'transparent';
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+
+            try {
+                document.execCommand('copy');
+                showCopyFeedback(label);
+            } catch (err) {
+                alert('Failed to copy: ' + text);
+            }
+
+            document.body.removeChild(textArea);
+        }
+
+        function showCopyFeedback(label) {
+            // Show temporary feedback
+            const feedback = document.createElement('div');
+            feedback.className = 'fixed top-4 left-1/2 transform -translate-x-1/2 bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg z-50 flex items-center gap-2';
+            feedback.innerHTML = `
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+                <span>${label.replace('_', ' ').toUpperCase()} copied!</span>
+            `;
+            document.body.appendChild(feedback);
+
+            setTimeout(function() {
+                feedback.remove();
+            }, 2000);
+        }
+
+        // Analytics Tracking Helper
+        function trackAnalytics(eventName, properties) {
+            if (window.KinvoiceAnalytics) {
+                window.KinvoiceAnalytics.track(eventName, properties);
+            }
+        }
+
+        // Copy Payment Message for WhatsApp (A2)
+        function copyPaymentMessage() {
+            const hasBankDetails = {{ ($invoice->from_bank_name && $invoice->from_account_number) ? 'true' : 'false' }};
+            const context = {{ session('invoice_just_created') ? "'post_generate'" : "'shared_view'" }};
+
+            // Build the message
+            let message = "Hello,\n\n";
+            message += "Please find payment details for Invoice {{ $invoice->invoice_number }}:\n\n";
+            message += "*Amount Due:* ₦{{ number_format($invoice->total_amount, 2) }}\n";
+            message += "*Due Date:* {{ $invoice->due_date->format('M d, Y') }}\n";
+            message += "*Invoice Link:* {{ route('public-invoice.show', $invoice->public_id) }}\n\n";
+
+            // Add bank details if available
+            @if($invoice->from_bank_name && $invoice->from_account_number)
+            message += "*Bank Transfer Details:*\n";
+            message += "Bank: {{ $invoice->from_bank_name }}\n";
+            message += "Account Number: {{ $invoice->from_account_number }}\n";
+            @if($invoice->from_account_name)
+            message += "Account Name: {{ $invoice->from_account_name }}\n";
+            @endif
+            message += "Amount: ₦{{ number_format($invoice->total_amount, 2) }}\n";
+            message += "Reference: {{ $invoice->invoice_number }}\n\n";
+            @endif
+
+            message += "Thank you!";
+
+            // Copy to clipboard
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(message).then(function() {
+                    showCopySuccessMessage();
+                    trackAnalytics('invoice_message_copied', {
+                        context: context,
+                        has_bank_details: hasBankDetails
+                    });
+                }).catch(function(err) {
+                    fallbackCopyMessage(message, context, hasBankDetails);
+                });
+            } else {
+                fallbackCopyMessage(message, context, hasBankDetails);
+            }
+        }
+
+        function fallbackCopyMessage(message, context, hasBankDetails) {
+            const textArea = document.createElement('textarea');
+            textArea.value = message;
+            textArea.style.position = 'fixed';
+            textArea.style.top = '0';
+            textArea.style.left = '0';
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+
+            try {
+                document.execCommand('copy');
+                showCopySuccessMessage();
+                trackAnalytics('invoice_message_copied', {
+                    context: context,
+                    has_bank_details: hasBankDetails
+                });
+            } catch (err) {
+                alert('Failed to copy message. Please try again.');
+            }
+
+            document.body.removeChild(textArea);
+        }
+
+        function showCopySuccessMessage() {
+            const feedback = document.createElement('div');
+            feedback.className = 'fixed top-4 left-1/2 transform -translate-x-1/2 bg-green-600 text-white px-6 py-4 rounded-lg shadow-2xl z-50 flex items-center gap-3 max-w-sm';
+            feedback.innerHTML = `
+                <svg class="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+                <div>
+                    <p class="font-bold">Message Copied!</p>
+                    <p class="text-sm text-green-100">Ready to paste in WhatsApp</p>
+                </div>
+            `;
+            document.body.appendChild(feedback);
+
+            setTimeout(function() {
+                feedback.remove();
+            }, 3000);
+        }
     </script>
 </x-layout>

@@ -118,10 +118,12 @@
                 <h2 class="text-2xl font-bold text-gray-900 mb-4">To (Your Customer)</h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Customer Name *</label>
-                        <input type="text" name="to_name" required
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Customer Name * <span id="recent-customers-label" class="text-xs text-gray-500"></span></label>
+                        <input type="text" name="to_name" id="to_name" required list="recentCustomers"
+                            onchange="saveRecentCustomer(this.value)"
                             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                             placeholder="Customer Name" value="{{ old('to_name') }}">
+                        <datalist id="recentCustomers"></datalist>
                     </div>
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-2">Email</label>
@@ -149,10 +151,16 @@
                 <h2 class="text-2xl font-bold text-gray-900 mb-4">Invoice Details</h2>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Invoice Number</label>
-                        <input type="text" name="invoice_number"
+                        <label class="block text-sm font-semibold text-gray-700 mb-2 flex items-center justify-between">
+                            <span>Invoice Number</span>
+                            <button type="button" onclick="autoSuggestInvoiceNumber()" class="text-xs text-purple-600 hover:text-purple-800 font-medium">
+                                💡 Auto-suggest
+                            </button>
+                        </label>
+                        <input type="text" name="invoice_number" id="invoice_number"
                             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                            placeholder="Auto-generated" value="{{ old('invoice_number') }}">
+                            placeholder="Click 'Auto-suggest' or type your own" value="{{ old('invoice_number') }}">
+                        <p class="text-xs text-gray-500 mt-1" id="invoice-preview"></p>
                     </div>
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-2">Issue Date *</label>
@@ -162,7 +170,13 @@
                     </div>
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-2">Due Date *</label>
-                        <input type="date" name="due_date" required
+                        <div class="flex gap-2 mb-2 flex-wrap">
+                            <button type="button" onclick="setDueDate(0)" class="text-xs px-3 py-1 bg-gray-100 hover:bg-purple-100 rounded-full">Today</button>
+                            <button type="button" onclick="setDueDate(7)" class="text-xs px-3 py-1 bg-gray-100 hover:bg-purple-100 rounded-full">7 days</button>
+                            <button type="button" onclick="setDueDate(14)" class="text-xs px-3 py-1 bg-gray-100 hover:bg-purple-100 rounded-full">14 days</button>
+                            <button type="button" onclick="setDueDate(30)" class="text-xs px-3 py-1 bg-purple-100 hover:bg-purple-200 rounded-full font-medium">30 days</button>
+                        </div>
+                        <input type="date" name="due_date" id="due_date" required
                             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                             value="{{ old('due_date', now()->addDays(30)->format('Y-m-d')) }}">
                     </div>
@@ -237,7 +251,7 @@
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-2 flex items-center">
                             VAT (%)
-                            <span class="ml-2 text-gray-500 cursor-help" title="Value Added Tax - Standard rate in Nigeria is 7.5%. This will be ADDED to your subtotal.">
+                            <span class="ml-2 text-gray-500 cursor-help" onclick="if(window.KinvoiceAnalytics){window.KinvoiceAnalytics.track('tax_tooltip_opened',{type:'vat'})}" title="Value Added Tax - Standard rate in Nigeria is 7.5%. This will be ADDED to your subtotal. Don't need tax? Toggle 'Simple Invoice' above.">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                 </svg>
@@ -251,7 +265,7 @@
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-2 flex items-center">
                             WHT (%)
-                            <span class="ml-2 text-gray-500 cursor-help" title="Withholding Tax - Tax withheld at source by your customer. This will be SUBTRACTED from your total.">
+                            <span class="ml-2 text-gray-500 cursor-help" onclick="if(window.KinvoiceAnalytics){window.KinvoiceAnalytics.track('tax_tooltip_opened',{type:'wht'})}" title="Withholding Tax - Your customer may deduct this before paying (usually 5% or 10%). This will be SUBTRACTED from your total. Don't need tax? Toggle 'Simple Invoice' above.">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                 </svg>
@@ -408,6 +422,106 @@
                 window.KinvoiceAnalytics.track('invoice_generator_viewed');
             }
         });
+
+        // Invoice Number Auto-Suggestion (A3)
+        function autoSuggestInvoiceNumber() {
+            const input = document.getElementById('invoice_number');
+            const preview = document.getElementById('invoice-preview');
+
+            // Check if user is logged in
+            const isLoggedIn = {{ auth()->check() ? 'true' : 'false' }};
+            const mode = isLoggedIn ? 'logged_in' : 'anonymous';
+
+            // Generate invoice number
+            const year = new Date().getFullYear();
+            const sequence = getNextInvoiceSequence();
+            const invoiceNumber = `INV-${year}-${String(sequence).padStart(4, '0')}`;
+
+            // Set the input value
+            input.value = invoiceNumber;
+
+            // Show preview
+            preview.textContent = `✓ Invoice number set to: ${invoiceNumber}`;
+            preview.classList.add('text-green-600');
+
+            // Track analytics
+            if (window.KinvoiceAnalytics) {
+                window.KinvoiceAnalytics.track('invoice_number_autofilled', { mode: mode });
+            }
+
+            // Clear preview after 3 seconds
+            setTimeout(function() {
+                preview.textContent = '';
+            }, 3000);
+        }
+
+        function getNextInvoiceSequence() {
+            const storageKey = 'kinvoice_sequence';
+
+            try {
+                // Get current sequence from localStorage
+                const currentSequence = parseInt(localStorage.getItem(storageKey) || '0');
+
+                // Increment for next invoice
+                const nextSequence = currentSequence + 1;
+
+                // Save updated sequence
+                localStorage.setItem(storageKey, nextSequence.toString());
+
+                return nextSequence;
+            } catch (e) {
+                // If localStorage is not available, use a timestamp-based fallback
+                return Math.floor(Date.now() / 1000) % 10000;
+            }
+        }
+
+        // Auto-suggest on page load if field is empty
+        window.addEventListener('DOMContentLoaded', function() {
+            const input = document.getElementById('invoice_number');
+            if (!input.value || input.value === '') {
+                autoSuggestInvoiceNumber();
+            }
+            loadRecentCustomers();
+        });
+
+        // Recent Customers & Items (B1)
+        function loadRecentCustomers() {
+            try {
+                const recent = JSON.parse(localStorage.getItem('kinvoice_recent_customers') || '[]');
+                const datalist = document.getElementById('recentCustomers');
+                const label = document.getElementById('recent-customers-label');
+
+                if (recent.length > 0) {
+                    label.textContent = `(${recent.length} recent)`;
+                    datalist.innerHTML = recent.map(c => `<option value="${c}">`).join('');
+                }
+            } catch (e) {}
+        }
+
+        function saveRecentCustomer(name) {
+            if (!name || name.length < 2) return;
+            try {
+                let recent = JSON.parse(localStorage.getItem('kinvoice_recent_customers') || '[]');
+                recent = recent.filter(c => c !== name);
+                recent.unshift(name);
+                recent = recent.slice(0, 5);
+                localStorage.setItem('kinvoice_recent_customers', JSON.stringify(recent));
+                if (window.KinvoiceAnalytics) {
+                    window.KinvoiceAnalytics.track('recent_customer_selected');
+                }
+            } catch (e) {}
+        }
+
+        // Due Date Chips (B2)
+        function setDueDate(days) {
+            const input = document.getElementById('due_date');
+            const date = new Date();
+            date.setDate(date.getDate() + days);
+            input.value = date.toISOString().split('T')[0];
+            if (window.KinvoiceAnalytics) {
+                window.KinvoiceAnalytics.track('invoice_due_date_chip_selected', { days });
+            }
+        }
     </script>
 
     <style>
