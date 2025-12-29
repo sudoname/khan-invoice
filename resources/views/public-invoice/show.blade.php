@@ -758,10 +758,12 @@
         }
 
         // Close modal when clicking outside
-        document.getElementById('whatsappModal').addEventListener('click', function(e) {
-            if (e.target === this) {
-                closeWhatsAppModal();
-            }
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('whatsappModal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeWhatsAppModal();
+                }
+            });
         });
 
         // Payment Modal Functions
@@ -782,7 +784,8 @@
         }
 
         // Handle Payment Form Submission
-        document.getElementById('paymentForm').addEventListener('submit', function(e) {
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('paymentForm').addEventListener('submit', function(e) {
             e.preventDefault();
 
             const payerName = document.getElementById('payer_name').value;
@@ -847,13 +850,14 @@
             });
 
             handler.openIframe();
-        });
+            });
 
-        // Close modal when clicking outside
-        document.getElementById('paymentModal').addEventListener('click', function(e) {
-            if (e.target === this) {
-                closePaymentModal();
-            }
+            // Close modal when clicking outside
+            document.getElementById('paymentModal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closePaymentModal();
+                }
+            });
         });
 
         // Copy to Clipboard Helper (A1)
