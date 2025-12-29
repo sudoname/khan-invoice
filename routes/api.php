@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\V1\AnalyticsEventController;
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\BusinessProfileController;
 use App\Http\Controllers\Api\V1\DashboardController;
@@ -34,6 +35,10 @@ Route::prefix('v1')->group(function () {
 
     // Contact form (public - no auth required)
     Route::post('/contact', [ContactController::class, 'store']);
+
+    // Analytics events (public - rate limited to 60 req/min per IP)
+    Route::post('/analytics/events', [AnalyticsEventController::class, 'store'])
+        ->middleware('throttle:60,1');
 
     // Protected auth routes
     Route::middleware('auth:sanctum')->group(function () {

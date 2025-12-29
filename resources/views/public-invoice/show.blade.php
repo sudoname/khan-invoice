@@ -74,6 +74,7 @@
                     </p>
                     <div class="flex flex-col sm:flex-row gap-3">
                         <a href="{{ route('filament.app.auth.register') }}"
+                            onclick="if (window.KinvoiceAnalytics) { window.KinvoiceAnalytics.track('post_invoice_signup_prompt_clicked'); }"
                             class="inline-flex items-center justify-center bg-gradient-to-r from-purple-600 to-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:from-purple-700 hover:to-blue-700 transition shadow-md text-sm sm:text-base">
                             Create Free Account
                         </a>
@@ -95,11 +96,10 @@
             if (!sessionStorage.getItem('conversionBannerDismissed')) {
                 document.getElementById('conversionBanner').style.display = 'block';
 
-                // Log event
-                console.log('[Event] post_invoice_signup_prompt_shown');
-
-                // Optional: Send to analytics endpoint if you have one
-                // fetch('/api/events/log', { method: 'POST', body: JSON.stringify({ event: 'post_invoice_signup_prompt_shown' }) });
+                // Track analytics event
+                if (window.KinvoiceAnalytics) {
+                    window.KinvoiceAnalytics.track('post_invoice_signup_prompt_shown');
+                }
             }
 
             function dismissConversionBanner() {
@@ -530,6 +530,13 @@
 
         // Handle PDF download
         function handleDownload(event, url) {
+            // Track analytics event
+            if (window.KinvoiceAnalytics) {
+                window.KinvoiceAnalytics.track('invoice_pdf_downloaded', {
+                    invoice_number: '{{ $invoice->invoice_number }}'
+                });
+            }
+
             // For mobile devices, just let the default behavior work
             // The download attribute and target="_blank" should handle it
             console.log('Downloading PDF from:', url);
@@ -592,6 +599,14 @@
             const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(fullMessage)}`;
 
             console.log('[WhatsApp] Generated link:', whatsappUrl);
+
+            // Track analytics event
+            if (window.KinvoiceAnalytics) {
+                window.KinvoiceAnalytics.track('invoice_shared', {
+                    invoice_number: '{{ $invoice->invoice_number }}',
+                    platform: 'whatsapp'
+                });
+            }
 
             // Try to open WhatsApp
             const newWindow = window.open(whatsappUrl, '_blank');

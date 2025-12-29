@@ -123,5 +123,8 @@
             </div>
         </div>
     </footer>
+
+    <!-- Analytics -->
+    <script src="{{ asset('js/analytics.js') }}"></script>
 </body>
 </html>

@@ -368,8 +368,10 @@
                 // Save to localStorage
                 localStorage.setItem('simpleInvoiceMode', 'true');
 
-                // Fire analytics event
-                console.log('[Event] invoice_simple_mode_toggled', { enabled: true, page: 'invoice_generator' });
+                // Track analytics event
+                if (window.KinvoiceAnalytics) {
+                    window.KinvoiceAnalytics.track('invoice_simple_mode_toggled', { enabled: true });
+                }
             } else {
                 // Disable simple mode
                 hiddenInput.value = '0';
@@ -386,8 +388,10 @@
                 // Save to localStorage
                 localStorage.setItem('simpleInvoiceMode', 'false');
 
-                // Fire analytics event
-                console.log('[Event] invoice_simple_mode_toggled', { enabled: false, page: 'invoice_generator' });
+                // Track analytics event
+                if (window.KinvoiceAnalytics) {
+                    window.KinvoiceAnalytics.track('invoice_simple_mode_toggled', { enabled: false });
+                }
             }
         }
 
@@ -397,6 +401,11 @@
             if (savedMode === 'true') {
                 document.getElementById('simpleModeToggle').checked = true;
                 toggleSimpleMode();
+            }
+
+            // Track invoice generator page view
+            if (window.KinvoiceAnalytics) {
+                window.KinvoiceAnalytics.track('invoice_generator_viewed');
             }
         });
     </script>

@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AnalyticsEvent;
 use App\Models\PublicInvoice;
 use App\Services\PaystackService;
 use App\Services\PaystackSubaccountService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class PublicInvoiceController extends Controller
@@ -24,7 +26,16 @@ class PublicInvoiceController extends Controller
      */
     public function preview(Request $request)
     {
-        $data = $this->validateAndPrepareData($request);
+        try {
+            $data = $this->validateAndPrepareData($request);
+        } catch (\Exception $e) {
+            // Track validation/generation error
+            $this->trackEvent($request, 'invoice_generation_error', [
+                'error_type' => 'validation',
+                'error_message' => $e->getMessage(),
+            ]);
+            throw $e;
+        }
 
         // Check for duplicate invoice in the last 5 minutes
         $fiveMinutesAgo = now()->subMinutes(5);
@@ -120,13 +131,13 @@ class PublicInvoiceController extends Controller
             'simple_mode' => $data['simple_mode'] ?? false,
         ]);
 
-        // Fire analytics event
+        // Track analytics event
         $invoiceMode = ($data['simple_mode'] ?? false) ? 'simple' : 'formal';
-        Log::info('[Event] invoice_generated', [
+        $this->trackEvent($request, 'invoice_generated', [
             'mode' => $invoiceMode,
-            'invoice_id' => $publicInvoice->public_id,
             'has_vat' => $publicInvoice->vat_percentage > 0,
             'has_wht' => $publicInvoice->wht_percentage > 0,
+            'total_amount' => $publicInvoice->total_amount,
         ]);
 
         // Check if this is an API/AJAX request (from mobile app)
@@ -151,9 +162,18 @@ class PublicInvoiceController extends Controller
     /**
      * Show a saved public invoice
      */
-    public function show(string $publicId)
+    public function show(Request $request, string $publicId)
     {
         $invoice = PublicInvoice::where('public_id', $publicId)->firstOrFail();
+
+        // Track invoice view (only if not just created in this session)
+        if (!session('invoice_just_created')) {
+            $this->trackEvent($request, 'invoice_viewed_shared', [
+                'invoice_number' => $invoice->invoice_number,
+                'payment_status' => $invoice->payment_status,
+                'total_amount' => $invoice->total_amount,
+            ]);
+        }
 
         return view('public-invoice.show', compact('invoice'));
     }
@@ -389,5 +409,29 @@ class PublicInvoiceController extends Controller
         }
 
         return redirect()->back()->with('error', 'Unable to mark invoice as sent.');
+    }
+
+    /**
+     * Track analytics event (server-side)
+     */
+    private function trackEvent(Request $request, string $eventName, array $properties = []): void
+    {
+        try {
+            $ipHash = $request->ip() ? hash('sha256', $request->ip() . config('app.key')) : null;
+
+            AnalyticsEvent::create([
+                'name' => $eventName,
+                'occurred_at' => now(),
+                'path' => $request->path(),
+                'referrer' => $request->header('referer'),
+                'user_id' => auth()->id(),
+                'properties' => $properties,
+                'ip_hash' => $ipHash,
+                'user_agent' => $request->userAgent(),
+            ]);
+        } catch (\Exception $e) {
+            // Silently fail - analytics shouldn't break the user experience
+            Log::debug('Analytics tracking failed', ['error' => $e->getMessage()]);
+        }
     }
 }
