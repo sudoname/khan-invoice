@@ -5,6 +5,7 @@ namespace App\Filament\Admin\Pages;
 use App\Models\AnalyticsEvent;
 use Filament\Pages\Page;
 use Illuminate\Support\Facades\DB;
+use Livewire\Attributes\Reactive;
 
 class Analytics extends Page
 {
@@ -18,12 +19,14 @@ class Analytics extends Page
 
     protected static ?int $navigationSort = 1;
 
-    public $dateRange = '7';
-    public $eventFilter = null;
+    public string $dateRange = '7';
+
+    public ?string $eventFilter = null;
 
     public function mount(): void
     {
         // Initialize filters
+        $this->dateRange = '7';
     }
 
     public function getStats(): array
@@ -31,15 +34,15 @@ class Analytics extends Page
         $days = (int) $this->dateRange;
         $startDate = now()->subDays($days);
 
-        $query = AnalyticsEvent::where('occurred_at', '>=', $startDate);
+        $baseQuery = AnalyticsEvent::where('occurred_at', '>=', $startDate);
 
         if ($this->eventFilter) {
-            $query->where('name', $this->eventFilter);
+            $baseQuery = $baseQuery->where('name', $this->eventFilter);
         }
 
-        $totalEvents = $query->count();
-        $uniqueSessions = $query->distinct('session_id')->count('session_id');
-        $uniqueUsers = $query->whereNotNull('user_id')->distinct('user_id')->count('user_id');
+        $totalEvents = (clone $baseQuery)->count();
+        $uniqueSessions = (clone $baseQuery)->whereNotNull('session_id')->distinct()->count('session_id');
+        $uniqueUsers = (clone $baseQuery)->whereNotNull('user_id')->distinct()->count('user_id');
 
         return [
             'total_events' => $totalEvents,
