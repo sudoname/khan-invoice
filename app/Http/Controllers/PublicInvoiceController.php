@@ -117,6 +117,16 @@ class PublicInvoiceController extends Controller
             'total_amount' => $data['total_amount'],
             'notes' => $data['notes'] ?? null,
             'payment_status' => 'sent', // Invoice is sent when created
+            'simple_mode' => $data['simple_mode'] ?? false,
+        ]);
+
+        // Fire analytics event
+        $invoiceMode = ($data['simple_mode'] ?? false) ? 'simple' : 'formal';
+        Log::info('[Event] invoice_generated', [
+            'mode' => $invoiceMode,
+            'invoice_id' => $publicInvoice->public_id,
+            'has_vat' => $publicInvoice->vat_percentage > 0,
+            'has_wht' => $publicInvoice->wht_percentage > 0,
         ]);
 
         // Check if this is an API/AJAX request (from mobile app)
@@ -358,5 +368,26 @@ class PublicInvoiceController extends Controller
         $validated['total_amount'] = $total;
 
         return $validated;
+    }
+
+    /**
+     * Mark invoice as sent (FREE-4)
+     */
+    public function markAsSent($publicId)
+    {
+        $invoice = PublicInvoice::where('public_id', $publicId)->firstOrFail();
+
+        if ($invoice->markAsSent()) {
+            // Fire analytics event
+            Log::info('[Event] invoice_marked_sent', [
+                'invoice_id' => $invoice->public_id,
+                'invoice_number' => $invoice->invoice_number,
+                'status' => $invoice->status,
+            ]);
+
+            return redirect()->back()->with('success', 'Invoice marked as sent successfully!');
+        }
+
+        return redirect()->back()->with('error', 'Unable to mark invoice as sent.');
     }
 }

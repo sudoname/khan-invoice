@@ -109,6 +109,39 @@
         </script>
         @endif
 
+        <!-- Status Badge and Actions -->
+        <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+            <!-- Status Badge -->
+            <div class="flex items-center gap-3">
+                <span class="px-4 py-2 rounded-full text-sm font-bold
+                    @if($invoice->status_color === 'gray') bg-gray-100 text-gray-800
+                    @elseif($invoice->status_color === 'blue') bg-blue-100 text-blue-800
+                    @elseif($invoice->status_color === 'yellow') bg-yellow-100 text-yellow-800
+                    @elseif($invoice->status_color === 'red') bg-red-100 text-red-800
+                    @elseif($invoice->status_color === 'green') bg-green-100 text-green-800
+                    @endif
+                    ">
+                    {{ $invoice->status_label }}
+                </span>
+
+                @if($invoice->simple_mode)
+                <span class="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-xs font-semibold border border-blue-200">
+                    Simple Invoice
+                </span>
+                @endif
+            </div>
+
+            <!-- Mark as Sent Button -->
+            @if($invoice->canMarkAsSent())
+            <form action="{{ route('public-invoice.mark-sent', $invoice->public_id) }}" method="POST" class="inline">
+                @csrf
+                <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-blue-700 transition">
+                    Mark as Sent
+                </button>
+            </form>
+            @endif
+        </div>
+
         <!-- Action Buttons -->
         <div class="action-buttons grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 mb-6">
             <!-- Print -->
@@ -254,17 +287,19 @@
                         <span class="text-gray-700">Subtotal:</span>
                         <span class="font-semibold">₦{{ number_format($invoice->subtotal, 2) }}</span>
                     </div>
-                    @if($invoice->vat_percentage > 0)
-                    <div class="flex justify-between py-2 border-b border-gray-200">
-                        <span class="text-gray-700">VAT ({{ number_format($invoice->vat_percentage, 2) }}%):</span>
-                        <span class="font-semibold text-red-600">+₦{{ number_format($invoice->vat_amount, 2) }}</span>
-                    </div>
-                    @endif
-                    @if($invoice->wht_percentage > 0)
-                    <div class="flex justify-between py-2 border-b border-gray-200">
-                        <span class="text-gray-700">WHT ({{ number_format($invoice->wht_percentage, 2) }}%):</span>
-                        <span class="font-semibold text-red-600">-₦{{ number_format($invoice->wht_amount, 2) }}</span>
-                    </div>
+                    @if(!$invoice->simple_mode)
+                        @if($invoice->vat_percentage > 0)
+                        <div class="flex justify-between py-2 border-b border-gray-200">
+                            <span class="text-gray-700">VAT ({{ number_format($invoice->vat_percentage, 2) }}%):</span>
+                            <span class="font-semibold text-green-600">+₦{{ number_format($invoice->vat_amount, 2) }}</span>
+                        </div>
+                        @endif
+                        @if($invoice->wht_percentage > 0)
+                        <div class="flex justify-between py-2 border-b border-gray-200">
+                            <span class="text-gray-700">WHT ({{ number_format($invoice->wht_percentage, 2) }}%):</span>
+                            <span class="font-semibold text-red-600">-₦{{ number_format($invoice->wht_amount, 2) }}</span>
+                        </div>
+                        @endif
                     @endif
                     @if($invoice->discount_percentage > 0)
                     <div class="flex justify-between py-2 border-b border-gray-200">

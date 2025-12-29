@@ -208,8 +208,30 @@
                 </div>
             </div>
 
+            <!-- Simple Invoice Mode Toggle -->
+            <div class="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-6 shadow-lg border-2 border-blue-200 mb-6">
+                <div class="flex items-center justify-between">
+                    <div class="flex-1">
+                        <label for="simpleModeToggle" class="flex items-center cursor-pointer">
+                            <div class="relative">
+                                <input type="checkbox" id="simpleModeToggle" class="sr-only" onchange="toggleSimpleMode()">
+                                <div class="block bg-gray-300 w-14 h-8 rounded-full"></div>
+                                <div class="dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition"></div>
+                            </div>
+                            <div class="ml-4">
+                                <span class="text-lg font-bold text-gray-900">Simple Invoice (No Tax)</span>
+                                <p class="text-sm text-gray-600 mt-1">
+                                    Use this if you're not charging VAT or WHT. Perfect for freelancers and small vendors.
+                                </p>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+                <input type="hidden" name="simple_mode" id="simpleModeInput" value="0">
+            </div>
+
             <!-- Tax and Discount Section -->
-            <div class="bg-white rounded-xl p-6 shadow-lg border-2 border-purple-100 mb-6">
+            <div class="bg-white rounded-xl p-6 shadow-lg border-2 border-purple-100 mb-6" id="taxSection">
                 <h2 class="text-2xl font-bold text-gray-900 mb-4">Tax & Discount (Optional)</h2>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
@@ -321,5 +343,74 @@
                 }
             }
         });
+
+        // Simple Invoice Mode Toggle Logic
+        function toggleSimpleMode() {
+            const checkbox = document.getElementById('simpleModeToggle');
+            const hiddenInput = document.getElementById('simpleModeInput');
+            const taxSection = document.getElementById('taxSection');
+            const toggle = checkbox.parentElement;
+
+            if (checkbox.checked) {
+                // Enable simple mode
+                hiddenInput.value = '1';
+                toggle.querySelector('.block').classList.remove('bg-gray-300');
+                toggle.querySelector('.block').classList.add('bg-green-500');
+                toggle.querySelector('.dot').style.transform = 'translateX(1.5rem)';
+
+                // Hide tax section
+                taxSection.style.display = 'none';
+
+                // Clear VAT/WHT values
+                document.querySelector('[name="vat_percentage"]').value = '0';
+                document.querySelector('[name="wht_percentage"]').value = '0';
+
+                // Save to localStorage
+                localStorage.setItem('simpleInvoiceMode', 'true');
+
+                // Fire analytics event
+                console.log('[Event] invoice_simple_mode_toggled', { enabled: true, page: 'invoice_generator' });
+            } else {
+                // Disable simple mode
+                hiddenInput.value = '0';
+                toggle.querySelector('.block').classList.add('bg-gray-300');
+                toggle.querySelector('.block').classList.remove('bg-green-500');
+                toggle.querySelector('.dot').style.transform = 'translateX(0)';
+
+                // Show tax section
+                taxSection.style.display = 'block';
+
+                // Restore default VAT
+                document.querySelector('[name="vat_percentage"]').value = '7.5';
+
+                // Save to localStorage
+                localStorage.setItem('simpleInvoiceMode', 'false');
+
+                // Fire analytics event
+                console.log('[Event] invoice_simple_mode_toggled', { enabled: false, page: 'invoice_generator' });
+            }
+        }
+
+        // Restore simple mode from localStorage on page load
+        window.addEventListener('DOMContentLoaded', function() {
+            const savedMode = localStorage.getItem('simpleInvoiceMode');
+            if (savedMode === 'true') {
+                document.getElementById('simpleModeToggle').checked = true;
+                toggleSimpleMode();
+            }
+        });
     </script>
+
+    <style>
+        /* Toggle switch styling */
+        #simpleModeToggle:checked ~ .block {
+            background-color: #10b981;
+        }
+        #simpleModeToggle:checked ~ .dot {
+            transform: translateX(100%);
+        }
+        .dot {
+            transition: transform 0.3s ease;
+        }
+    </style>
 </x-layout>

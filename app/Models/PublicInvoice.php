@@ -88,4 +88,80 @@ class PublicInvoice extends Model
     {
         return route('public-invoice.pay', $this->public_id);
     }
+
+    /**
+     * Get the invoice status based on payment and sent status
+     * Status logic:
+     * - Paid: payment_status is 'paid'
+     * - Draft: not sent (sent_at is null)
+     * - Sent: sent_at is set but due date is in future
+     * - Due: sent and due date is in future
+     * - Overdue: sent and due date has passed
+     */
+    public function getStatusAttribute(): string
+    {
+        if ($this->payment_status === 'paid') {
+            return 'paid';
+        }
+
+        if (!$this->sent_at) {
+            return 'draft';
+        }
+
+        if ($this->due_date && $this->due_date->isFuture()) {
+            return 'due';
+        }
+
+        return 'overdue';
+    }
+
+    /**
+     * Get the status color for UI display
+     */
+    public function getStatusColorAttribute(): string
+    {
+        return match($this->status) {
+            'draft' => 'gray',
+            'sent' => 'blue',
+            'due' => 'yellow',
+            'overdue' => 'red',
+            'paid' => 'green',
+            default => 'gray',
+        };
+    }
+
+    /**
+     * Get the status label for display
+     */
+    public function getStatusLabelAttribute(): string
+    {
+        return match($this->status) {
+            'draft' => 'Draft',
+            'sent' => 'Sent',
+            'due' => 'Due',
+            'overdue' => 'Overdue',
+            'paid' => 'Paid',
+            default => 'Unknown',
+        };
+    }
+
+    /**
+     * Check if invoice can be marked as sent
+     */
+    public function canMarkAsSent(): bool
+    {
+        return !$this->sent_at && $this->payment_status !== 'paid';
+    }
+
+    /**
+     * Mark invoice as sent
+     */
+    public function markAsSent(): bool
+    {
+        if ($this->canMarkAsSent()) {
+            $this->sent_at = now();
+            return $this->save();
+        }
+        return false;
+    }
 }
