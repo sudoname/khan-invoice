@@ -4,6 +4,33 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ $title ?? 'Khan Invoice - Nigerian Invoice Management System' }}</title>
+
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="{{ $description ?? 'Create professional invoices in minutes with Khan Invoice. Built-in VAT (7.5%), WHT, Paystack payments, and WhatsApp sharing for Nigerian businesses.' }}">
+    <meta name="keywords" content="invoice generator Nigeria, Nigerian invoice software, VAT invoice, WHT invoice, Naira invoice, Paystack invoice, invoice management Nigeria">
+    <meta name="author" content="Khan Invoice">
+    <link rel="canonical" href="{{ url()->current() }}">
+
+    <!-- OpenGraph Meta Tags -->
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Khan Invoice">
+    <meta property="og:title" content="{{ $ogTitle ?? $title ?? 'Khan Invoice - Nigerian Invoice Management System' }}">
+    <meta property="og:description" content="{{ $ogDescription ?? $description ?? 'Create professional invoices in minutes with Khan Invoice. Built-in VAT (7.5%), WHT, Paystack payments, and WhatsApp sharing for Nigerian businesses.' }}">
+    <meta property="og:url" content="{{ url()->current() }}">
+    <meta property="og:image" content="{{ asset('images/og-image.png') }}">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+
+    <!-- Twitter Card Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{{ $twitterTitle ?? $title ?? 'Khan Invoice - Nigerian Invoice Management System' }}">
+    <meta name="twitter:description" content="{{ $twitterDescription ?? $description ?? 'Create professional invoices in minutes with Khan Invoice. Built-in VAT (7.5%), WHT, Paystack payments, and WhatsApp sharing for Nigerian businesses.' }}">
+    <meta name="twitter:image" content="{{ asset('images/og-image.png') }}">
+
+    <!-- Additional Meta -->
+    <meta name="robots" content="index, follow">
+    <meta name="theme-color" content="#667eea">
+
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         .gradient-bg {

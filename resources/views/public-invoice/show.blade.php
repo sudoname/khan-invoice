@@ -238,14 +238,62 @@
             </div>
         </div>
 
-        <!-- CTA Section -->
-        <div class="mt-8 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-xl p-6 sm:p-8 text-center">
-            <h3 class="text-xl sm:text-2xl font-bold mb-2">Want to manage invoices professionally?</h3>
-            <p class="text-sm sm:text-base text-purple-100 mb-4">Track payments, send invoices, and manage your business with Khan Invoice</p>
-            <a href="{{ route('filament.app.auth.register') }}"
-                class="inline-block bg-white text-purple-600 px-6 sm:px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition text-sm sm:text-base">
-                Create Free Account
-            </a>
+        <!-- Enhanced CTA Section -->
+        <div class="mt-8 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-xl p-8 sm:p-10 shadow-2xl border-2 border-purple-400">
+            <div class="max-w-3xl mx-auto text-center">
+                <div class="bg-yellow-400 text-yellow-900 px-4 py-2 rounded-full inline-block font-bold text-sm mb-4">
+                    ✨ FREE ACCOUNT
+                </div>
+                <h3 class="text-2xl sm:text-3xl font-bold mb-3">Save time on your next invoice</h3>
+                <p class="text-lg sm:text-xl text-purple-100 mb-6">
+                    Create a free account to save customers & items, track payments, and generate invoices faster
+                </p>
+
+                <!-- Benefits Grid -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8 text-left">
+                    <div class="bg-white/10 backdrop-blur-sm rounded-lg p-4">
+                        <div class="flex items-start">
+                            <svg class="w-5 h-5 text-green-300 mr-2 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            <div>
+                                <p class="font-semibold text-sm">Save customers</p>
+                                <p class="text-xs text-purple-200">Reuse customer details</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white/10 backdrop-blur-sm rounded-lg p-4">
+                        <div class="flex items-start">
+                            <svg class="w-5 h-5 text-green-300 mr-2 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            <div>
+                                <p class="font-semibold text-sm">Save items</p>
+                                <p class="text-xs text-purple-200">Create invoices faster</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white/10 backdrop-blur-sm rounded-lg p-4">
+                        <div class="flex items-start">
+                            <svg class="w-5 h-5 text-green-300 mr-2 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            <div>
+                                <p class="font-semibold text-sm">Track payments</p>
+                                <p class="text-xs text-purple-200">See paid/unpaid status</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                    <a href="{{ route('filament.app.auth.register') }}"
+                        class="bg-white text-purple-600 px-8 py-4 rounded-lg font-bold text-lg hover:bg-gray-100 transition shadow-xl transform hover:scale-105">
+                        Create Free Account →
+                    </a>
+                    <span class="text-sm text-purple-200">No credit card required</span>
+                </div>
+            </div>
         </div>
     </div>
 

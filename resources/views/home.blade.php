@@ -1,28 +1,89 @@
 <x-layout>
+    <x-slot name="title">Khan Invoice - Create Professional Invoices in Minutes for Nigerian Businesses</x-slot>
+    <x-slot name="description">Free Nigerian invoice generator with VAT (7.5%), WHT, Paystack payments, and WhatsApp sharing. Create professional invoices instantly with Naira support.</x-slot>
     <!-- Hero Section -->
     <section class="gradient-bg text-white py-20">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
                 <div>
-                    <h1 class="text-4xl md:text-5xl font-bold mb-6">
-                        Professional Invoice Management for Nigerian Businesses
+                    <h1 class="text-4xl md:text-5xl font-bold mb-4">
+                        Create professional invoices in minutes — built for Nigerian businesses
                     </h1>
-                    <p class="text-xl mb-8 text-purple-100">
-                        Create, manage, and track invoices with built-in VAT, Withholding Tax, and Nigerian banking support.
+                    <p class="text-xl mb-6 text-purple-100">
+                        Add VAT/WHT, share via WhatsApp, and get paid faster with Paystack
                     </p>
+
+                    <!-- Benefit Bullets -->
+                    <ul class="space-y-3 mb-8">
+                        <li class="flex items-start">
+                            <svg class="w-6 h-6 text-green-300 mr-3 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            <span class="text-lg text-white">₦ Naira-ready invoices with VAT (7.5%) & WHT options</span>
+                        </li>
+                        <li class="flex items-start">
+                            <svg class="w-6 h-6 text-green-300 mr-3 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            <span class="text-lg text-white">PDF download & WhatsApp sharing</span>
+                        </li>
+                        <li class="flex items-start">
+                            <svg class="w-6 h-6 text-green-300 mr-3 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            <span class="text-lg text-white">Save customers & items (with free account)</span>
+                        </li>
+                        <li class="flex items-start">
+                            <svg class="w-6 h-6 text-green-300 mr-3 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            <span class="text-lg text-white">Secure online payments via Paystack</span>
+                        </li>
+                    </ul>
+
+                    <!-- Trust Strip -->
+                    <div class="bg-white/10 backdrop-blur-sm rounded-lg px-4 py-3 mb-8">
+                        <div class="flex flex-wrap items-center justify-center sm:justify-start gap-x-6 gap-y-2 text-sm text-purple-100">
+                            <span class="flex items-center">
+                                <svg class="w-4 h-4 mr-1.5" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                                </svg>
+                                VAT/WHT ready
+                            </span>
+                            <span class="flex items-center">
+                                <svg class="w-4 h-4 mr-1.5" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                                </svg>
+                                ₦ Naira support
+                            </span>
+                            <span class="flex items-center">
+                                <svg class="w-4 h-4 mr-1.5" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                                </svg>
+                                Paystack payments
+                            </span>
+                            <span class="flex items-center">
+                                <svg class="w-4 h-4 mr-1.5" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                                </svg>
+                                Secure links
+                            </span>
+                        </div>
+                    </div>
+
                     <div class="flex flex-col sm:flex-row gap-4">
+                        <a href="{{ route('public-invoice.create') }}" class="bg-white text-purple-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition text-center shadow-lg">
+                            Generate Free Invoice
+                        </a>
                         @auth
-                            <a href="/app" class="bg-white text-purple-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition text-center">
+                            <a href="/app" class="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-purple-600 transition text-center">
                                 Go to Dashboard
                             </a>
                         @else
-                            <a href="/login" class="bg-white text-purple-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition text-center">
-                                Get Started
+                            <a href="/login" class="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-purple-600 transition text-center">
+                                Create Account
                             </a>
                         @endauth
-                        <a href="{{ route('public-invoice.create') }}" class="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-purple-600 transition text-center">
-                            Generate Free Invoice
-                        </a>
                     </div>
                 </div>
                 <div class="hidden md:block">
@@ -146,6 +207,104 @@
                     <p class="text-gray-700">
                         Monitor payment status with draft, sent, paid, and overdue tracking.
                     </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Comparison Section -->
+    <section class="py-16 bg-gradient-to-br from-purple-50 to-blue-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                    Why Khan Invoice?
+                </h2>
+                <p class="text-xl text-gray-600">
+                    Built specifically for Nigerian businesses, not an afterthought
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+                <!-- Khan Invoice -->
+                <div class="bg-white rounded-xl shadow-lg p-8 border-2 border-purple-600">
+                    <div class="flex items-center mb-6">
+                        <div class="bg-purple-600 text-white px-4 py-2 rounded-lg font-bold text-lg">
+                            Khan Invoice
+                        </div>
+                    </div>
+                    <ul class="space-y-4">
+                        <li class="flex items-start">
+                            <svg class="w-6 h-6 text-green-600 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            <span class="text-gray-700"><strong>Nigeria-first:</strong> VAT (7.5%), WHT, CAC, TIN support built-in</span>
+                        </li>
+                        <li class="flex items-start">
+                            <svg class="w-6 h-6 text-green-600 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            <span class="text-gray-700"><strong>Simple:</strong> No complex setup, create invoices instantly</span>
+                        </li>
+                        <li class="flex items-start">
+                            <svg class="w-6 h-6 text-green-600 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            <span class="text-gray-700"><strong>WhatsApp-friendly:</strong> Share invoices where your clients are</span>
+                        </li>
+                        <li class="flex items-start">
+                            <svg class="w-6 h-6 text-green-600 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            <span class="text-gray-700"><strong>All Nigerian banks:</strong> Pre-loaded with every major bank</span>
+                        </li>
+                        <li class="flex items-start">
+                            <svg class="w-6 h-6 text-green-600 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            <span class="text-gray-700"><strong>Free tier:</strong> Generate invoices without an account</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Generic Tools -->
+                <div class="bg-white rounded-xl shadow-lg p-8 border-2 border-gray-300">
+                    <div class="flex items-center mb-6">
+                        <div class="bg-gray-500 text-white px-4 py-2 rounded-lg font-bold text-lg">
+                            Generic Tools
+                        </div>
+                    </div>
+                    <ul class="space-y-4">
+                        <li class="flex items-start">
+                            <svg class="w-6 h-6 text-gray-400 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                            <span class="text-gray-500">Often less localized, manual VAT/WHT setup</span>
+                        </li>
+                        <li class="flex items-start">
+                            <svg class="w-6 h-6 text-gray-400 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                            <span class="text-gray-500">More complex setup with unnecessary features</span>
+                        </li>
+                        <li class="flex items-start">
+                            <svg class="w-6 h-6 text-gray-400 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                            <span class="text-gray-500">Email-centric sharing (less common in Nigeria)</span>
+                        </li>
+                        <li class="flex items-start">
+                            <svg class="w-6 h-6 text-gray-400 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                            <span class="text-gray-500">Manual bank entry, no Nigerian bank list</span>
+                        </li>
+                        <li class="flex items-start">
+                            <svg class="w-6 h-6 text-gray-400 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                            <span class="text-gray-500">Mandatory account signup before trying</span>
+                        </li>
+                    </ul>
                 </div>
             </div>
         </div>

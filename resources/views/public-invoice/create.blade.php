@@ -1,5 +1,6 @@
 <x-layout>
     <x-slot name="title">Free Invoice Generator - Khan Invoice</x-slot>
+    <x-slot name="description">Create professional Nigerian invoices instantly with our free generator. No signup required. VAT (7.5%), WHT, Paystack payments, PDF download, and WhatsApp sharing included.</x-slot>
 
     <!-- Hero Section -->
     <div class="gradient-bg text-white py-12">
@@ -212,22 +213,46 @@
                 <h2 class="text-2xl font-bold text-gray-900 mb-4">Tax & Discount (Optional)</h2>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">VAT (%)</label>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2 flex items-center">
+                            VAT (%)
+                            <span class="ml-2 text-gray-500 cursor-help" title="Value Added Tax - Standard rate in Nigeria is 7.5%. This will be ADDED to your subtotal.">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                            </span>
+                        </label>
                         <input type="number" name="vat_percentage" step="0.01" min="0" max="100"
                             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                             placeholder="7.5" value="{{ old('vat_percentage', '7.5') }}">
+                        <p class="text-xs text-gray-500 mt-1">Standard rate: 7.5% (added to total)</p>
                     </div>
                     <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">WHT (%)</label>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2 flex items-center">
+                            WHT (%)
+                            <span class="ml-2 text-gray-500 cursor-help" title="Withholding Tax - Tax withheld at source by your customer. This will be SUBTRACTED from your total.">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                            </span>
+                        </label>
                         <input type="number" name="wht_percentage" step="0.01" min="0" max="100"
                             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                             placeholder="0" value="{{ old('wht_percentage', '0') }}">
+                        <p class="text-xs text-gray-500 mt-1">Common: 5% or 10% (deducted from total)</p>
                     </div>
                     <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Discount (%)</label>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2 flex items-center">
+                            Discount (%)
+                            <span class="ml-2 text-gray-500 cursor-help" title="Percentage discount to apply to your customer. This will be SUBTRACTED from your total.">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                            </span>
+                        </label>
                         <input type="number" name="discount_percentage" step="0.01" min="0" max="100"
                             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                             placeholder="0" value="{{ old('discount_percentage', '0') }}">
+                        <p class="text-xs text-gray-500 mt-1">Optional discount for your customer</p>
                     </div>
                 </div>
             </div>
