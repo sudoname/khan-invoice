@@ -694,10 +694,25 @@
         };
 
         function openWhatsAppTemplateModal() {
-            document.getElementById('whatsappModal').classList.remove('hidden');
-            // Pre-select first template
-            document.querySelector('input[name="template"][value="1"]').checked = true;
-            selectTemplate(1);
+            console.log('WhatsApp button clicked');
+            try {
+                const modal = document.getElementById('whatsappModal');
+                console.log('WhatsApp modal element:', modal);
+                if (!modal) {
+                    alert('WhatsApp modal not found. Please contact support.');
+                    return;
+                }
+                modal.classList.remove('hidden');
+                // Pre-select first template
+                const templateInput = document.querySelector('input[name="template"][value="1"]');
+                if (templateInput) {
+                    templateInput.checked = true;
+                    selectTemplate(1);
+                }
+            } catch (error) {
+                console.error('Error opening WhatsApp modal:', error);
+                alert('Unable to open WhatsApp modal. Please refresh the page and try again.');
+            }
         }
 
         function closeWhatsAppModal() {
@@ -768,14 +783,27 @@
 
         // Payment Modal Functions
         function openPaymentModal() {
-            const paymentStatus = '{{ $invoice->payment_status }}';
+            console.log('Payment button clicked');
+            try {
+                const paymentStatus = '{{ $invoice->payment_status }}';
+                const modal = document.getElementById('paymentModal');
+                console.log('Payment modal element:', modal);
 
-            if (paymentStatus === 'paid') {
-                if (confirm('⚠️ This invoice appears to have been paid already.\n\nPaid on: {{ $invoice->paid_at ? $invoice->paid_at->format("M d, Y h:i A") : "N/A" }}\nAmount Paid: ₦{{ number_format($invoice->amount_paid ?? 0, 2) }}\n\nDo you still want to make a payment?')) {
-                    document.getElementById('paymentModal').classList.remove('hidden');
+                if (!modal) {
+                    alert('Payment modal not found. Please contact support.');
+                    return;
                 }
-            } else {
-                document.getElementById('paymentModal').classList.remove('hidden');
+
+                if (paymentStatus === 'paid') {
+                    if (confirm('⚠️ This invoice appears to have been paid already.\n\nPaid on: {{ $invoice->paid_at ? $invoice->paid_at->format("M d, Y h:i A") : "N/A" }}\nAmount Paid: ₦{{ number_format($invoice->amount_paid ?? 0, 2) }}\n\nDo you still want to make a payment?')) {
+                        modal.classList.remove('hidden');
+                    }
+                } else {
+                    modal.classList.remove('hidden');
+                }
+            } catch (error) {
+                console.error('Error opening payment modal:', error);
+                alert('Unable to open payment modal. Please refresh the page and try again.');
             }
         }
 
