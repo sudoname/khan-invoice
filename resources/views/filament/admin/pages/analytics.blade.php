@@ -32,22 +32,25 @@
                 <div class="flex-1">
                     <p class="text-sm font-medium text-gray-600">Total Events</p>
                     <p class="text-3xl font-bold text-gray-900 mt-1">{{ number_format($stats['total_events']) }}</p>
-                    @if($stats['total_events_change'] != 0)
-                        <div class="flex items-center mt-2">
-                            @if($stats['total_events_change'] > 0)
-                                <svg class="w-4 h-4 text-green-600 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path>
-                                </svg>
-                                <span class="text-sm font-semibold text-green-600">{{ abs($stats['total_events_change']) }}%</span>
-                            @else
-                                <svg class="w-4 h-4 text-red-600 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
-                                </svg>
-                                <span class="text-sm font-semibold text-red-600">{{ abs($stats['total_events_change']) }}%</span>
-                            @endif
-                            <span class="text-xs text-gray-500 ml-1">vs previous period</span>
-                        </div>
-                    @endif
+                    <div class="flex items-center mt-2">
+                        @if($stats['total_events_change'] > 0)
+                            <svg class="w-4 h-4 text-green-600 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path>
+                            </svg>
+                            <span class="text-sm font-semibold text-green-600">+{{ number_format(abs($stats['total_events_change']), 1) }}%</span>
+                        @elseif($stats['total_events_change'] < 0)
+                            <svg class="w-4 h-4 text-red-600 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+                            </svg>
+                            <span class="text-sm font-semibold text-red-600">{{ number_format($stats['total_events_change'], 1) }}%</span>
+                        @else
+                            <svg class="w-4 h-4 text-gray-400 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14"></path>
+                            </svg>
+                            <span class="text-sm font-semibold text-gray-600">0%</span>
+                        @endif
+                        <span class="text-xs text-gray-500 ml-1">vs previous period</span>
+                    </div>
                 </div>
                 <div class="p-3 bg-blue-100 rounded-full">
                     <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -62,22 +65,25 @@
                 <div class="flex-1">
                     <p class="text-sm font-medium text-gray-600">Unique Sessions</p>
                     <p class="text-3xl font-bold text-gray-900 mt-1">{{ number_format($stats['unique_sessions']) }}</p>
-                    @if($stats['unique_sessions_change'] != 0)
-                        <div class="flex items-center mt-2">
-                            @if($stats['unique_sessions_change'] > 0)
-                                <svg class="w-4 h-4 text-green-600 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path>
-                                </svg>
-                                <span class="text-sm font-semibold text-green-600">{{ abs($stats['unique_sessions_change']) }}%</span>
-                            @else
-                                <svg class="w-4 h-4 text-red-600 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
-                                </svg>
-                                <span class="text-sm font-semibold text-red-600">{{ abs($stats['unique_sessions_change']) }}%</span>
-                            @endif
-                            <span class="text-xs text-gray-500 ml-1">vs previous period</span>
-                        </div>
-                    @endif
+                    <div class="flex items-center mt-2">
+                        @if($stats['unique_sessions_change'] > 0)
+                            <svg class="w-4 h-4 text-green-600 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path>
+                            </svg>
+                            <span class="text-sm font-semibold text-green-600">+{{ number_format(abs($stats['unique_sessions_change']), 1) }}%</span>
+                        @elseif($stats['unique_sessions_change'] < 0)
+                            <svg class="w-4 h-4 text-red-600 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+                            </svg>
+                            <span class="text-sm font-semibold text-red-600">{{ number_format($stats['unique_sessions_change'], 1) }}%</span>
+                        @else
+                            <svg class="w-4 h-4 text-gray-400 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14"></path>
+                            </svg>
+                            <span class="text-sm font-semibold text-gray-600">0%</span>
+                        @endif
+                        <span class="text-xs text-gray-500 ml-1">vs previous period</span>
+                    </div>
                 </div>
                 <div class="p-3 bg-green-100 rounded-full">
                     <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -92,22 +98,25 @@
                 <div class="flex-1">
                     <p class="text-sm font-medium text-gray-600">Registered Users</p>
                     <p class="text-3xl font-bold text-gray-900 mt-1">{{ number_format($stats['unique_users']) }}</p>
-                    @if($stats['unique_users_change'] != 0)
-                        <div class="flex items-center mt-2">
-                            @if($stats['unique_users_change'] > 0)
-                                <svg class="w-4 h-4 text-green-600 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path>
-                                </svg>
-                                <span class="text-sm font-semibold text-green-600">{{ abs($stats['unique_users_change']) }}%</span>
-                            @else
-                                <svg class="w-4 h-4 text-red-600 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
-                                </svg>
-                                <span class="text-sm font-semibold text-red-600">{{ abs($stats['unique_users_change']) }}%</span>
-                            @endif
-                            <span class="text-xs text-gray-500 ml-1">vs previous period</span>
-                        </div>
-                    @endif
+                    <div class="flex items-center mt-2">
+                        @if($stats['unique_users_change'] > 0)
+                            <svg class="w-4 h-4 text-green-600 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path>
+                            </svg>
+                            <span class="text-sm font-semibold text-green-600">+{{ number_format(abs($stats['unique_users_change']), 1) }}%</span>
+                        @elseif($stats['unique_users_change'] < 0)
+                            <svg class="w-4 h-4 text-red-600 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+                            </svg>
+                            <span class="text-sm font-semibold text-red-600">{{ number_format($stats['unique_users_change'], 1) }}%</span>
+                        @else
+                            <svg class="w-4 h-4 text-gray-400 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14"></path>
+                            </svg>
+                            <span class="text-sm font-semibold text-gray-600">0%</span>
+                        @endif
+                        <span class="text-xs text-gray-500 ml-1">vs previous period</span>
+                    </div>
                 </div>
                 <div class="p-3 bg-purple-100 rounded-full">
                     <svg class="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -129,7 +138,7 @@
                     <span class="text-sm font-medium text-gray-700">Landing Page Views</span>
                     <span class="text-sm font-bold text-gray-900">{{ number_format($funnel['landing_views']) }}</span>
                 </div>
-                <div class="w-full bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg h-12 flex items-center justify-center shadow-sm">
+                <div class="w-full rounded-lg h-12 flex items-center justify-center shadow-sm" style="background: linear-gradient(to right, #3b82f6, #2563eb);">
                     <span class="text-white font-semibold text-sm">100% · {{ number_format($funnel['landing_views']) }} visitors</span>
                 </div>
             </div>
@@ -140,7 +149,7 @@
                     <span class="text-sm font-medium text-gray-700">Generator Views</span>
                     <span class="text-sm font-bold text-gray-900">{{ number_format($funnel['generator_views']) }} <span class="text-xs text-gray-500">({{ number_format($pct, 1) }}%)</span></span>
                 </div>
-                <div class="w-full bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-lg h-12 flex items-center justify-center shadow-sm">
+                <div class="w-full rounded-lg h-12 flex items-center justify-center shadow-sm" style="background: linear-gradient(to right, #10b981, #059669);">
                     <span class="text-white font-semibold text-sm">{{ number_format($pct, 1) }}% · {{ number_format($funnel['generator_views']) }} started</span>
                 </div>
             </div>
@@ -151,7 +160,7 @@
                     <span class="text-sm font-medium text-gray-700">Invoices Generated</span>
                     <span class="text-sm font-bold text-gray-900">{{ number_format($funnel['invoices_generated']) }} <span class="text-xs text-gray-500">({{ number_format($pct, 1) }}%)</span></span>
                 </div>
-                <div class="w-full bg-gradient-to-r from-purple-500 to-purple-600 rounded-lg h-12 flex items-center justify-center shadow-sm">
+                <div class="w-full rounded-lg h-12 flex items-center justify-center shadow-sm" style="background: linear-gradient(to right, #8b5cf6, #7c3aed);">
                     <span class="text-white font-semibold text-sm">{{ number_format($pct, 1) }}% · {{ number_format($funnel['invoices_generated']) }} invoices</span>
                 </div>
             </div>
@@ -162,7 +171,7 @@
                     <span class="text-sm font-medium text-gray-700">PDF Downloads</span>
                     <span class="text-sm font-bold text-gray-900">{{ number_format($funnel['pdf_downloads']) }} <span class="text-xs text-gray-500">({{ number_format($pct, 1) }}%)</span></span>
                 </div>
-                <div class="w-full bg-gradient-to-r from-amber-500 to-amber-600 rounded-lg h-12 flex items-center justify-center shadow-sm">
+                <div class="w-full rounded-lg h-12 flex items-center justify-center shadow-sm" style="background: linear-gradient(to right, #f59e0b, #d97706);">
                     <span class="text-white font-semibold text-sm">{{ number_format($pct, 1) }}% · {{ number_format($funnel['pdf_downloads']) }} downloads</span>
                 </div>
             </div>
@@ -173,7 +182,7 @@
                     <span class="text-sm font-medium text-gray-700">Signup Prompts Shown</span>
                     <span class="text-sm font-bold text-gray-900">{{ number_format($funnel['signup_prompt_shown']) }} <span class="text-xs text-gray-500">({{ number_format($pct, 1) }}%)</span></span>
                 </div>
-                <div class="w-full bg-gradient-to-r from-indigo-500 to-indigo-600 rounded-lg h-12 flex items-center justify-center shadow-sm">
+                <div class="w-full rounded-lg h-12 flex items-center justify-center shadow-sm" style="background: linear-gradient(to right, #6366f1, #4f46e5);">
                     <span class="text-white font-semibold text-sm">{{ number_format($pct, 1) }}% · {{ number_format($funnel['signup_prompt_shown']) }} prompts</span>
                 </div>
             </div>
@@ -184,7 +193,7 @@
                     <span class="text-sm font-medium text-gray-700">Signup Clicks</span>
                     <span class="text-sm font-bold text-gray-900">{{ number_format($funnel['signup_prompt_clicked']) }} <span class="text-xs text-gray-500">({{ number_format($pct, 1) }}%)</span></span>
                 </div>
-                <div class="w-full bg-gradient-to-r from-pink-500 to-pink-600 rounded-lg h-12 flex items-center justify-center shadow-sm">
+                <div class="w-full rounded-lg h-12 flex items-center justify-center shadow-sm" style="background: linear-gradient(to right, #ec4899, #db2777);">
                     <span class="text-white font-semibold text-sm">{{ number_format($pct, 1) }}% · {{ number_format($funnel['signup_prompt_clicked']) }} clicked</span>
                 </div>
             </div>
