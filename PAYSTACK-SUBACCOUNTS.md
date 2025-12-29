@@ -134,6 +134,10 @@ $paystackService->createSubaccount([
 ]);
 ```
 
+  $service = new App\Services\TermiiService();
+  $result = $service->sendSms('+2348168166109', 'Test from Khan Invoice');
+  print_r($result);
+  
 ### List Banks
 ```php
 $banks = $paystackService->listBanks();

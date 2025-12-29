@@ -12,13 +12,14 @@ php artisan migrate
 php artisan db:seed --class=PlansSeeder
 ```
 
-Creates 4 tiers: Free, Starter (¦5k), Professional (¦15k), Business (¦35k)
+Creates 4 tiers: Free, Starter (ï¿½5k), Professional (ï¿½15k), Business (ï¿½35k)
 
 ### 3. Configure Paystack
 Add to `.env`:
 ```env
 PAYSTACK_PUBLIC_KEY=pk_test_xxx
-PAYSTACK_SECRET_KEY=sk_test_xxx
+PAYSTACK_SECRET_KEY=sk_test_
+xxx
 ```
 
 ### 4. Set Up Scheduler
@@ -70,7 +71,7 @@ PAYSTACK_SECRET_KEY=sk_live_xxx
 ```
 
 ### 2. Configure Webhook
-Paystack Dashboard ’ Settings ’ Webhooks:
+Paystack Dashboard ï¿½ Settings ï¿½ Webhooks:
 - URL: `https://kinvoice.ng/api/webhooks/paystack`
 - Events: charge.success, subscription.create, subscription.disable, invoice.payment_failed
 

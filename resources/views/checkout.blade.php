@@ -11,21 +11,45 @@
                 <!-- Order Summary -->
                 <div class="bg-white rounded-xl shadow-lg p-8">
                     <h2 class="text-2xl font-bold mb-6">Order Summary</h2>
-                    
+
                     <div class="space-y-4">
                         <div>
                             <h3 class="text-xl font-semibold">{{ $plan->name }} Plan</h3>
                             <p class="text-gray-600">{{ $plan->description }}</p>
                         </div>
-                        
+
+                        <!-- Billing Cycle Toggle -->
+                        <div class="border-t pt-4">
+                            <label class="block text-sm font-semibold text-gray-700 mb-3">Choose Billing Cycle:</label>
+                            <div class="grid grid-cols-2 gap-3 mb-4">
+                                <button type="button" onclick="selectCycle('monthly')" id="monthlyBtn"
+                                    class="billing-cycle-btn px-4 py-3 rounded-lg border-2 transition {{ $billingCycle === 'monthly' ? 'border-purple-600 bg-purple-50 text-purple-700 font-semibold' : 'border-gray-300 hover:border-purple-300' }}">
+                                    <div class="text-center">
+                                        <div class="font-semibold">Monthly</div>
+                                        <div class="text-sm">₦{{ number_format($plan->price_monthly) }}/mo</div>
+                                    </div>
+                                </button>
+                                <button type="button" onclick="selectCycle('yearly')" id="yearlyBtn"
+                                    class="billing-cycle-btn px-4 py-3 rounded-lg border-2 transition {{ $billingCycle === 'yearly' ? 'border-purple-600 bg-purple-50 text-purple-700 font-semibold' : 'border-gray-300 hover:border-purple-300' }}">
+                                    <div class="text-center">
+                                        <div class="font-semibold">Annual</div>
+                                        <div class="text-sm">₦{{ number_format($plan->price_yearly) }}/yr</div>
+                                        @if($plan->price_yearly < $plan->price_monthly * 12)
+                                        <div class="text-xs text-green-600 font-semibold mt-1">Save {{ round((1 - ($plan->price_yearly / ($plan->price_monthly * 12))) * 100) }}%</div>
+                                        @endif
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
+
                         <div class="border-t pt-4">
                             <div class="flex justify-between mb-2">
                                 <span class="text-gray-600">Billing Cycle:</span>
-                                <span class="font-semibold capitalize">{{ $billingCycle }}</span>
+                                <span class="font-semibold capitalize" id="cycleDisplay">{{ $billingCycle }}</span>
                             </div>
                             <div class="flex justify-between text-lg font-bold">
                                 <span>Total:</span>
-                                <span class="text-purple-600">₦{{ number_format($amount) }}</span>
+                                <span class="text-purple-600" id="totalAmount">₦{{ number_format($amount) }}</span>
                             </div>
                         </div>
                     </div>
@@ -92,7 +116,7 @@
                     <h2 class="text-2xl font-bold mb-6">Payment</h2>
                     
                     <form id="paymentForm">
-                        <button type="button" onclick="initiatePayment()" class="w-full bg-purple-600 hover:bg-purple-700 text-white py-4 rounded-lg font-semibold text-lg transition">
+                        <button type="button" onclick="initiatePayment()" id="payButton" class="w-full bg-purple-600 hover:bg-purple-700 text-white py-4 rounded-lg font-semibold text-lg transition">
                             Pay ₦{{ number_format($amount) }} Now
                         </button>
                     </form>
@@ -112,6 +136,37 @@
     </section>
 
     <script>
+    // Plan data
+    const planData = {
+        slug: "{{ $plan->slug }}",
+        monthlyPrice: {{ $plan->price_monthly }},
+        yearlyPrice: {{ $plan->price_yearly }}
+    };
+
+    let selectedCycle = "{{ $billingCycle }}";
+
+    function selectCycle(cycle) {
+        selectedCycle = cycle;
+        const amount = cycle === 'monthly' ? planData.monthlyPrice : planData.yearlyPrice;
+
+        // Update UI
+        document.getElementById('cycleDisplay').textContent = cycle.charAt(0).toUpperCase() + cycle.slice(1);
+        document.getElementById('totalAmount').textContent = '₦' + amount.toLocaleString();
+        document.getElementById('payButton').textContent = 'Pay ₦' + amount.toLocaleString() + ' Now';
+
+        // Update button styles
+        const monthlyBtn = document.getElementById('monthlyBtn');
+        const yearlyBtn = document.getElementById('yearlyBtn');
+
+        if (cycle === 'monthly') {
+            monthlyBtn.className = 'billing-cycle-btn px-4 py-3 rounded-lg border-2 transition border-purple-600 bg-purple-50 text-purple-700 font-semibold';
+            yearlyBtn.className = 'billing-cycle-btn px-4 py-3 rounded-lg border-2 transition border-gray-300 hover:border-purple-300';
+        } else {
+            yearlyBtn.className = 'billing-cycle-btn px-4 py-3 rounded-lg border-2 transition border-purple-600 bg-purple-50 text-purple-700 font-semibold';
+            monthlyBtn.className = 'billing-cycle-btn px-4 py-3 rounded-lg border-2 transition border-gray-300 hover:border-purple-300';
+        }
+    }
+
     function initiatePayment() {
         fetch("{{ route('checkout.initialize') }}", {
             method: "POST",
@@ -120,8 +175,8 @@
                 "X-CSRF-TOKEN": "{{ csrf_token() }}"
             },
             body: JSON.stringify({
-                plan_slug: "{{ $plan->slug }}",
-                billing_cycle: "{{ $billingCycle }}"
+                plan_slug: planData.slug,
+                billing_cycle: selectedCycle
             })
         })
         .then(response => response.json())

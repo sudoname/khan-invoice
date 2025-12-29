@@ -16,7 +16,7 @@ class UserSeeder extends Seeder
     {
         // Create Admin User
         User::firstOrCreate(
-            ['email' => 'admin@khaninvoice.com'],
+            ['email' => 'info@khan.ng'],
             [
                 'name' => 'Admin User',
                 'password' => Hash::make('password'),
@@ -27,7 +27,7 @@ class UserSeeder extends Seeder
 
         // Create Member User
         User::firstOrCreate(
-            ['email' => 'member@khaninvoice.com'],
+            ['email' => 'member@khan.ng'],
             [
                 'name' => 'Member User',
                 'password' => Hash::make('password'),
@@ -37,7 +37,7 @@ class UserSeeder extends Seeder
         );
 
         $this->command->info('Admin and Member users created successfully!');
-        $this->command->info('Admin: admin@khaninvoice.com / password');
-        $this->command->info('Member: member@khaninvoice.com / password');
+        $this->command->info('Admin: info@khan.ng / password');
+        $this->command->info('Member: member@khan.ng / password');
     }
 }

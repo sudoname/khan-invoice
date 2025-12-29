@@ -18,8 +18,7 @@
 
 ```bash
 # SSH into production
-ssh user@kinvoice.ng
-
+ssh user@k
 # Navigate to project
 cd /var/www/kinvoice.ng
 

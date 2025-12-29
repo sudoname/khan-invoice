@@ -33,7 +33,7 @@
                 <div class="bg-gradient-to-br from-purple-50 to-blue-50 rounded-xl p-6 mb-6">
                     <h3 class="text-xl font-semibold text-gray-900 mb-4">Option 1: Delete from Khan Invoice</h3>
                     <ol class="list-decimal pl-6 text-gray-700 space-y-3">
-                        <li>Log in to your Khan Invoice account at <a href="/admin" class="text-purple-600 hover:underline">http://localhost:8050/admin</a></li>
+                        <li>Log in to your Khan Invoice account at <a href="{{ config('app.url') }}/admin" class="text-purple-600 hover:underline">{{ config('app.url') }}/admin</a></li>
                         <li>Navigate to your Profile or Account Settings</li>
                         <li>Click on "Delete Account" or "Deactivate Account"</li>
                         <li>Confirm the deletion</li>
