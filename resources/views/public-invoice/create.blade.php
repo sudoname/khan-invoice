@@ -200,36 +200,44 @@
             <!-- Invoice Details -->
             <div class="bg-white rounded-xl p-6 shadow-lg border-2 border-purple-100 mb-6">
                 <h2 class="text-2xl font-bold text-gray-900 mb-4">Invoice Details</h2>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2 flex items-center justify-between">
-                            <span>Invoice Number</span>
-                            <button type="button" onclick="autoSuggestInvoiceNumber()" class="text-xs text-purple-600 hover:text-purple-800 font-medium">
-                                💡 Auto-suggest
-                            </button>
-                        </label>
-                        <input type="text" name="invoice_number" id="invoice_number"
-                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                            placeholder="Click 'Auto-suggest' or type your own" value="{{ old('invoice_number') }}">
-                        <p class="text-xs text-gray-500 mt-1" id="invoice-preview"></p>
-                    </div>
+
+                <!-- Invoice Number - Full width on mobile -->
+                <div class="mb-4">
+                    <label class="block text-sm font-semibold text-gray-700 mb-2 flex items-center justify-between">
+                        <span>Invoice Number</span>
+                        <button type="button" onclick="autoSuggestInvoiceNumber()" class="text-xs text-purple-600 hover:text-purple-800 font-medium">
+                            💡 Auto-suggest
+                        </button>
+                    </label>
+                    <input type="text" name="invoice_number" id="invoice_number"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                        placeholder="Click 'Auto-suggest' or type your own" value="{{ old('invoice_number') }}">
+                    <p class="text-xs text-gray-500 mt-1" id="invoice-preview"></p>
+                </div>
+
+                <!-- Issue Date & Due Date - Side by side on all screens -->
+                <div class="grid grid-cols-2 gap-3 sm:gap-4">
+                    <!-- Issue Date -->
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-2">Issue Date *</label>
                         <input type="date" name="issue_date" required
-                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                            class="w-full px-3 sm:px-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                             value="{{ old('issue_date', now()->format('Y-m-d')) }}">
                     </div>
+
+                    <!-- Due Date -->
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-2">Due Date *</label>
-                        <div class="flex gap-2 mb-2 flex-wrap">
-                            <button type="button" onclick="setDueDate(0)" class="text-xs px-3 py-1 bg-gray-100 hover:bg-purple-100 rounded-full">Today</button>
-                            <button type="button" onclick="setDueDate(7)" class="text-xs px-3 py-1 bg-gray-100 hover:bg-purple-100 rounded-full">7 days</button>
-                            <button type="button" onclick="setDueDate(14)" class="text-xs px-3 py-1 bg-gray-100 hover:bg-purple-100 rounded-full">14 days</button>
-                            <button type="button" onclick="setDueDate(30)" class="text-xs px-3 py-1 bg-purple-100 hover:bg-purple-200 rounded-full font-medium">30 days</button>
-                        </div>
                         <input type="date" name="due_date" id="due_date" required
-                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                            class="w-full px-3 sm:px-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                             value="{{ old('due_date', now()->addDays(30)->format('Y-m-d')) }}">
+                        <!-- Quick select buttons below date picker -->
+                        <div class="flex gap-1.5 sm:gap-2 mt-2 flex-wrap">
+                            <button type="button" onclick="setDueDate(0)" class="text-xs px-2 sm:px-3 py-1 bg-gray-100 hover:bg-purple-100 rounded-full transition">Today</button>
+                            <button type="button" onclick="setDueDate(7)" class="text-xs px-2 sm:px-3 py-1 bg-gray-100 hover:bg-purple-100 rounded-full transition">7 days</button>
+                            <button type="button" onclick="setDueDate(14)" class="text-xs px-2 sm:px-3 py-1 bg-gray-100 hover:bg-purple-100 rounded-full transition">14 days</button>
+                            <button type="button" onclick="setDueDate(30)" class="text-xs px-2 sm:px-3 py-1 bg-purple-100 hover:bg-purple-200 rounded-full font-medium transition">30 days</button>
+                        </div>
                     </div>
                 </div>
             </div>
