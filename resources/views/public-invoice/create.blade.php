@@ -12,6 +12,57 @@
         </div>
     </div>
 
+    <!-- Free Mode Awareness Banner (for logged-out users) -->
+    @guest
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
+        <div class="bg-gradient-to-r from-blue-50 to-purple-50 border-2 border-blue-300 rounded-xl p-4 sm:p-6 shadow-md">
+            <div class="flex items-start justify-between gap-4">
+                <div class="flex-1">
+                    <div class="flex items-center gap-2 mb-2">
+                        <div class="bg-blue-600 text-white px-3 py-1 rounded-full text-xs font-bold">
+                            FREE MODE
+                        </div>
+                        <span class="text-gray-700 font-semibold">Create unlimited invoices instantly</span>
+                    </div>
+                    <p class="text-sm text-gray-600 mb-3">
+                        Want to save customers, track payments, and create invoices faster? <strong>Create a free account in 20 seconds</strong>.
+                    </p>
+                    <div class="flex flex-wrap gap-3 items-center">
+                        <a href="{{ route('filament.app.auth.register') }}?ref=generator_banner"
+                           onclick="if (window.KinvoiceAnalytics) { window.KinvoiceAnalytics.track('generator_banner_signup_clicked'); }"
+                           class="inline-flex items-center bg-gradient-to-r from-purple-600 to-blue-600 text-white px-5 py-2.5 rounded-lg font-semibold hover:from-purple-700 hover:to-blue-700 transition shadow-md text-sm">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            Create Free Account
+                        </a>
+                        <div class="flex items-center gap-4 text-xs text-gray-600">
+                            <span class="flex items-center gap-1">
+                                <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                </svg>
+                                Save customers
+                            </span>
+                            <span class="flex items-center gap-1">
+                                <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                </svg>
+                                Track payments
+                            </span>
+                            <span class="flex items-center gap-1">
+                                <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                </svg>
+                                Invoice history
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    @endguest
+
     <!-- Invoice Form -->
     <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <form method="POST" action="{{ route('public-invoice.preview') }}" id="invoiceForm" enctype="multipart/form-data">

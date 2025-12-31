@@ -591,6 +591,11 @@
         </div>
     </div>
 
+    <!-- Conversion Signup Modal (for logged-out users) -->
+    @guest
+        <x-conversion-modal trigger="pdf" :dismissible="true" />
+    @endguest
+
     <!-- Payment Modal -->
     <div id="paymentModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
         <div class="bg-white rounded-xl max-w-md w-full p-6">
@@ -679,6 +684,15 @@
                 }, 500);
             }
 
+            // Show conversion modal after download starts (for logged-out users only)
+            @guest
+            setTimeout(() => {
+                if (window.ConversionModal) {
+                    window.ConversionModal.show('pdf');
+                }
+            }, 1500); // Wait 1.5 seconds for download to initiate
+            @endguest
+
             // Let the default link behavior proceed
             return true;
         }
@@ -692,6 +706,16 @@
 
         function openWhatsAppTemplateModal() {
             console.log('WhatsApp button clicked');
+
+            // Conversion loop: Require signup for WhatsApp sharing (logged-out users only)
+            @guest
+            if (window.ConversionModal) {
+                window.ConversionModal.show('whatsapp');
+                return;
+            }
+            @endguest
+
+            // If logged in, proceed with WhatsApp modal
             try {
                 const modal = document.getElementById('whatsappModal');
                 console.log('WhatsApp modal element:', modal);
