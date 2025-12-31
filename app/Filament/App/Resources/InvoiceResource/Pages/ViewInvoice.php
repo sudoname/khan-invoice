@@ -15,8 +15,22 @@ class ViewInvoice extends ViewRecord
 
     public function infolist(Infolist $infolist): Infolist
     {
+        $record = $this->getRecord();
+        $showPaymentNudge = in_array($record->status, ['sent', 'overdue']) &&
+                           ($record->total_amount - $record->amount_paid) > 0;
+
         return $infolist
             ->schema([
+                // Contextual Payment Nudge
+                Components\Section::make()
+                    ->schema([
+                        Components\ViewField::make('payment_nudge')
+                            ->view('filament.app.infolists.payment-nudge')
+                            ->columnSpanFull(),
+                    ])
+                    ->visible($showPaymentNudge)
+                    ->columnSpanFull(),
+
                 Components\Section::make('Invoice Information')
                     ->schema([
                         Components\TextEntry::make('invoice_number')

@@ -65,11 +65,22 @@ class StatsOverview extends BaseWidget
         $combinedRevenue = $totalBilled + $publicInvoicesRevenue;
         $combinedCollected = $totalCollected + $publicInvoicesPaid;
 
+        // Invoices sent this month
+        $invoicesSentThisMonth = (clone $query)
+            ->whereMonth('created_at', now()->month)
+            ->whereYear('created_at', now()->year)
+            ->count();
+
         return [
             Stat::make('Total Invoices', $combinedInvoiceCount)
                 ->description('Private: ' . $totalPrivateInvoices . ' | Public: ' . $totalPublicInvoices)
                 ->descriptionIcon('heroicon-m-document-text')
                 ->color('info'),
+
+            Stat::make('Invoices Sent This Month', $invoicesSentThisMonth)
+                ->description('Created in ' . now()->format('F'))
+                ->descriptionIcon('heroicon-m-paper-airplane')
+                ->color('primary'),
 
             Stat::make('Private Invoices', $totalPrivateInvoices)
                 ->description('₦' . number_format($totalBilled, 2) . ' billed')
@@ -81,18 +92,18 @@ class StatsOverview extends BaseWidget
                 ->descriptionIcon('heroicon-m-globe-alt')
                 ->color('success'),
 
-            Stat::make('Outstanding Amount', '₦' . number_format($outstandingAmount, 2))
+            Stat::make('Money Owed To You', '₦' . number_format($outstandingAmount, 2))
                 ->description($outstandingCount . ' unpaid invoices')
                 ->descriptionIcon('heroicon-m-banknotes')
                 ->color('warning')
                 ->chart([7, 12, 15, 18, 22, 19, $outstandingCount]),
 
-            Stat::make('This Month Revenue', '₦' . number_format($thisMonthRevenue, 2))
+            Stat::make('Cash Received This Month', '₦' . number_format($thisMonthRevenue, 2))
                 ->description(($revenueChange >= 0 ? '+' : '') . number_format($revenueChange, 1) . '% from last month')
                 ->descriptionIcon($revenueChange >= 0 ? 'heroicon-m-arrow-trending-up' : 'heroicon-m-arrow-trending-down')
                 ->color($revenueChange >= 0 ? 'success' : 'danger'),
 
-            Stat::make('Combined Revenue', '₦' . number_format($combinedRevenue, 2))
+            Stat::make('Total Revenue', '₦' . number_format($combinedRevenue, 2))
                 ->description('₦' . number_format($combinedCollected, 2) . ' collected')
                 ->descriptionIcon('heroicon-m-currency-dollar')
                 ->color('success'),
