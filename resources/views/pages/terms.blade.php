@@ -38,8 +38,56 @@
                 </ul>
             </section>
 
+            <section class="mb-8 bg-red-50 border-l-4 border-red-500 p-6 rounded-r-lg">
+                <h2 class="text-2xl font-semibold text-red-900 mb-4 flex items-center">
+                    <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                    </svg>
+                    4. Fraud Prevention & Law Enforcement Cooperation
+                </h2>
+                <div class="space-y-4">
+                    <p class="text-gray-800 font-semibold mb-3">
+                        Khan Invoice maintains a zero-tolerance policy regarding fraudulent activities.
+                    </p>
+                    <p class="text-gray-700 mb-3">
+                        <strong>Prohibited Activities Include:</strong>
+                    </p>
+                    <ul class="list-disc pl-6 text-gray-700 space-y-2 mb-4">
+                        <li>Creating fraudulent or fictitious invoices</li>
+                        <li>Using the platform to facilitate money laundering</li>
+                        <li>Misrepresenting business identity or credentials</li>
+                        <li>Creating invoices with intent to deceive or defraud</li>
+                        <li>Manipulating invoice amounts or tax calculations for illegal purposes</li>
+                        <li>Using stolen business or payment information</li>
+                    </ul>
+                    <div class="bg-white border-l-4 border-red-600 p-4 mt-4">
+                        <p class="text-gray-800 font-bold mb-2">⚠️ Law Enforcement Cooperation</p>
+                        <p class="text-gray-700">
+                            We will <strong>fully cooperate with law enforcement agencies</strong> and provide all necessary information,
+                            including but not limited to user account details, transaction records, IP addresses, and invoice data,
+                            when presented with:
+                        </p>
+                        <ul class="list-disc pl-6 text-gray-700 space-y-1 mt-2">
+                            <li>Valid court orders or subpoenas</li>
+                            <li>Official requests from Nigerian law enforcement (Nigerian Police, EFCC, ICPC)</li>
+                            <li>Requests from the Federal Inland Revenue Service (FIRS)</li>
+                            <li>International law enforcement requests through proper legal channels</li>
+                        </ul>
+                        <p class="text-gray-700 mt-3 font-semibold">
+                            Fraudulent use of this platform may result in criminal prosecution under Nigerian law,
+                            including the Criminal Code Act, Economic and Financial Crimes Commission (EFCC) Act,
+                            and other applicable legislation.
+                        </p>
+                    </div>
+                    <p class="text-gray-700 mt-4">
+                        <strong>Our Monitoring:</strong> We employ automated systems and manual review processes to detect
+                        suspicious activities. Accounts flagged for potential fraud will be immediately suspended pending investigation.
+                    </p>
+                </div>
+            </section>
+
             <section class="mb-8">
-                <h2 class="text-2xl font-semibold text-gray-900 mb-4">4. Tax Compliance</h2>
+                <h2 class="text-2xl font-semibold text-gray-900 mb-4">5. Tax Compliance</h2>
                 <p class="text-gray-700 mb-4">
                     While Khan Invoice provides tools to help calculate VAT and Withholding Tax according to Nigerian tax laws,
                     you remain solely responsible for:
@@ -54,7 +102,7 @@
             </section>
 
             <section class="mb-8">
-                <h2 class="text-2xl font-semibold text-gray-900 mb-4">5. Data Ownership and Use</h2>
+                <h2 class="text-2xl font-semibold text-gray-900 mb-4">6. Data Ownership and Use</h2>
                 <p class="text-gray-700 mb-4">
                     You retain all rights to the data you input into the Service. By using Khan Invoice, you grant us
                     permission to process and store your data solely for the purpose of providing the Service to you.
@@ -63,7 +111,7 @@
             </section>
 
             <section class="mb-8">
-                <h2 class="text-2xl font-semibold text-gray-900 mb-4">6. Service Availability</h2>
+                <h2 class="text-2xl font-semibold text-gray-900 mb-4">7. Service Availability</h2>
                 <p class="text-gray-700 mb-4">
                     We strive to provide reliable service, but we do not guarantee that the Service will be uninterrupted
                     or error-free. We reserve the right to modify, suspend, or discontinue the Service at any time with
@@ -72,7 +120,7 @@
             </section>
 
             <section class="mb-8">
-                <h2 class="text-2xl font-semibold text-gray-900 mb-4">7. Limitation of Liability</h2>
+                <h2 class="text-2xl font-semibold text-gray-900 mb-4">8. Limitation of Liability</h2>
                 <p class="text-gray-700 mb-4">
                     Khan Invoice and its operators shall not be liable for any indirect, incidental, special, consequential,
                     or punitive damages resulting from your use or inability to use the Service. This includes but is not
@@ -88,7 +136,7 @@
             </section>
 
             <section class="mb-8">
-                <h2 class="text-2xl font-semibold text-gray-900 mb-4">8. Intellectual Property</h2>
+                <h2 class="text-2xl font-semibold text-gray-900 mb-4">9. Intellectual Property</h2>
                 <p class="text-gray-700 mb-4">
                     The Service, including its original content, features, and functionality, is owned by Khan Invoice
                     and is protected by international copyright, trademark, and other intellectual property laws.
@@ -96,7 +144,7 @@
             </section>
 
             <section class="mb-8">
-                <h2 class="text-2xl font-semibold text-gray-900 mb-4">9. Termination</h2>
+                <h2 class="text-2xl font-semibold text-gray-900 mb-4">10. Termination</h2>
                 <p class="text-gray-700 mb-4">
                     We reserve the right to terminate or suspend your account immediately, without prior notice or liability,
                     for any reason, including if you breach these Terms of Service. Upon termination, your right to use
@@ -105,7 +153,7 @@
             </section>
 
             <section class="mb-8">
-                <h2 class="text-2xl font-semibold text-gray-900 mb-4">10. Governing Law</h2>
+                <h2 class="text-2xl font-semibold text-gray-900 mb-4">11. Governing Law</h2>
                 <p class="text-gray-700 mb-4">
                     These Terms shall be governed by and construed in accordance with the laws of the Federal Republic
                     of Nigeria, without regard to its conflict of law provisions.
@@ -113,7 +161,7 @@
             </section>
 
             <section class="mb-8">
-                <h2 class="text-2xl font-semibold text-gray-900 mb-4">11. Changes to Terms</h2>
+                <h2 class="text-2xl font-semibold text-gray-900 mb-4">12. Changes to Terms</h2>
                 <p class="text-gray-700 mb-4">
                     We reserve the right to modify or replace these Terms at any time. If a revision is material, we will
                     provide at least 30 days' notice prior to any new terms taking effect. Continued use of the Service
@@ -122,7 +170,7 @@
             </section>
 
             <section class="mb-8">
-                <h2 class="text-2xl font-semibold text-gray-900 mb-4">12. Contact Information</h2>
+                <h2 class="text-2xl font-semibold text-gray-900 mb-4">13. Contact Information</h2>
                 <p class="text-gray-700 mb-4">
                     If you have any questions about these Terms of Service, please contact us at:
                 </p>
