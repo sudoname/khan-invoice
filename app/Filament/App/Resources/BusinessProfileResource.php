@@ -24,7 +24,7 @@ class BusinessProfileResource extends Resource
 
     protected static ?string $modelLabel = 'Business Profile';
 
-    protected static ?string $navigationGroup = 'Setup';
+    protected static ?string $navigationGroup = 'My Business';
 
     protected static ?int $navigationSort = 1;
 

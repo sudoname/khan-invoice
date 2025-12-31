@@ -13,7 +13,7 @@ class MySubscription extends Page
     protected static string $view = 'filament.app.pages.my-subscription';
     protected static ?string $navigationLabel = 'My Subscription';
     protected static ?string $title = 'Subscription & Usage';
-    protected static ?string $navigationGroup = 'Billing';
+    protected static ?string $navigationGroup = 'My Plan';
     protected static ?int $navigationSort = 91;
 
     public function getSubscription()

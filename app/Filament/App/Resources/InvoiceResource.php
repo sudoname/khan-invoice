@@ -23,9 +23,14 @@ class InvoiceResource extends Resource
 
     protected static ?string $navigationLabel = 'Invoices';
 
-    protected static ?string $navigationGroup = 'Sales';
+    protected static ?string $navigationGroup = 'Get Paid';
 
     protected static ?int $navigationSort = 1;
+
+    public static function getNavigationBadgeTooltip(): ?string
+    {
+        return 'Create, send, and track invoices';
+    }
 
     public static function form(Form $form): Form
     {

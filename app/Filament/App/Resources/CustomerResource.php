@@ -19,9 +19,14 @@ class CustomerResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-user-group';
 
-    protected static ?string $navigationGroup = 'Sales';
+    protected static ?string $navigationGroup = 'Get Paid';
 
     protected static ?int $navigationSort = 3;
+
+    public static function getNavigationBadgeTooltip(): ?string
+    {
+        return 'Save and reuse customer details';
+    }
 
     public static function form(Form $form): Form
     {

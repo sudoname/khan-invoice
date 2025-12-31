@@ -16,7 +16,7 @@ class AgingReport extends Page
 
     protected static ?string $title = 'Accounts Receivable Aging';
 
-    protected static ?string $navigationGroup = 'Reports';
+    protected static ?string $navigationGroup = 'Insights';
 
     protected static ?int $navigationSort = 1;
 

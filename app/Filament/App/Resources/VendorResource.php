@@ -21,7 +21,7 @@ class VendorResource extends Resource
 
     protected static ?string $navigationLabel = 'Vendors';
 
-    protected static ?string $navigationGroup = 'Setup';
+    protected static ?string $navigationGroup = 'My Business';
 
     protected static ?int $navigationSort = 2;
 

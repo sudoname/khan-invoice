@@ -17,7 +17,7 @@ class ProfitLossStatement extends Page
 
     protected static ?string $navigationLabel = 'Profit & Loss';
 
-    protected static ?string $navigationGroup = 'Reports';
+    protected static ?string $navigationGroup = 'Insights';
 
     protected static ?int $navigationSort = 3;
 

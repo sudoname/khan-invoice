@@ -21,9 +21,14 @@ class ExpenseResource extends Resource
 
     protected static ?string $navigationLabel = 'Expenses';
 
-    protected static ?string $navigationGroup = 'Sales';
+    protected static ?string $navigationGroup = 'My Business';
 
     protected static ?int $navigationSort = 3;
+
+    public static function getNavigationBadgeTooltip(): ?string
+    {
+        return 'Track spending and receipts';
+    }
 
     public static function form(Form $form): Form
     {

@@ -24,7 +24,7 @@ class SalesReport extends Page implements HasForms
 
     protected static ?string $title = 'Sales & Collections Report';
 
-    protected static ?string $navigationGroup = 'Reports';
+    protected static ?string $navigationGroup = 'Insights';
 
     protected static ?int $navigationSort = 2;
 

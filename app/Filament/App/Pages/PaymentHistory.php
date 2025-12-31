@@ -20,7 +20,7 @@ class PaymentHistory extends Page implements HasTable
     protected static string $view = 'filament.app.pages.payment-history';
     protected static ?string $navigationLabel = 'Payment History';
     protected static ?string $title = 'Payment History';
-    protected static ?string $navigationGroup = 'Billing';
+    protected static ?string $navigationGroup = 'My Plan';
     protected static ?int $navigationSort = 92;
 
     public function table(Table $table): Table
@@ -120,7 +120,7 @@ class PaymentHistory extends Page implements HasTable
             ->where('status', 'successful')
             ->sum('amount');
 
-        return '¦' . number_format($total, 2);
+        return 'ï¿½' . number_format($total, 2);
     }
 
     public function getSuccessfulCount(): int
@@ -138,6 +138,6 @@ class PaymentHistory extends Page implements HasTable
             ->whereYear('created_at', now()->year)
             ->sum('amount');
 
-        return '¦' . number_format($amount, 2);
+        return 'ï¿½' . number_format($amount, 2);
     }
 }

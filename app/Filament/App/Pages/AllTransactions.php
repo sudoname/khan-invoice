@@ -16,7 +16,7 @@ class AllTransactions extends Page
 
     protected static ?string $navigationLabel = 'All Transactions';
 
-    protected static ?string $navigationGroup = 'Reports';
+    protected static ?string $navigationGroup = 'Insights';
 
     protected static ?int $navigationSort = 4;
 
