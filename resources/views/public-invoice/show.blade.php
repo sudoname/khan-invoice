@@ -72,16 +72,25 @@
                     <p class="text-sm sm:text-base text-gray-700 mb-4">
                         Create a free account to <strong>save invoices, reuse customers, and track payments</strong>.
                     </p>
-                    <div class="flex flex-col sm:flex-row gap-3">
-                        <a href="{{ route('filament.app.auth.register') }}"
-                            onclick="if (window.KinvoiceAnalytics) { window.KinvoiceAnalytics.track('post_invoice_signup_prompt_clicked'); }"
-                            class="inline-flex items-center justify-center bg-gradient-to-r from-purple-600 to-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:from-purple-700 hover:to-blue-700 transition shadow-md text-sm sm:text-base">
-                            Create Free Account
-                        </a>
-                        <button onclick="dismissConversionBanner()"
-                            class="inline-flex items-center justify-center bg-white text-gray-700 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition border-2 border-gray-300 text-sm sm:text-base">
-                            Not now
-                        </button>
+                    <div class="flex flex-col gap-3">
+                        <div class="flex flex-col sm:flex-row gap-3">
+                            <a href="{{ route('filament.app.auth.register') }}?from=public_invoice&invoice_id={{ $invoice->public_id }}"
+                                onclick="if (window.KinvoiceAnalytics) { window.KinvoiceAnalytics.track('post_invoice_signup_prompt_clicked'); }"
+                                class="inline-flex items-center justify-center bg-gradient-to-r from-purple-600 to-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:from-purple-700 hover:to-blue-700 transition shadow-md text-sm sm:text-base">
+                                Create Free Account
+                            </a>
+                            <button onclick="dismissConversionBanner()"
+                                class="inline-flex items-center justify-center bg-white text-gray-700 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition border-2 border-gray-300 text-sm sm:text-base">
+                                Not now
+                            </button>
+                        </div>
+                        <p class="text-center text-sm text-gray-600">
+                            Already have an account?
+                            <a href="{{ route('filament.app.auth.login') }}?from=public_invoice&invoice_id={{ $invoice->public_id }}"
+                               class="text-purple-600 font-semibold hover:text-purple-800">
+                                Login here
+                            </a>
+                        </p>
                     </div>
                 </div>
                 <button onclick="dismissConversionBanner()" class="ml-4 text-gray-400 hover:text-gray-600 flex-shrink-0">
@@ -240,6 +249,10 @@
                     <p class="text-xs text-center text-gray-600">
                         ⚡ Takes 20 seconds • 🆓 Free forever
                     </p>
+                    <a href="{{ route('filament.app.auth.login') }}?from=public_invoice&invoice_id={{ $invoice->public_id }}"
+                       class="text-sm text-center text-gray-700 hover:text-purple-600 font-semibold">
+                        Already have an account? Login
+                    </a>
                 </div>
             </div>
         </div>
@@ -930,6 +943,7 @@
                 amount: Math.round(invoiceAmount * 100), // Customer pays ONLY invoice amount (in kobo)
                 currency: 'NGN',
                 ref: reference,
+                label: "{{ $invoice->from_name }}", // Show the business name (FROM) as the merchant
                 @if($invoice->paystack_subaccount_code)
                 subaccount: '{{ $invoice->paystack_subaccount_code }}',
                 transaction_charge: Math.round(netCalculation.service_charge * 100), // Platform keeps service charge (in kobo)
