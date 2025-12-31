@@ -34,6 +34,7 @@ class User extends Authenticatable implements MustVerifyEmail, FilamentUser
         'api_enabled',
         'api_rate_limit',
         'api_last_used_at',
+        'settings',
     ];
 
     /**
@@ -58,6 +59,7 @@ class User extends Authenticatable implements MustVerifyEmail, FilamentUser
             'password' => 'hashed',
             'api_enabled' => 'boolean',
             'api_last_used_at' => 'datetime',
+            'settings' => 'array',
         ];
     }
 

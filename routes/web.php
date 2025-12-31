@@ -73,6 +73,11 @@ Route::get('/invoice/{publicId}/pay', [PublicInvoiceController::class, 'pay'])->
 Route::post('/invoice/{publicId}/mark-sent', [PublicInvoiceController::class, 'markAsSent'])->name('public-invoice.mark-sent');
 Route::post('/webhook/public-invoice/paystack', [PublicInvoiceController::class, 'webhook'])->name('public-invoice.webhook');
 
+// Invoice prefill routes (signed URLs for secure data transfer)
+Route::get('/invoice/prefill/{invoice}', [App\Http\Controllers\InvoicePrefillController::class, 'getPrefillData'])
+    ->middleware('signed')
+    ->name('invoice.prefill');
+
 // Public invoice routes
 Route::get('/inv/{publicId}', [InvoiceController::class, 'showPublic'])->name('invoice.public');
 Route::get('/inv/{publicId}/download', [InvoiceController::class, 'downloadPdf'])->name('invoice.download');

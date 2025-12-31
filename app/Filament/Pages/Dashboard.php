@@ -13,6 +13,7 @@ class Dashboard extends BaseDashboard
     public function getWidgets(): array
     {
         return [
+            \App\Filament\Widgets\WelcomePanel::class,
             \App\Filament\Widgets\StatsOverview::class,
             \App\Filament\Widgets\RevenueChartWidget::class,
             \App\Filament\Widgets\OverdueInvoicesWidget::class,

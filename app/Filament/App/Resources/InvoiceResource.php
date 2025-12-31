@@ -36,10 +36,41 @@ class InvoiceResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\Section::make('Invoice Details')
+                // Step 1: Customer Selection (Most Important First)
+                Forms\Components\Section::make('Who is this invoice for?')
+                    ->description('Select or add a new customer')
                     ->schema([
                         Forms\Components\Hidden::make('user_id')
                             ->default(auth()->id()),
+                        Forms\Components\Select::make('customer_id')
+                            ->label('Customer')
+                            ->relationship('customer', 'name')
+                            ->required()
+                            ->searchable()
+                            ->preload()
+                            ->createOptionForm([
+                                Forms\Components\TextInput::make('name')
+                                    ->required()
+                                    ->label('Customer Name'),
+                                Forms\Components\TextInput::make('company_name')
+                                    ->label('Company (Optional)'),
+                                Forms\Components\TextInput::make('email')
+                                    ->email()
+                                    ->label('Email'),
+                                Forms\Components\TextInput::make('phone')
+                                    ->label('Phone Number'),
+                            ])
+                            ->createOptionModalHeading('Add New Customer')
+                            ->columnSpanFull(),
+                    ])
+                    ->icon('heroicon-o-user-circle')
+                    ->collapsible()
+                    ->persistCollapsed(),
+
+                // Step 2: Business Profile
+                Forms\Components\Section::make('Which business is invoicing?')
+                    ->description('Select your business profile')
+                    ->schema([
                         Forms\Components\Select::make('business_profile_id')
                             ->label('Business Profile')
                             ->relationship('businessProfile', 'business_name', fn ($query) => $query->where('user_id', auth()->id()))
@@ -47,35 +78,46 @@ class InvoiceResource extends Resource
                             ->searchable()
                             ->preload()
                             ->createOptionForm([
-                                Forms\Components\TextInput::make('business_name')->required(),
-                                Forms\Components\TextInput::make('email')->email(),
-                                Forms\Components\TextInput::make('phone'),
-                                Forms\Components\Textarea::make('address'),
+                                Forms\Components\TextInput::make('business_name')
+                                    ->required()
+                                    ->label('Business Name'),
+                                Forms\Components\TextInput::make('email')
+                                    ->email()
+                                    ->label('Business Email'),
+                                Forms\Components\TextInput::make('phone')
+                                    ->label('Business Phone'),
+                                Forms\Components\Textarea::make('address')
+                                    ->label('Business Address'),
                             ])
-                            ->helperText('Select the business profile for this invoice'),
-                        Forms\Components\Select::make('customer_id')
-                            ->relationship('customer', 'name')
-                            ->required()
-                            ->searchable()
-                            ->preload()
-                            ->createOptionForm([
-                                Forms\Components\TextInput::make('name')->required(),
-                                Forms\Components\TextInput::make('company_name'),
-                                Forms\Components\TextInput::make('email')->email(),
-                                Forms\Components\TextInput::make('phone'),
-                            ]),
+                            ->createOptionModalHeading('Add New Business Profile')
+                            ->columnSpanFull(),
+                    ])
+                    ->icon('heroicon-o-building-office')
+                    ->collapsible()
+                    ->persistCollapsed(),
+
+                // Step 3: Invoice Details
+                Forms\Components\Section::make('Invoice Details')
+                    ->description('Basic invoice information')
+                    ->schema([
                         Forms\Components\TextInput::make('invoice_number')
+                            ->label('Invoice Number')
                             ->required()
                             ->default(fn () => \App\Models\Invoice::generateInvoiceNumber())
                             ->unique(ignoreRecord: true)
                             ->helperText('Auto-generated sequential number'),
                         Forms\Components\DatePicker::make('issue_date')
+                            ->label('Issue Date')
                             ->required()
-                            ->default(now()),
+                            ->default(now())
+                            ->native(false),
                         Forms\Components\DatePicker::make('due_date')
+                            ->label('Due Date')
                             ->required()
-                            ->default(now()->addDays(30)),
+                            ->default(now()->addDays(30))
+                            ->native(false),
                         Forms\Components\Select::make('status')
+                            ->label('Status')
                             ->required()
                             ->options([
                                 'draft' => 'Draft',
@@ -103,31 +145,41 @@ class InvoiceResource extends Resource
                                     ->toArray();
                             })
                             ->required()
-                            ->default('USD')
+                            ->default('NGN')
                             ->searchable()
                             ->helperText('Select invoice currency - 53+ currencies supported'),
                     ])
-                    ->columns(3),
+                    ->icon('heroicon-o-document-text')
+                    ->columns(3)
+                    ->collapsible()
+                    ->persistCollapsed(),
 
-                Forms\Components\Section::make('Line Items')
+                // Step 4: Line Items (Core Content)
+                Forms\Components\Section::make('What are you charging for?')
+                    ->description('Add products or services to this invoice')
                     ->schema([
                         Forms\Components\Repeater::make('items')
                             ->relationship('items')
                             ->schema([
                                 Forms\Components\TextInput::make('description')
+                                    ->label('Description')
                                     ->required()
+                                    ->placeholder('e.g., Website Development')
                                     ->columnSpan(2),
                                 Forms\Components\TextInput::make('quantity')
+                                    ->label('Qty')
                                     ->required()
                                     ->numeric()
                                     ->default(1)
                                     ->minValue(0.01),
                                 Forms\Components\TextInput::make('unit_price')
+                                    ->label('Price')
                                     ->required()
                                     ->numeric()
                                     ->default(0)
                                     ->prefix('₦'),
                                 Forms\Components\TextInput::make('discount')
+                                    ->label('Discount')
                                     ->numeric()
                                     ->default(0)
                                     ->prefix('₦'),
@@ -150,15 +202,19 @@ class InvoiceResource extends Resource
                             ->reorderable()
                             ->collapsible()
                             ->columnSpanFull(),
-                    ]),
+                    ])
+                    ->icon('heroicon-o-shopping-cart'),
 
-                Forms\Components\Section::make('Tax & Totals')
+                // Step 5: Tax & Totals (Advanced - Collapsed by Default)
+                Forms\Components\Section::make('Tax & Discounts')
+                    ->description('Optional: Add invoice-level tax and discounts')
                     ->schema([
                         Forms\Components\TextInput::make('discount_total')
                             ->label('Invoice Discount')
                             ->numeric()
                             ->default(0)
-                            ->prefix('₦'),
+                            ->prefix('₦')
+                            ->helperText('Additional discount on entire invoice'),
                         Forms\Components\TextInput::make('vat_rate')
                             ->label('VAT Rate (%)')
                             ->required()
@@ -166,7 +222,8 @@ class InvoiceResource extends Resource
                             ->default(7.5)
                             ->suffix('%')
                             ->minValue(0)
-                            ->maxValue(100),
+                            ->maxValue(100)
+                            ->helperText('Nigeria standard VAT rate is 7.5%'),
                         Forms\Components\TextInput::make('wht_rate')
                             ->label('Withholding Tax Rate (%)')
                             ->numeric()
@@ -179,23 +236,35 @@ class InvoiceResource extends Resource
                             ->label('Amount Already Paid')
                             ->numeric()
                             ->default(0)
-                            ->prefix('₦'),
+                            ->prefix('₦')
+                            ->helperText('If customer made partial payment'),
                     ])
-                    ->columns(4),
+                    ->icon('heroicon-o-calculator')
+                    ->columns(4)
+                    ->collapsed()
+                    ->collapsible()
+                    ->persistCollapsed(),
 
+                // Step 6: Additional Information (Optional - Collapsed by Default)
                 Forms\Components\Section::make('Additional Information')
+                    ->description('Optional: Add notes and invoice footer')
                     ->schema([
                         Forms\Components\Textarea::make('notes')
                             ->label('Private Notes')
                             ->helperText('Internal notes (not shown on invoice)')
+                            ->placeholder('Add internal notes about this invoice...')
                             ->rows(3),
                         Forms\Components\Textarea::make('footer')
                             ->label('Invoice Footer')
                             ->helperText('Text shown at bottom of invoice (e.g., payment terms)')
+                            ->placeholder('Thank you for your business...')
                             ->rows(3),
                     ])
+                    ->icon('heroicon-o-document-plus')
                     ->columns(2)
-                    ->collapsible(),
+                    ->collapsed()
+                    ->collapsible()
+                    ->persistCollapsed(),
             ]);
     }
 
