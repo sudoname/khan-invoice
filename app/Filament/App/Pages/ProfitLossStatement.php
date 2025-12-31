@@ -3,6 +3,7 @@
 namespace App\Filament\App\Pages;
 
 use App\Models\Invoice;
+use App\Models\Income;
 use App\Models\Expense;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -60,21 +61,53 @@ class ProfitLossStatement extends Page
         $userId = auth()->id();
         $isAdmin = auth()->user()->isAdmin();
 
-        // Revenue (from paid invoices)
-        $revenueQuery = Invoice::query()
+        // Revenue from paid invoices
+        $invoiceRevenueQuery = Invoice::query()
             ->whereBetween('issue_date', [$startDate, $endDate])
             ->where('status', 'paid');
 
         if (!$isAdmin) {
-            $revenueQuery->where('user_id', $userId);
+            $invoiceRevenueQuery->where('user_id', $userId);
         }
 
-        $totalRevenue = $revenueQuery->sum('total_amount');
-        $revenueByMonth = $revenueQuery
+        $invoiceRevenue = $invoiceRevenueQuery->sum('total_amount');
+        $invoiceRevenueByMonth = $invoiceRevenueQuery
             ->selectRaw("MONTH(issue_date) as month, SUM(total_amount) as total")
             ->groupBy('month')
             ->pluck('total', 'month')
             ->toArray();
+
+        // Revenue from direct income (not tied to invoices)
+        $directIncomeQuery = Income::query()
+            ->whereBetween('income_date', [$startDate, $endDate]);
+
+        if (!$isAdmin) {
+            $directIncomeQuery->where('user_id', $userId);
+        }
+
+        $directIncome = $directIncomeQuery->sum('total_amount');
+        $directIncomeByMonth = $directIncomeQuery
+            ->selectRaw("MONTH(income_date) as month, SUM(total_amount) as total")
+            ->groupBy('month')
+            ->pluck('total', 'month')
+            ->toArray();
+
+        $directIncomeByCategory = $directIncomeQuery
+            ->selectRaw('category, SUM(total_amount) as total')
+            ->groupBy('category')
+            ->pluck('total', 'category')
+            ->toArray();
+
+        // Total revenue (invoices + direct income)
+        $totalRevenue = $invoiceRevenue + $directIncome;
+
+        // Combined revenue by month
+        $revenueByMonth = [];
+        for ($month = 1; $month <= 12; $month++) {
+            $revenueByMonth[$month] =
+                ($invoiceRevenueByMonth[$month] ?? 0) +
+                ($directIncomeByMonth[$month] ?? 0);
+        }
 
         // Expenses
         $expensesQuery = Expense::query()
@@ -106,6 +139,9 @@ class ProfitLossStatement extends Page
             'revenue' => [
                 'total' => $totalRevenue,
                 'by_month' => $revenueByMonth,
+                'invoice_revenue' => $invoiceRevenue,
+                'direct_income' => $directIncome,
+                'direct_income_by_category' => $directIncomeByCategory,
             ],
             'expenses' => [
                 'total' => $totalExpenses,

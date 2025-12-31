@@ -3,6 +3,7 @@
 namespace App\Filament\Widgets;
 
 use App\Models\Invoice;
+use App\Models\Income;
 use App\Models\PublicInvoice;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
@@ -46,6 +47,24 @@ class StatsOverview extends BaseWidget
         $overdueQuery = (clone $query)->where('status', 'overdue');
         $overdueCount = $overdueQuery->count();
         $overdueAmount = $overdueQuery->sum(DB::raw('total_amount - amount_paid'));
+
+        // Direct income (not tied to invoices)
+        $directIncomeQuery = Income::query();
+        if (!auth()->user()->isAdmin()) {
+            $directIncomeQuery->where('user_id', auth()->id());
+        }
+
+        $totalDirectIncome = $directIncomeQuery->sum('total_amount');
+
+        $thisMonthDirectIncome = (clone $directIncomeQuery)
+            ->whereMonth('income_date', now()->month)
+            ->whereYear('income_date', now()->year)
+            ->sum('total_amount');
+
+        $lastMonthDirectIncome = (clone $directIncomeQuery)
+            ->whereMonth('income_date', now()->subMonth()->month)
+            ->whereYear('income_date', now()->subMonth()->year)
+            ->sum('total_amount');
 
         // This month payments received
         $thisMonthPaid = (clone $query)
@@ -98,13 +117,13 @@ class StatsOverview extends BaseWidget
                 ->color('warning')
                 ->chart([7, 12, 15, 18, 22, 19, $outstandingCount]),
 
-            Stat::make('Cash Received This Month', '₦' . number_format($thisMonthRevenue, 2))
-                ->description(($revenueChange >= 0 ? '+' : '') . number_format($revenueChange, 1) . '% from last month')
-                ->descriptionIcon($revenueChange >= 0 ? 'heroicon-m-arrow-trending-up' : 'heroicon-m-arrow-trending-down')
-                ->color($revenueChange >= 0 ? 'success' : 'danger'),
+            Stat::make('Cash Received This Month', '₦' . number_format($thisMonthRevenue + $thisMonthDirectIncome, 2))
+                ->description('Invoices: ₦' . number_format($thisMonthRevenue, 2) . ' | Direct: ₦' . number_format($thisMonthDirectIncome, 2))
+                ->descriptionIcon('heroicon-m-currency-dollar')
+                ->color('success'),
 
-            Stat::make('Total Revenue', '₦' . number_format($combinedRevenue, 2))
-                ->description('₦' . number_format($combinedCollected, 2) . ' collected')
+            Stat::make('Total Revenue', '₦' . number_format($combinedRevenue + $totalDirectIncome, 2))
+                ->description('Invoices: ₦' . number_format($combinedRevenue, 2) . ' | Direct: ₦' . number_format($totalDirectIncome, 2))
                 ->descriptionIcon('heroicon-m-currency-dollar')
                 ->color('success'),
 
