@@ -181,6 +181,82 @@
             </button>
         </div>
 
+        <!-- Next Step Strip (for logged-out users after generation) -->
+        @guest
+        <div class="mb-6 bg-gradient-to-r from-green-50 to-blue-50 border-2 border-green-400 rounded-xl p-6 shadow-lg">
+            <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
+                <!-- Left Content -->
+                <div class="flex-1">
+                    <div class="flex items-center mb-3">
+                        <div class="bg-green-600 text-white px-3 py-1 rounded-full text-xs font-bold mr-3">
+                            NEXT STEP
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900">Save & track this invoice</h3>
+                    </div>
+                    <p class="text-sm text-gray-700 mb-4">
+                        This invoice is temporary and will be lost. Create a <strong>free account</strong> to unlock:
+                    </p>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <div class="flex items-start">
+                            <svg class="w-5 h-5 text-green-600 mr-2 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            <div>
+                                <p class="font-semibold text-sm text-gray-900">Save invoice history</p>
+                                <p class="text-xs text-gray-600">Never lose an invoice again</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <svg class="w-5 h-5 text-green-600 mr-2 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            <div>
+                                <p class="font-semibold text-sm text-gray-900">Track payment status</p>
+                                <p class="text-xs text-gray-600">Know who owes you money</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <svg class="w-5 h-5 text-green-600 mr-2 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            <div>
+                                <p class="font-semibold text-sm text-gray-900">Reuse this customer</p>
+                                <p class="text-xs text-gray-600">Save time on future invoices</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right CTA -->
+                <div class="flex flex-col gap-3 min-w-fit">
+                    <a href="{{ route('filament.app.auth.register') }}?from=public_invoice&invoice_id={{ $invoice->public_id }}"
+                       onclick="if (window.KinvoiceAnalytics) { window.KinvoiceAnalytics.track('public_invoice_save_cta_clicked', { invoice_id: '{{ $invoice->public_id }}', context: 'next_step_strip' }); }"
+                       class="inline-flex items-center justify-center bg-gradient-to-r from-purple-600 to-blue-600 text-white px-8 py-4 rounded-lg font-bold text-lg hover:from-purple-700 hover:to-blue-700 transition shadow-lg transform hover:scale-105 whitespace-nowrap">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        Create Free Account
+                    </a>
+                    <p class="text-xs text-center text-gray-600">
+                        ⚡ Takes 20 seconds • 🆓 Free forever
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            // Track next step strip shown
+            document.addEventListener('DOMContentLoaded', function() {
+                if (window.KinvoiceAnalytics) {
+                    window.KinvoiceAnalytics.track('public_invoice_save_cta_shown', {
+                        invoice_id: '{{ $invoice->public_id }}',
+                        context: 'next_step_strip'
+                    });
+                }
+            });
+        </script>
+        @endguest
+
         <!-- Invoice Preview -->
         <div class="invoice-container bg-white rounded-xl shadow-2xl overflow-hidden border-2 border-gray-200">
             <!-- Header -->

@@ -364,10 +364,37 @@
 
             <!-- Submit Button -->
             <div class="text-center">
+                <!-- Loss Awareness Microcopy -->
+                @guest
+                <div class="mb-4 inline-block">
+                    <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-r-lg max-w-lg mx-auto">
+                        <div class="flex items-start">
+                            <svg class="w-5 h-5 text-yellow-600 mr-2 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <p class="text-sm text-yellow-800">
+                                <strong class="font-semibold">This invoice will not be saved</strong> unless you create an account.
+                                <span class="text-yellow-700">You'll be able to save it after generation.</span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                @endguest
+
                 <button type="submit"
-                    class="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-12 py-4 rounded-lg text-lg font-semibold hover:from-purple-700 hover:to-blue-700 transition transform hover:scale-105">
+                    class="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-12 py-4 rounded-lg text-lg font-semibold hover:from-purple-700 hover:to-blue-700 transition transform hover:scale-105 shadow-lg">
                     Generate Invoice Preview
                 </button>
+
+                <!-- Quick Signup Link -->
+                @guest
+                <p class="mt-3 text-sm text-gray-600">
+                    Already have an account?
+                    <a href="{{ route('filament.app.auth.login') }}" class="text-purple-600 hover:text-purple-800 font-semibold">
+                        Log in to save automatically
+                    </a>
+                </p>
+                @endguest
             </div>
         </form>
     </div>
