@@ -216,7 +216,7 @@
                 </div>
 
                 <!-- Issue Date & Due Date - Side by side on all screens -->
-                <div class="grid grid-cols-2 gap-3 sm:gap-4">
+                <div class="grid grid-cols-2 gap-3 sm:gap-4 mb-3">
                     <!-- Issue Date -->
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-2">Issue Date *</label>
@@ -231,14 +231,16 @@
                         <input type="date" name="due_date" id="due_date" required
                             class="w-full px-3 sm:px-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                             value="{{ old('due_date', now()->addDays(30)->format('Y-m-d')) }}">
-                        <!-- Quick select buttons below date picker -->
-                        <div class="flex gap-1.5 sm:gap-2 mt-2 flex-wrap">
-                            <button type="button" onclick="setDueDate(0)" class="text-xs px-2 sm:px-3 py-1 bg-gray-100 hover:bg-purple-100 rounded-full transition">Today</button>
-                            <button type="button" onclick="setDueDate(7)" class="text-xs px-2 sm:px-3 py-1 bg-gray-100 hover:bg-purple-100 rounded-full transition">7 days</button>
-                            <button type="button" onclick="setDueDate(14)" class="text-xs px-2 sm:px-3 py-1 bg-gray-100 hover:bg-purple-100 rounded-full transition">14 days</button>
-                            <button type="button" onclick="setDueDate(30)" class="text-xs px-2 sm:px-3 py-1 bg-purple-100 hover:bg-purple-200 rounded-full font-medium transition">30 days</button>
-                        </div>
                     </div>
+                </div>
+
+                <!-- Quick select buttons below both date fields -->
+                <div class="flex gap-1.5 sm:gap-2 flex-wrap items-center">
+                    <span class="text-xs text-gray-600 font-medium">Quick select:</span>
+                    <button type="button" onclick="setDueDate(0)" class="text-xs px-2.5 sm:px-3 py-1.5 bg-gray-100 hover:bg-purple-100 rounded-full transition">Today</button>
+                    <button type="button" onclick="setDueDate(7)" class="text-xs px-2.5 sm:px-3 py-1.5 bg-gray-100 hover:bg-purple-100 rounded-full transition">7 days</button>
+                    <button type="button" onclick="setDueDate(14)" class="text-xs px-2.5 sm:px-3 py-1.5 bg-gray-100 hover:bg-purple-100 rounded-full transition">14 days</button>
+                    <button type="button" onclick="setDueDate(30)" class="text-xs px-2.5 sm:px-3 py-1.5 bg-purple-100 hover:bg-purple-200 rounded-full font-medium transition">30 days</button>
                 </div>
             </div>
 
