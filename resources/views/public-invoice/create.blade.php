@@ -362,6 +362,17 @@
                     placeholder="Payment terms, thank you message, etc.">{{ old('notes') }}</textarea>
             </div>
 
+            <!-- Payment Fee Notice -->
+            <div class="mb-6">
+                <p class="text-center text-sm text-gray-500">
+                    <svg class="w-4 h-4 inline-block mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    Online payments via "Pay Now" button include processing fees.
+                    <a href="{{ route('fees') }}" target="_blank" class="text-blue-600 hover:text-blue-800 underline">View fee schedule</a>
+                </p>
+            </div>
+
             <!-- Submit Button -->
             <div class="text-center">
                 <!-- Loss Awareness Microcopy -->

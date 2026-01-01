@@ -265,6 +265,19 @@ class InvoiceResource extends Resource
                     ->collapsed()
                     ->collapsible()
                     ->persistCollapsed(),
+
+                // Fee Notice
+                Forms\Components\Placeholder::make('fee_notice')
+                    ->label('')
+                    ->content(new \Illuminate\Support\HtmlString('
+                        <div class="text-sm text-gray-500 text-center py-2">
+                            <svg class="w-4 h-4 inline-block mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            Online payments via "Pay Now" button include processing fees.
+                            <a href="/fees" target="_blank" class="text-blue-600 hover:text-blue-800 underline">View fee schedule</a>
+                        </div>
+                    ')),
             ]);
     }
 

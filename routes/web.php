@@ -27,6 +27,10 @@ Route::get('/policy/terms', function () {
     return view('pages.terms');
 });
 
+Route::get('/fees', function () {
+    return view('pages.fees');
+})->name('fees');
+
 Route::get('/about', function () {
     return view('pages.about');
 });
