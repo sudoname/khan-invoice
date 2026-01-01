@@ -15,6 +15,7 @@ class Income extends Model
         'user_id',
         'business_profile_id',
         'customer_id',
+        'invoice_id',
         'income_number',
         'income_date',
         'category',
@@ -58,6 +59,14 @@ class Income extends Model
     public function customer(): BelongsTo
     {
         return $this->belongsTo(Customer::class);
+    }
+
+    /**
+     * Get the invoice associated with the income (if auto-created from invoice).
+     */
+    public function invoice(): BelongsTo
+    {
+        return $this->belongsTo(Invoice::class);
     }
 
     /**

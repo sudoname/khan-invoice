@@ -4,6 +4,7 @@ namespace App\Observers;
 
 use App\Models\Invoice;
 use App\Models\Expense;
+use App\Models\Income;
 use App\Models\User;
 
 class InvoiceObserver
@@ -35,9 +36,14 @@ class InvoiceObserver
      */
     public function updated(Invoice $invoice): void
     {
-        // If invoice status changed, update linked expense
+        // If invoice status changed, update linked expense and create income if paid
         if ($invoice->isDirty('status')) {
             $this->syncExpenseStatus($invoice);
+
+            // Create income record when invoice becomes paid
+            if ($invoice->status === 'paid') {
+                $this->createIncomeForPaidInvoice($invoice);
+            }
         }
     }
 
@@ -115,6 +121,51 @@ class InvoiceObserver
         // Update expense status
         $expense->update([
             'status' => $newStatus,
+        ]);
+    }
+
+    /**
+     * Create income record when invoice is paid
+     */
+    protected function createIncomeForPaidInvoice(Invoice $invoice): void
+    {
+        // Check if income already exists for this invoice
+        $existingIncome = Income::where('invoice_id', $invoice->id)->first();
+
+        if ($existingIncome) {
+            return; // Income already created
+        }
+
+        // Determine payment method from the most recent payment record
+        $paymentMethod = 'other';
+        $lastPayment = $invoice->payments()->latest()->first();
+        if ($lastPayment) {
+            $paymentMethod = match($lastPayment->payment_method) {
+                'paystack' => 'card',
+                'bank_transfer' => 'bank_transfer',
+                'cash' => 'cash',
+                default => 'other'
+            };
+        }
+
+        // Create income record
+        Income::create([
+            'user_id' => $invoice->user_id,
+            'business_profile_id' => $invoice->business_profile_id,
+            'customer_id' => $invoice->customer_id,
+            'invoice_id' => $invoice->id,
+            'income_number' => Income::generateIncomeNumber(),
+            'income_date' => $invoice->paid_at ?? now(),
+            'category' => 'service_revenue', // Default category for invoice-based income
+            'description' => "Payment received for Invoice #{$invoice->invoice_number}" .
+                           ($invoice->customer ? " from {$invoice->customer->name}" : ""),
+            'payment_method' => $paymentMethod,
+            'reference_number' => $invoice->invoice_number,
+            'currency' => $invoice->currency,
+            'amount' => $invoice->sub_total ?? ($invoice->total_amount - ($invoice->vat_amount ?? 0)),
+            'tax_amount' => $invoice->vat_amount ?? 0,
+            'total_amount' => $invoice->amount_paid, // Use actual amount paid
+            'notes' => "Automatically created from paid invoice",
         ]);
     }
 
