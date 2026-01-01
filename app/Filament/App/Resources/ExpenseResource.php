@@ -142,73 +142,147 @@ class ExpenseResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('user.name')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('businessProfile.id')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('vendor.name')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('expense_number')
-                    ->searchable(),
                 Tables\Columns\TextColumn::make('expense_date')
+                    ->label('Date')
                     ->date()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('due_date')
-                    ->date()
-                    ->sortable(),
+                    ->sortable()
+                    ->weight('bold'),
+
+                Tables\Columns\TextColumn::make('expense_number')
+                    ->label('Expense #')
+                    ->searchable()
+                    ->copyable(),
+
+                Tables\Columns\TextColumn::make('description')
+                    ->label('Description')
+                    ->searchable()
+                    ->limit(40)
+                    ->tooltip(function ($record) {
+                        return $record->description;
+                    }),
+
+                Tables\Columns\TextColumn::make('receivedInvoice.invoice_number')
+                    ->label('Invoice Received')
+                    ->searchable()
+                    ->badge()
+                    ->color('info')
+                    ->url(fn ($record) => $record->received_invoice_id ? route('filament.app.resources.invoices.view', $record->received_invoice_id) : null)
+                    ->placeholder('—')
+                    ->description(fn ($record) => $record->receivedInvoice ? 'From: ' . ($record->receivedInvoice->businessProfile->business_name ?? $record->receivedInvoice->user->name) : null),
+
+                Tables\Columns\TextColumn::make('vendor.name')
+                    ->label('Vendor')
+                    ->searchable()
+                    ->toggleable()
+                    ->placeholder('—'),
+
                 Tables\Columns\TextColumn::make('category')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('reference_number')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('payment_method')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('status')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('currency')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('amount')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('tax_amount')
-                    ->numeric()
-                    ->sortable(),
+                    ->badge()
+                    ->colors([
+                        'primary' => 'services',
+                        'success' => 'supplies',
+                        'warning' => 'utilities',
+                        'danger' => 'rent',
+                        'info' => fn ($state) => in_array($state, ['salary', 'wages']),
+                    ]),
+
                 Tables\Columns\TextColumn::make('total_amount')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('receipt_url')
-                    ->searchable(),
+                    ->label('Total')
+                    ->money('NGN')
+                    ->sortable()
+                    ->weight('bold')
+                    ->color('danger')
+                    ->summarize([
+                        Tables\Columns\Summarizers\Sum::make()
+                            ->money('NGN')
+                            ->label('Total Expenses'),
+                    ]),
+
+                Tables\Columns\BadgeColumn::make('status')
+                    ->colors([
+                        'secondary' => 'pending',
+                        'success' => 'paid',
+                        'danger' => 'overdue',
+                        'gray' => 'cancelled',
+                    ])
+                    ->formatStateUsing(fn (string $state): string => ucfirst($state)),
+
+                Tables\Columns\TextColumn::make('due_date')
+                    ->label('Due')
+                    ->date()
+                    ->sortable()
+                    ->toggleable()
+                    ->color(fn ($record) => $record->due_date && $record->due_date < now() && $record->status !== 'paid' ? 'danger' : null),
+
+                Tables\Columns\TextColumn::make('payment_method')
+                    ->label('Paid Via')
+                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->placeholder('Not paid'),
+
                 Tables\Columns\TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('updated_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('deleted_at')
+                    ->label('Recorded')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                Tables\Filters\SelectFilter::make('status')
+                    ->options([
+                        'pending' => 'Pending',
+                        'paid' => 'Paid',
+                        'overdue' => 'Overdue',
+                        'cancelled' => 'Cancelled',
+                    ]),
+
+                Tables\Filters\SelectFilter::make('category')
+                    ->options([
+                        'rent' => 'Rent',
+                        'utilities' => 'Utilities',
+                        'supplies' => 'Office Supplies',
+                        'equipment' => 'Equipment',
+                        'salary' => 'Salary',
+                        'wages' => 'Wages',
+                        'services' => 'Professional Services',
+                        'travel' => 'Travel',
+                        'marketing' => 'Marketing',
+                        'insurance' => 'Insurance',
+                        'taxes' => 'Taxes',
+                        'other' => 'Other',
+                    ]),
+
+                Tables\Filters\Filter::make('received_invoices')
+                    ->label('Received Invoices Only')
+                    ->query(fn (Builder $query) => $query->whereNotNull('received_invoice_id')),
+
+                Tables\Filters\TrashedFilter::make(),
             ])
             ->actions([
+                Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\Action::make('view_invoice')
+                    ->label('View Invoice')
+                    ->icon('heroicon-o-document-text')
+                    ->color('info')
+                    ->url(fn ($record) => $record->received_invoice_id ? route('filament.app.resources.invoices.view', $record->received_invoice_id) : null)
+                    ->visible(fn ($record) => $record->received_invoice_id !== null)
+                    ->openUrlInNewTab(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\RestoreBulkAction::make(),
+                    Tables\Actions\ForceDeleteBulkAction::make(),
                 ]),
-            ]);
+            ])
+            ->defaultSort('expense_date', 'desc');
     }
 
     public static function getEloquentQuery(): Builder
     {
-        $query = parent::getEloquentQuery();
+        $query = parent::getEloquentQuery()
+            ->withoutGlobalScopes([
+                SoftDeletingScope::class,
+            ]);
 
         // Admin users can see all expenses, members only see their own
         if (!auth()->user()->isAdmin()) {

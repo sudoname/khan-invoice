@@ -14,6 +14,7 @@ class Expense extends Model
         'user_id',
         'business_profile_id',
         'vendor_id',
+        'received_invoice_id',
         'expense_number',
         'expense_date',
         'due_date',
@@ -100,6 +101,11 @@ class Expense extends Model
     public function vendor(): BelongsTo
     {
         return $this->belongsTo(Vendor::class);
+    }
+
+    public function receivedInvoice(): BelongsTo
+    {
+        return $this->belongsTo(Invoice::class, 'received_invoice_id');
     }
 
     // Query scopes
