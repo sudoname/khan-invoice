@@ -78,8 +78,10 @@ class ProfitLossStatement extends Page
             ->toArray();
 
         // Revenue from direct income (not tied to invoices)
+        // Exclude auto-created income from invoices to prevent double-counting
         $directIncomeQuery = Income::query()
-            ->whereBetween('income_date', [$startDate, $endDate]);
+            ->whereBetween('income_date', [$startDate, $endDate])
+            ->whereNull('invoice_id'); // Only manual income entries
 
         if (!$isAdmin) {
             $directIncomeQuery->where('user_id', $userId);

@@ -184,6 +184,15 @@ class IncomeResource extends Resource
                     ->copyable()
                     ->copyMessage('Income number copied!'),
 
+                Tables\Columns\TextColumn::make('invoice.invoice_number')
+                    ->label('From Invoice')
+                    ->searchable()
+                    ->sortable()
+                    ->toggleable()
+                    ->url(fn ($record) => $record->invoice_id ? route('filament.app.resources.invoices.view', ['record' => $record->invoice_id]) : null)
+                    ->placeholder('—')
+                    ->tooltip('Auto-created from paid invoice'),
+
                 Tables\Columns\TextColumn::make('category')
                     ->label('Category')
                     ->badge()
