@@ -191,10 +191,10 @@ class IncomeResource extends Resource
                         'success' => 'cash_sales',
                         'info' => 'service_revenue',
                         'warning' => 'product_sales',
-                        'primary' => fn ($state) => in_array($state, ['commission', 'consulting']),
-                        'secondary' => fn ($state) => in_array($state, ['interest', 'rental_income', 'refund', 'other']),
+                        'primary' => fn ($state) => $state && in_array($state, ['commission', 'consulting']),
+                        'secondary' => fn ($state) => $state && in_array($state, ['interest', 'rental_income', 'refund', 'other']),
                     ])
-                    ->formatStateUsing(fn (string $state): string => Income::getCategoryOptions()[$state] ?? ucwords(str_replace('_', ' ', $state))),
+                    ->formatStateUsing(fn (?string $state): string => $state ? (Income::getCategoryOptions()[$state] ?? ucwords(str_replace('_', ' ', $state))) : '—'),
 
                 Tables\Columns\TextColumn::make('description')
                     ->label('Description')
@@ -226,8 +226,9 @@ class IncomeResource extends Resource
                         'info' => 'card',
                         'secondary' => 'mobile_money',
                     ])
-                    ->formatStateUsing(fn (string $state): string => Income::getPaymentMethodOptions()[$state] ?? ucwords(str_replace('_', ' ', $state)))
-                    ->toggleable(),
+                    ->formatStateUsing(fn (?string $state): string => $state ? (Income::getPaymentMethodOptions()[$state] ?? ucwords(str_replace('_', ' ', $state))) : '—')
+                    ->toggleable()
+                    ->placeholder('—'),
 
                 Tables\Columns\TextColumn::make('customer.name')
                     ->label('Customer')
