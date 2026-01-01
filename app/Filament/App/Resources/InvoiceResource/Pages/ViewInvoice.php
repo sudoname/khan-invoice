@@ -24,7 +24,7 @@ class ViewInvoice extends ViewRecord
                 // Contextual Payment Nudge
                 Components\Section::make()
                     ->schema([
-                        Components\ViewField::make('payment_nudge')
+                        Components\View::make('payment_nudge')
                             ->view('filament.app.infolists.payment-nudge')
                             ->columnSpanFull(),
                     ])
@@ -87,9 +87,9 @@ class ViewInvoice extends ViewRecord
                 Components\Section::make('Payment Fee Breakdown')
                     ->description('When your customer pays via card/online payment, here\'s how fees are distributed')
                     ->schema([
-                        Components\ViewField::make('fee_breakdown')
+                        Components\View::make('fee_breakdown')
                             ->view('filament.app.infolists.fee-breakdown')
-                            ->state(fn ($record) => [
+                            ->viewData(fn ($record) => [
                                 'invoice_amount' => $record->total_amount,
                                 'breakdown' => PaymentSetting::calculateNetAmountReceived($record->total_amount),
                             ])
