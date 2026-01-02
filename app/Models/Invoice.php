@@ -153,6 +153,11 @@ class Invoice extends Model
         return $this->hasMany(Payment::class);
     }
 
+    public function expenses(): HasMany
+    {
+        return $this->hasMany(Expense::class, 'received_invoice_id');
+    }
+
     // Calculate totals
     public function calculateTotals(): void
     {
