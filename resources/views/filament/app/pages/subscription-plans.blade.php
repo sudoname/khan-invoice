@@ -45,26 +45,27 @@
             </div>
         @endif
 
-        {{-- Billing Cycle Toggle --}}
-        <div class="flex justify-center">
-            <div class="inline-flex items-center gap-3 bg-gray-100 dark:bg-gray-800 rounded-lg p-1"
-                 x-data="{ cycle: 'monthly' }">
-                <button @click="cycle = 'monthly'"
-                        :class="cycle === 'monthly' ? 'bg-white dark:bg-gray-700 shadow-sm' : ''"
-                        class="px-4 py-2 text-sm font-medium rounded-md transition-all">
-                    Monthly
-                </button>
-                <button @click="cycle = 'yearly'"
-                        :class="cycle === 'yearly' ? 'bg-white dark:bg-gray-700 shadow-sm' : ''"
-                        class="px-4 py-2 text-sm font-medium rounded-md transition-all">
-                    Yearly
-                    <span class="ml-1 text-xs text-green-600 dark:text-green-400 font-semibold">Save 17%</span>
-                </button>
+        {{-- Plans Grid with Billing Cycle Toggle --}}
+        <div x-data="{ billingCycle: 'monthly' }">
+            {{-- Billing Cycle Toggle --}}
+            <div class="flex justify-center mb-8">
+                <div class="inline-flex items-center gap-3 bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
+                    <button @click="billingCycle = 'monthly'"
+                            :class="billingCycle === 'monthly' ? 'bg-white dark:bg-gray-700 shadow-sm' : ''"
+                            class="px-4 py-2 text-sm font-medium rounded-md transition-all">
+                        Monthly
+                    </button>
+                    <button @click="billingCycle = 'yearly'"
+                            :class="billingCycle === 'yearly' ? 'bg-white dark:bg-gray-700 shadow-sm' : ''"
+                            class="px-4 py-2 text-sm font-medium rounded-md transition-all">
+                        Yearly
+                        <span class="ml-1 text-xs text-green-600 dark:text-green-400 font-semibold">Save 17%</span>
+                    </button>
+                </div>
             </div>
-        </div>
 
         {{-- Plans Grid --}}
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6" x-data="{ cycle: 'monthly' }">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             @foreach($this->getPlans() as $plan)
                 <div class="relative bg-white dark:bg-gray-800 rounded-lg border-2
                             {{ $currentSubscription && $currentSubscription->plan_id === $plan->id
@@ -94,13 +95,13 @@
 
                         {{-- Price --}}
                         <div>
-                            <div x-show="cycle === 'monthly'">
+                            <div x-show="billingCycle === 'monthly'">
                                 <span class="text-4xl font-bold text-gray-900 dark:text-white">
                                     {{ $plan->formatted_monthly_price }}
                                 </span>
                                 <span class="text-gray-600 dark:text-gray-400">/month</span>
                             </div>
-                            <div x-show="cycle === 'yearly'" x-cloak>
+                            <div x-show="billingCycle === 'yearly'" x-cloak>
                                 <span class="text-4xl font-bold text-gray-900 dark:text-white">
                                     {{ $plan->formatted_yearly_price }}
                                 </span>
@@ -198,7 +199,7 @@
                                     Current Plan
                                 </button>
                             @else
-                                <button wire:click="selectPlan({{ $plan->id }}, cycle)"
+                                <button @click="$wire.selectPlan({{ $plan->id }}, billingCycle)"
                                         class="w-full py-3 px-4 rounded-lg font-semibold transition-all
                                                {{ $plan->is_popular
                                                   ? 'bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white shadow-md hover:shadow-lg'
@@ -210,6 +211,7 @@
                     </div>
                 </div>
             @endforeach
+        </div>
         </div>
 
         {{-- Help Text --}}
