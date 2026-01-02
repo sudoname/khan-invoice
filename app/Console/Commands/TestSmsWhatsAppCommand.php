@@ -70,11 +70,11 @@ class TestSmsWhatsAppCommand extends Command
                     config('app.name')
                 );
 
-                $result = $whatsappService->sendMessage($phone, $message);
+                $result = $whatsappService->sendWhatsApp($phone, $message);
 
                 if ($result['status']) {
                     $this->info('✓ WhatsApp sent successfully!');
-                    $this->line('  Message SID: ' . ($result['data']['sid'] ?? 'N/A'));
+                    $this->line('  Message ID: ' . ($result['data']['message_id'] ?? 'N/A'));
                 } else {
                     $this->error('✗ WhatsApp failed: ' . $result['message']);
                 }

@@ -7,21 +7,18 @@ use Illuminate\Support\Facades\Log;
 
 class WhatsAppService
 {
-    protected ?string $accountSid;
-    protected ?string $authToken;
-    protected ?string $fromNumber;
-    protected string $baseUrl;
+    protected string $apiKey;
+    protected string $senderId;
+    protected string $baseUrl = 'https://api.ng.termii.com/api';
 
     public function __construct()
     {
-        $this->accountSid = config('services.twilio.account_sid');
-        $this->authToken = config('services.twilio.auth_token');
-        $this->fromNumber = config('services.twilio.whatsapp_from');
-        $this->baseUrl = 'https://api.twilio.com/2010-04-01';
+        $this->apiKey = config('services.termii.api_key');
+        $this->senderId = config('services.termii.sender_id', 'KhanInvoice');
     }
 
     /**
-     * Send WhatsApp message via Twilio API.
+     * Send WhatsApp message via Termii API.
      *
      * @param string $phoneNumber Recipient phone number (E.164 format: +234...)
      * @param string $message Message content
@@ -33,34 +30,38 @@ class WhatsAppService
             // Normalize phone number
             $phoneNumber = $this->normalizePhoneNumber($phoneNumber);
 
-            // Prepare request
-            $url = "{$this->baseUrl}/Accounts/{$this->accountSid}/Messages.json";
+            $payload = [
+                'to' => $phoneNumber,
+                'from' => $this->senderId,
+                'type' => 'plain',
+                'channel' => 'whatsapp',
+                'api_key' => $this->apiKey,
+                'data' => [
+                    'message' => $message,
+                ],
+            ];
 
-            $response = Http::asForm()
-                ->withBasicAuth($this->accountSid, $this->authToken)
-                ->post($url, [
-                    'From' => "whatsapp:{$this->fromNumber}",
-                    'To' => "whatsapp:{$phoneNumber}",
-                    'Body' => $message,
-                ]);
+            $response = Http::withHeaders([
+                'Content-Type' => 'application/json',
+            ])->post($this->baseUrl . '/send/message', $payload);
 
             if ($response->successful()) {
                 $data = $response->json();
 
                 Log::info('WhatsApp message sent successfully', [
-                    'sid' => $data['sid'] ?? null,
+                    'message_id' => $data['message_id'] ?? null,
                     'to' => $phoneNumber,
-                    'status' => $data['status'] ?? null,
+                    'balance' => $data['balance'] ?? null,
                 ]);
 
                 return [
                     'status' => true,
                     'message' => 'WhatsApp message sent successfully',
                     'data' => [
-                        'message_id' => $data['sid'] ?? null,
-                        'status' => $data['status'] ?? 'queued',
+                        'message_id' => $data['message_id'] ?? null,
+                        'balance' => $data['balance'] ?? null,
                         'to' => $phoneNumber,
-                        'from' => $this->fromNumber,
+                        'from' => $this->senderId,
                     ],
                 ];
             }
@@ -68,7 +69,7 @@ class WhatsAppService
             $errorData = $response->json();
             $errorMessage = $errorData['message'] ?? 'Failed to send WhatsApp message';
 
-            Log::error('WhatsApp API error', [
+            Log::error('Termii WhatsApp API error', [
                 'status' => $response->status(),
                 'error' => $errorMessage,
                 'response' => $errorData,
@@ -81,7 +82,7 @@ class WhatsAppService
             ];
 
         } catch (\Exception $e) {
-            Log::error('WhatsApp service exception', [
+            Log::error('Termii WhatsApp service exception', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
@@ -95,17 +96,16 @@ class WhatsAppService
     }
 
     /**
-     * Get Twilio account balance and message count.
+     * Get Termii account balance.
      *
      * @return array [status => bool, message => string, data => array]
      */
     public function getBalance(): array
     {
         try {
-            $url = "{$this->baseUrl}/Accounts/{$this->accountSid}/Balance.json";
-
-            $response = Http::withBasicAuth($this->accountSid, $this->authToken)
-                ->get($url);
+            $response = Http::get($this->baseUrl . '/get-balance', [
+                'api_key' => $this->apiKey,
+            ]);
 
             if ($response->successful()) {
                 $data = $response->json();
@@ -114,8 +114,8 @@ class WhatsAppService
                     'status' => true,
                     'message' => 'Balance retrieved successfully',
                     'data' => [
-                        'balance' => $data['balance'] ?? '0',
-                        'currency' => $data['currency'] ?? 'USD',
+                        'balance' => $data['balance'] ?? 0,
+                        'currency' => $data['currency'] ?? 'NGN',
                     ],
                 ];
             }
@@ -127,7 +127,7 @@ class WhatsAppService
             ];
 
         } catch (\Exception $e) {
-            Log::error('WhatsApp balance check failed', [
+            Log::error('Termii balance check failed', [
                 'error' => $e->getMessage(),
             ]);
 
