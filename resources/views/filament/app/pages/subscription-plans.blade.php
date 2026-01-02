@@ -71,13 +71,14 @@
                             {{ $currentSubscription && $currentSubscription->plan_id === $plan->id
                                ? 'border-primary-500 shadow-lg'
                                : 'border-gray-200 dark:border-gray-700 hover:border-primary-300 dark:hover:border-primary-700' }}
-                            transition-all duration-200">
+                            transition-all duration-200
+                            {{ $plan->is_popular ? 'mt-4' : '' }}">
 
                     {{-- Popular Badge --}}
                     @if($plan->is_popular)
-                        <div class="absolute -top-3 left-1/2 -translate-x-1/2 z-10">
-                            <span class="bg-gradient-to-r from-primary-500 to-primary-600 text-white text-xs font-bold px-4 py-1.5 rounded-full shadow-lg whitespace-nowrap">
-                                MOST POPULAR
+                        <div class="absolute -top-4 left-1/2 -translate-x-1/2 z-10">
+                            <span class="bg-gradient-to-r from-amber-500 to-orange-600 text-white text-xs font-bold px-5 py-2 rounded-full shadow-xl whitespace-nowrap uppercase tracking-wide">
+                                ⭐ Most Popular
                             </span>
                         </div>
                     @endif
@@ -195,15 +196,15 @@
                         <div class="pt-4">
                             @if($currentSubscription && $currentSubscription->plan_id === $plan->id)
                                 <button disabled
-                                        class="w-full py-3 px-4 rounded-lg font-semibold bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-not-allowed">
+                                        class="w-full py-3 px-4 rounded-lg font-semibold bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-not-allowed border-2 border-gray-200 dark:border-gray-600">
                                     Current Plan
                                 </button>
                             @else
                                 <button @click="$wire.selectPlan({{ $plan->id }}, billingCycle)"
-                                        class="w-full py-3 px-4 rounded-lg font-semibold transition-all
+                                        class="w-full py-3 px-4 rounded-lg font-bold text-base transition-all
                                                {{ $plan->is_popular
-                                                  ? 'bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white shadow-md hover:shadow-lg'
-                                                  : 'bg-primary-600 hover:bg-primary-700 text-white shadow-sm hover:shadow-md' }}">
+                                                  ? 'bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white shadow-lg hover:shadow-xl border-2 border-amber-400'
+                                                  : 'bg-blue-600 hover:bg-blue-700 text-white shadow-md hover:shadow-lg border-2 border-blue-500' }}">
                                     {{ $plan->isFree() ? 'Get Started Free' : 'Select Plan' }}
                                 </button>
                             @endif
