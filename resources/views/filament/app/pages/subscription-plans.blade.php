@@ -83,7 +83,7 @@
                         </div>
                     @endif
 
-                    <div class="p-6 space-y-4">
+                    <div class="{{ $plan->is_popular ? 'pt-10 px-6 pb-6' : 'p-6' }} space-y-4">
                         {{-- Plan Name --}}
                         <div>
                             <h3 class="text-xl font-bold text-gray-900 dark:text-white">
