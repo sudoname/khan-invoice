@@ -12,9 +12,9 @@
         @if(!empty($reportData))
             {{-- Summary Cards --}}
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                    <div class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Revenue</div>
-                    <div class="text-3xl font-bold text-green-600 dark:text-green-400 mt-2">
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 border-l-4 border-green-500">
+                    <div class="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Total Revenue</div>
+                    <div class="text-3xl font-extrabold mt-2" style="color: #16a34a;">
                         ₦{{ number_format($reportData['revenue']['total'], 2) }}
                     </div>
                     <div class="text-sm text-gray-600 dark:text-gray-300 mt-1">
@@ -22,9 +22,9 @@
                     </div>
                 </div>
 
-                <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                    <div class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Expenses</div>
-                    <div class="text-3xl font-bold text-red-600 dark:text-red-400 mt-2">
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 border-l-4 border-red-500">
+                    <div class="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Total Expenses</div>
+                    <div class="text-3xl font-extrabold mt-2" style="color: #dc2626;">
                         ₦{{ number_format($reportData['expenses']['total'], 2) }}
                     </div>
                     <div class="text-sm text-gray-600 dark:text-gray-300 mt-1">
@@ -32,12 +32,12 @@
                     </div>
                 </div>
 
-                <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                    <div class="text-sm font-medium text-gray-500 dark:text-gray-400">Net Income</div>
-                    <div class="text-3xl font-bold {{ $reportData['net_income'] >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400' }} mt-2">
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 border-l-4 {{ $reportData['net_income'] >= 0 ? 'border-blue-500' : 'border-orange-500' }}">
+                    <div class="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Net Income</div>
+                    <div class="text-3xl font-extrabold mt-2" style="color: {{ $reportData['net_income'] >= 0 ? '#16a34a' : '#dc2626' }};">
                         ₦{{ number_format($reportData['net_income'], 2) }}
                     </div>
-                    <div class="text-sm text-gray-600 dark:text-gray-300 mt-1">
+                    <div class="text-sm mt-1" style="color: {{ $reportData['net_income'] >= 0 ? '#16a34a' : '#dc2626' }}; font-weight: 600;">
                         Profit Margin: {{ number_format($reportData['profit_margin'], 1) }}%
                     </div>
                 </div>
