@@ -72,12 +72,12 @@
                                ? 'border-primary-500 shadow-lg'
                                : 'border-gray-200 dark:border-gray-700 hover:border-primary-300 dark:hover:border-primary-700' }}
                             transition-all duration-200
-                            {{ $plan->is_popular ? 'mt-4' : '' }}">
+                            {{ $plan->is_popular ? 'mt-6' : '' }}">
 
                     {{-- Popular Badge --}}
                     @if($plan->is_popular)
-                        <div class="absolute -top-4 left-1/2 -translate-x-1/2 z-10">
-                            <span class="bg-gradient-to-r from-amber-500 to-orange-600 text-white text-xs font-bold px-5 py-2 rounded-full shadow-xl whitespace-nowrap uppercase tracking-wide">
+                        <div class="absolute -top-5 left-1/2 -translate-x-1/2 z-20">
+                            <span class="inline-block bg-gradient-to-r from-amber-500 via-orange-500 to-orange-600 text-white text-xs font-extrabold px-6 py-2.5 rounded-full shadow-2xl whitespace-nowrap uppercase tracking-wider border-2 border-amber-300" style="background: linear-gradient(to right, #f59e0b, #f97316, #ea580c);">
                                 ⭐ Most Popular
                             </span>
                         </div>
