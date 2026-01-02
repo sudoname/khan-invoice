@@ -64,10 +64,20 @@ class TermiiService
                 ];
             }
 
+            $errorData = $response->json();
+            $errorMessage = is_array($errorData)
+                ? ($errorData['message'] ?? json_encode($errorData))
+                : 'Failed to send SMS';
+
+            Log::error('Termii SMS API error', [
+                'status' => $response->status(),
+                'response' => $errorData,
+            ]);
+
             return [
                 'status' => false,
-                'message' => $response->json('message') ?? 'Failed to send SMS',
-                'data' => null,
+                'message' => $errorMessage,
+                'data' => $errorData,
             ];
         } catch (\Exception $e) {
             Log::error('Termii SMS error: ' . $e->getMessage(), [

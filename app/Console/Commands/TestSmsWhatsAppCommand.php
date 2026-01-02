@@ -51,8 +51,14 @@ class TestSmsWhatsAppCommand extends Command
                 if ($result['status']) {
                     $this->info('✓ SMS sent successfully!');
                     $this->line('  Message ID: ' . ($result['data']['message_id'] ?? 'N/A'));
+                    if (isset($result['data']['balance'])) {
+                        $this->line('  Remaining balance: ₦' . $result['data']['balance']);
+                    }
                 } else {
                     $this->error('✗ SMS failed: ' . $result['message']);
+                    if (isset($result['data']) && is_array($result['data'])) {
+                        $this->line('  Response: ' . json_encode($result['data'], JSON_PRETTY_PRINT));
+                    }
                 }
             } catch (\Exception $e) {
                 $this->error('✗ SMS Error: ' . $e->getMessage());
