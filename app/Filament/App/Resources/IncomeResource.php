@@ -218,7 +218,7 @@ class IncomeResource extends Resource
                     ->money('NGN')
                     ->sortable()
                     ->weight('bold')
-                    ->color('success')
+                    ->color(fn ($record) => $record->total_amount < 0 ? 'danger' : 'success')
                     ->summarize([
                         Tables\Columns\Summarizers\Sum::make()
                             ->money('NGN')
