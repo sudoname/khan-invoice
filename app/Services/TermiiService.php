@@ -30,12 +30,16 @@ class TermiiService
             // Normalize phone number to international format
             $phoneNumber = $this->normalizePhoneNumber($phoneNumber);
 
+            // Use DND channel if no sender ID configured or sender ID not approved
+            // DND channel doesn't require registered sender ID (good for testing)
+            $channel = config('services.termii.channel', 'dnd');
+
             $payload = [
                 'to' => $phoneNumber,
                 'from' => $this->senderId,
                 'sms' => $message,
                 'type' => 'plain',
-                'channel' => 'generic',
+                'channel' => $channel,
                 'api_key' => $this->apiKey,
             ];
 

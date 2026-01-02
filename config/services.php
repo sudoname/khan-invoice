@@ -55,6 +55,7 @@ return [
     'termii' => [
         'api_key' => env('TERMII_API_KEY'),
         'sender_id' => env('TERMII_SENDER_ID', 'KhanInvoice'),
+        'channel' => env('TERMII_CHANNEL', 'dnd'), // dnd = no sender ID required (testing), generic = requires registered sender ID (production)
         // Termii is used for both SMS and WhatsApp messaging
     ],
 
