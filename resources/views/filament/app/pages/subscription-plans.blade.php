@@ -200,13 +200,19 @@
                                     Current Plan
                                 </button>
                             @else
-                                <button @click="$wire.selectPlan({{ $plan->id }}, billingCycle)"
-                                        class="w-full py-3 px-4 rounded-lg font-bold text-base transition-all
-                                               {{ $plan->is_popular
-                                                  ? 'bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white shadow-lg hover:shadow-xl border-2 border-amber-400'
-                                                  : 'bg-blue-600 hover:bg-blue-700 text-white shadow-md hover:shadow-lg border-2 border-blue-500' }}">
-                                    {{ $plan->isFree() ? 'Get Started Free' : 'Select Plan' }}
-                                </button>
+                                @if($plan->is_popular)
+                                    <button @click="$wire.selectPlan({{ $plan->id }}, billingCycle)"
+                                            class="w-full py-3 px-4 rounded-lg font-bold text-base transition-all text-white shadow-lg hover:shadow-xl border-2 border-amber-400"
+                                            style="background: linear-gradient(to right, #f59e0b, #ea580c); color: white;">
+                                        {{ $plan->isFree() ? 'Get Started Free' : 'Select Plan' }}
+                                    </button>
+                                @else
+                                    <button @click="$wire.selectPlan({{ $plan->id }}, billingCycle)"
+                                            class="w-full py-3 px-4 rounded-lg font-bold text-base transition-all text-white shadow-md hover:shadow-lg border-2 border-blue-500"
+                                            style="background-color: #2563eb; color: white;">
+                                        {{ $plan->isFree() ? 'Get Started Free' : 'Select Plan' }}
+                                    </button>
+                                @endif
                             @endif
                         </div>
                     </div>
