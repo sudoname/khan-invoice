@@ -6,14 +6,11 @@ use App\Models\Invoice;
 use App\Models\Payment;
 use App\Notifications\Channels\SmsChannel;
 use App\Notifications\Channels\WhatsAppChannel;
-use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class PaymentReceivedNotification extends Notification implements ShouldQueue
+class PaymentReceivedNotification extends Notification
 {
-    use Queueable;
 
     /**
      * Create a new notification instance.
