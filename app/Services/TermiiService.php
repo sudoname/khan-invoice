@@ -36,12 +36,16 @@ class TermiiService
 
             $payload = [
                 'to' => $phoneNumber,
-                'from' => $this->senderId,
                 'sms' => $message,
                 'type' => 'plain',
                 'channel' => $channel,
                 'api_key' => $this->apiKey,
             ];
+
+            // Only include sender ID for generic/whatsapp channels (requires registration)
+            if (in_array($channel, ['generic', 'whatsapp'])) {
+                $payload['from'] = $this->senderId;
+            }
 
             $response = Http::withHeaders([
                 'Content-Type' => 'application/json',
