@@ -120,6 +120,14 @@ class User extends Authenticatable implements MustVerifyEmail, FilamentUser
     }
 
     /**
+     * Get all subscriptions for the user.
+     */
+    public function subscriptions(): HasMany
+    {
+        return $this->hasMany(Subscription::class);
+    }
+
+    /**
      * Get the payment transactions for the user.
      */
     public function paymentTransactions(): HasMany
