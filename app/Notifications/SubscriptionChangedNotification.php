@@ -114,7 +114,7 @@ class SubscriptionChangedNotification extends Notification
             'billing_cycle' => $this->subscription->billing_cycle,
             'credit_issued' => $this->creditIssued,
             'amount_charged' => $this->amountCharged,
-            'next_billing_date' => $this->subscription->next_billing_date->toDateString(),
+            'next_billing_date' => $this->subscription->next_billing_date?->toDateString(),
         ];
     }
 }
