@@ -16,7 +16,7 @@
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
 @foreach($plans as $plan)
 <div class="bg-white rounded-xl shadow-lg p-8 {{ $plan->is_popular ? 'ring-4 ring-purple-600' : '' }}">
-@if($plan->is_popular)<div class="bg-purple-600 text-white text-center py-2 -mx-8 -mt-8 mb-4 font-semibold text-sm">MOST POPULAR</div>@endif
+@if($plan->is_popular)<div class="bg-purple-600 text-white text-center py-2 -mx-8 -mt-8 mb-4 font-semibold text-sm">MOST POPULAR ⭐</div>@endif
 <h3 class="text-2xl font-bold mb-2">{{ $plan->name }}</h3>
 <p class="text-gray-600 mb-6">{{ $plan->description }}</p>
 <div class="mb-6">

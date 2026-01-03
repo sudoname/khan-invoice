@@ -78,7 +78,7 @@
                     @if($plan->is_popular)
                         <div class="absolute -top-5 left-1/2 -translate-x-1/2 z-20">
                             <span class="inline-block bg-gradient-to-r from-amber-500 via-orange-500 to-orange-600 text-white text-xs font-extrabold px-6 py-2.5 rounded-full shadow-2xl whitespace-nowrap uppercase tracking-wider border-2 border-amber-300" style="background: linear-gradient(to right, #f59e0b, #f97316, #ea580c);">
-                                ⭐ Most Popular
+                                Most Popular ⭐
                             </span>
                         </div>
                     @endif
