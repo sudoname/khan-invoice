@@ -85,9 +85,13 @@ class SubscriptionChangedNotification extends Notification
             $message->line('• ' . $this->newPlan->max_users . ' team members');
         }
 
-        $message->line('---')
-            ->line('Your next billing date is ' . $this->subscription->next_billing_date->format('F j, Y') . '.')
-            ->action('View Subscription', url('/app/my-subscription'))
+        $message->line('---');
+
+        if ($this->subscription->next_billing_date) {
+            $message->line('Your next billing date is ' . $this->subscription->next_billing_date->format('F j, Y') . '.');
+        }
+
+        $message->action('View Subscription', url('/app/my-subscription'))
             ->line('Thank you for using Khan Invoice!');
 
         return $message;
