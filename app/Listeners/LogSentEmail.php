@@ -19,8 +19,16 @@ class LogSentEmail
 
             // Get recipient info
             $recipients = $message->getTo();
-            $recipientEmail = array_key_first($recipients);
-            $recipientName = $recipients[$recipientEmail] ?? null;
+            $firstRecipient = reset($recipients);
+
+            if ($firstRecipient instanceof \Symfony\Component\Mime\Address) {
+                $recipientEmail = $firstRecipient->getAddress();
+                $recipientName = $firstRecipient->getName();
+            } else {
+                // Fallback for older format
+                $recipientEmail = is_string($firstRecipient) ? $firstRecipient : (string) $firstRecipient;
+                $recipientName = null;
+            }
 
             // Get subject
             $subject = $message->getSubject();
