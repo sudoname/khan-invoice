@@ -30,22 +30,18 @@ class TermiiService
             // Normalize phone number to international format
             $phoneNumber = $this->normalizePhoneNumber($phoneNumber);
 
-            // Use DND channel if no sender ID configured or sender ID not approved
-            // DND channel doesn't require registered sender ID (good for testing)
+            // Channel: 'dnd' = can reach DND numbers, 'generic' = standard delivery
+            // Both require registered sender ID - no way around it
             $channel = config('services.termii.channel', 'dnd');
 
             $payload = [
                 'to' => $phoneNumber,
+                'from' => $this->senderId,
                 'sms' => $message,
                 'type' => 'plain',
                 'channel' => $channel,
                 'api_key' => $this->apiKey,
             ];
-
-            // Only include sender ID for generic/whatsapp channels (requires registration)
-            if (in_array($channel, ['generic', 'whatsapp'])) {
-                $payload['from'] = $this->senderId;
-            }
 
             $response = Http::withHeaders([
                 'Content-Type' => 'application/json',
@@ -65,9 +61,24 @@ class TermiiService
             }
 
             $errorData = $response->json();
-            $errorMessage = is_array($errorData)
-                ? ($errorData['message'] ?? json_encode($errorData))
-                : 'Failed to send SMS';
+
+            // Extract error message
+            $errorMessage = 'Failed to send SMS';
+            if (is_array($errorData)) {
+                if (isset($errorData['message'])) {
+                    // Handle array of error objects
+                    if (is_array($errorData['message']) && isset($errorData['message'][0]['issue'])) {
+                        $errorMessage = $errorData['message'][0]['issue'];
+
+                        // Provide helpful context for common errors
+                        if (str_contains($errorMessage, 'ApplicationSenderId not found')) {
+                            $errorMessage .= ' - You need to register this Sender ID in Termii dashboard first. See TERMII_QUICK_START.txt';
+                        }
+                    } else {
+                        $errorMessage = is_string($errorData['message']) ? $errorData['message'] : json_encode($errorData['message']);
+                    }
+                }
+            }
 
             Log::error('Termii SMS API error', [
                 'status' => $response->status(),

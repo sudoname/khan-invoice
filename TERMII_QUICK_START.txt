@@ -1,0 +1,89 @@
+================================================================================
+TERMII SMS QUICK START GUIDE
+================================================================================
+
+Your Termii account is configured but needs ONE more step: Sender ID registration
+
+CURRENT STATUS:
+✅ API Key: Configured (ending in ...mS)
+✅ Account Balance: ₦10 (enough for ~5 test messages)
+❌ Sender ID: NOT REGISTERED (blocking all sends)
+
+NEXT STEP - Register Your Sender ID:
+================================================================================
+
+1. Go to: https://termii.com/dashboard
+
+2. Log in with your account credentials
+
+3. Navigate to: Configuration → Sender ID (or Settings → Sender ID)
+
+4. Click "Request New Sender ID"
+
+5. Fill in the form:
+   - Sender ID Name: KhanInvoice
+   - Purpose: Transactional (invoice notifications)
+   - Company/Business: Khan Invoice
+
+6. Submit required documents (usually):
+   - Business registration certificate (CAC)
+   - Valid ID of business owner
+   - Letter of authorization (Termii may provide template)
+
+7. Wait for approval: Usually 24-48 hours (sometimes same day)
+
+8. Once approved, test again with:
+   ssh root@147.182.242.177
+   cd /var/www/kinvoice.ng
+   php artisan test:messaging +2348168166109
+
+ALTERNATIVE - Use Numeric Sender ID (Faster Approval):
+================================================================================
+
+If you want FASTER approval (often instant):
+
+1. Request a NUMERIC sender ID instead (e.g., "2348012345678")
+2. These are approved much faster but look less professional
+3. Messages will show from a phone number instead of "KhanInvoice"
+
+FOR WHATSAPP:
+================================================================================
+
+WhatsApp requires additional setup in Termii:
+1. Go to Channels → WhatsApp in Termii dashboard
+2. Connect your WhatsApp Business account
+3. Complete WhatsApp Business verification
+4. This can take 3-5 business days
+
+TESTING AFTER APPROVAL:
+================================================================================
+
+Once your Sender ID is approved:
+
+1. No code changes needed - everything is ready!
+
+2. Test SMS:
+   php artisan test:messaging +2348168166109 --sms
+
+3. Expected output:
+   ✓ SMS sent successfully!
+   Message ID: 123456789
+   Remaining balance: ₦8
+
+4. Check if recipient received the SMS
+
+5. If successful, SMS notifications are LIVE for:
+   - Invoice sent notifications
+   - Payment received notifications
+   - Payment reminders
+   - Overdue invoice alerts
+
+SUPPORT:
+================================================================================
+
+If you have questions about sender ID registration:
+- Email: support@termii.com
+- Dashboard: https://termii.com/dashboard → Support/Chat
+- Phone: Check Termii website for contact number
+
+The infrastructure is 100% ready - just waiting for sender ID approval!
