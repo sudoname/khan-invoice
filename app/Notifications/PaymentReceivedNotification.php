@@ -6,6 +6,7 @@ use App\Models\Invoice;
 use App\Models\Payment;
 use App\Notifications\Channels\SmsChannel;
 use App\Notifications\Channels\WhatsAppChannel;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
@@ -56,6 +57,21 @@ class PaymentReceivedNotification extends Notification
      */
     public function toMail(object $notifiable): MailMessage
     {
+        // Load invoice with relationships for PDF generation
+        $this->invoice->load(['businessProfile', 'customer', 'items']);
+
+        // Get business profile (with fallback to first profile)
+        $businessProfile = $this->invoice->businessProfile ?? $this->invoice->user->businessProfiles->first();
+
+        // Generate PDF in memory
+        $pdf = Pdf::loadView('invoices.pdf', [
+            'invoice' => $this->invoice,
+            'businessProfile' => $businessProfile,
+        ]);
+
+        $pdfContent = $pdf->output();
+        $pdfFilename = 'Invoice-' . $this->invoice->invoice_number . '-PAID.pdf';
+
         return (new MailMessage)
             ->subject('Payment Received - ' . $this->invoice->invoice_number)
             ->greeting('Hello ' . $notifiable->name . ',')
@@ -63,7 +79,9 @@ class PaymentReceivedNotification extends Notification
             ->line('Payment Method: ' . ucfirst($this->payment->payment_method))
             ->line('Reference: ' . $this->payment->reference_number)
             ->line('Thank you for your prompt payment!')
+            ->line('A copy of the paid invoice is attached to this email for your records.')
             ->action('View Invoice', url('/app/invoices/' . $this->invoice->id))
+            ->attachData($pdfContent, $pdfFilename, ['mime' => 'application/pdf'])
             ->salutation('Best regards, ' . config('app.name'));
     }
 

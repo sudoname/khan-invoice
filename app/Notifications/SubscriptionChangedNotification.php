@@ -4,6 +4,7 @@ namespace App\Notifications;
 
 use App\Models\Plan;
 use App\Models\Subscription;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
@@ -39,6 +40,20 @@ class SubscriptionChangedNotification extends Notification
      */
     public function toMail(object $notifiable): MailMessage
     {
+        // Generate PDF receipt
+        $pdf = Pdf::loadView('subscriptions.receipt-pdf', [
+            'subscription' => $this->subscription,
+            'oldPlan' => $this->oldPlan,
+            'newPlan' => $this->newPlan,
+            'changeType' => $this->changeType,
+            'creditIssued' => $this->creditIssued,
+            'amountCharged' => $this->amountCharged,
+            'user' => $notifiable,
+        ]);
+
+        $pdfContent = $pdf->output();
+        $pdfFilename = 'Subscription-Receipt-' . $this->subscription->id . '-' . now()->format('Ymd') . '.pdf';
+
         $message = (new MailMessage)
             ->subject('Your Subscription Has Been ' . ucfirst($this->changeType) . 'd')
             ->greeting('Hello ' . $notifiable->name . '!')
@@ -87,11 +102,13 @@ class SubscriptionChangedNotification extends Notification
 
         $message->line('---');
 
-        if ($this->subscription->next_billing_date) {
-            $message->line('Your next billing date is ' . $this->subscription->next_billing_date->format('F j, Y') . '.');
+        if ($this->subscription->current_period_end) {
+            $message->line('Your next billing date is ' . $this->subscription->current_period_end->format('F j, Y') . '.');
         }
 
-        $message->action('View Subscription', url('/app/my-subscription'))
+        $message->line('A detailed receipt is attached to this email for your records.')
+            ->action('View Subscription', url('/app/my-subscription'))
+            ->attachData($pdfContent, $pdfFilename, ['mime' => 'application/pdf'])
             ->line('Thank you for using Khan Invoice!');
 
         return $message;

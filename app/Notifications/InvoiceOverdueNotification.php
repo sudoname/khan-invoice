@@ -56,6 +56,8 @@ class InvoiceOverdueNotification extends Notification
     public function toMail(object $notifiable): MailMessage
     {
         $dueDate = $this->invoice->due_date->format('M d, Y');
+        $publicInvoiceUrl = route('public-invoice.show', $this->invoice->public_id);
+        $payNowUrl = route('public-invoice.pay', $this->invoice->public_id);
 
         return (new MailMessage)
             ->subject('OVERDUE: Invoice ' . $this->invoice->invoice_number)
@@ -66,9 +68,10 @@ class InvoiceOverdueNotification extends Notification
             ->line('Original Due Date: ' . $dueDate)
             ->line('Days Overdue: ' . $this->daysOverdue . ' days')
             ->line('Please make payment immediately to avoid late fees or service interruption.')
-            ->action('Pay Now', url('/app/invoices/' . $this->invoice->id))
+            ->action('Pay Now', $payNowUrl)
+            ->line('Or view invoice: ' . $publicInvoiceUrl)
             ->line('If you have any questions or need to discuss payment arrangements, please contact us.')
-            ->salutation('Best regards, ' . config('app.name'));
+            ->salutation('Best regards, ' . ($this->invoice->businessProfile->business_name ?? config('app.name')));
     }
 
     /**
@@ -76,12 +79,14 @@ class InvoiceOverdueNotification extends Notification
      */
     public function toSms(object $notifiable): string
     {
+        $publicInvoiceUrl = route('public-invoice.show', $this->invoice->public_id);
+
         return sprintf(
-            'URGENT: Invoice %s is OVERDUE by %d days. Amount: %s. Please pay immediately. - %s',
+            'URGENT: Invoice %s is OVERDUE by %d days. Amount: %s. Pay now: %s',
             $this->invoice->invoice_number,
             $this->daysOverdue,
             $this->formatAmount(),
-            config('app.name')
+            $publicInvoiceUrl
         );
     }
 
@@ -90,14 +95,17 @@ class InvoiceOverdueNotification extends Notification
      */
     public function toWhatsApp(object $notifiable): string
     {
+        $publicInvoiceUrl = route('public-invoice.show', $this->invoice->public_id);
+
         return sprintf(
-            "❗ *INVOICE OVERDUE*\n\n🚨 Urgent Payment Required\n\nInvoice: %s\nAmount: %s\nDue Date: %s\nDays Overdue: *%d day%s*\n\nPlease make payment immediately to avoid late fees.\n\nIf you have questions, please contact us.\n\n- %s",
+            "❗ *INVOICE OVERDUE*\n\n🚨 Urgent Payment Required\n\nInvoice: %s\nAmount: %s\nDue Date: %s\nDays Overdue: *%d day%s*\n\nPay Now:\n%s\n\nPlease make payment immediately to avoid late fees.\n\n- %s",
             $this->invoice->invoice_number,
             $this->formatAmount(),
             $this->invoice->due_date->format('M d, Y'),
             $this->daysOverdue,
             $this->daysOverdue === 1 ? '' : 's',
-            config('app.name')
+            $publicInvoiceUrl,
+            $this->invoice->businessProfile->business_name ?? config('app.name')
         );
     }
 

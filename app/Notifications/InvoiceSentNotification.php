@@ -55,17 +55,20 @@ class InvoiceSentNotification extends Notification
     public function toMail(object $notifiable): MailMessage
     {
         $dueDate = $this->invoice->due_date->format('M d, Y');
+        $publicInvoiceUrl = route('public-invoice.show', $this->invoice->public_id);
+        $payNowUrl = route('public-invoice.pay', $this->invoice->public_id);
 
         return (new MailMessage)
             ->subject('New Invoice - ' . $this->invoice->invoice_number)
             ->greeting('Hello ' . $notifiable->name . ',')
-            ->line('You have received a new invoice from ' . config('app.name') . '.')
+            ->line('You have received a new invoice from ' . ($this->invoice->businessProfile->business_name ?? config('app.name')) . '.')
             ->line('Invoice Number: ' . $this->invoice->invoice_number)
             ->line('Amount Due: ' . $this->formatAmount())
             ->line('Due Date: ' . $dueDate)
-            ->action('View Invoice', url('/app/invoices/' . $this->invoice->id))
+            ->action('Pay Now', $payNowUrl)
+            ->line('Or view invoice: ' . $publicInvoiceUrl)
             ->line('Please ensure payment is made before the due date.')
-            ->salutation('Best regards, ' . config('app.name'));
+            ->salutation('Best regards, ' . ($this->invoice->businessProfile->business_name ?? config('app.name')));
     }
 
     /**
@@ -73,12 +76,14 @@ class InvoiceSentNotification extends Notification
      */
     public function toSms(object $notifiable): string
     {
+        $publicInvoiceUrl = route('public-invoice.show', $this->invoice->public_id);
+
         return sprintf(
-            'Invoice %s for %s is due on %s. View: %s',
+            'Invoice %s for %s is due on %s. View & Pay: %s',
             $this->invoice->invoice_number,
             $this->formatAmount(),
             $this->invoice->due_date->format('M d'),
-            url('/app/invoices/' . $this->invoice->id)
+            $publicInvoiceUrl
         );
     }
 
@@ -87,12 +92,15 @@ class InvoiceSentNotification extends Notification
      */
     public function toWhatsApp(object $notifiable): string
     {
+        $publicInvoiceUrl = route('public-invoice.show', $this->invoice->public_id);
+
         return sprintf(
-            "📄 *New Invoice*\n\nInvoice: %s\nAmount: %s\nDue Date: %s\n\nPlease ensure payment is made before the due date.\n\n- %s",
+            "📄 *New Invoice*\n\nInvoice: %s\nAmount: %s\nDue Date: %s\n\nView & Pay Now:\n%s\n\nPlease ensure payment is made before the due date.\n\n- %s",
             $this->invoice->invoice_number,
             $this->formatAmount(),
             $this->invoice->due_date->format('M d, Y'),
-            config('app.name')
+            $publicInvoiceUrl,
+            $this->invoice->businessProfile->business_name ?? config('app.name')
         );
     }
 
