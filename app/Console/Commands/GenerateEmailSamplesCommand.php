@@ -50,7 +50,8 @@ class GenerateEmailSamplesCommand extends Command
         }
 
         // Get sample data
-        $invoice = Invoice::with(['customer', 'user'])->first();
+        $invoice = Invoice::with(['customer', 'user', 'payments'])->first();
+        $payment = $invoice?->payments()->first() ?? \App\Models\Payment::first();
         $customer = $invoice?->customer ?? Customer::first();
         $subscription = Subscription::with(['plan'])->first();
         $plan = Plan::where('slug', 'professional')->first() ?? Plan::skip(1)->first();
@@ -72,11 +73,11 @@ class GenerateEmailSamplesCommand extends Command
         // 2. Payment Received
         if ($all || $this->option('payment-received')) {
             $this->info('📧 Sending: Payment Received sample...');
-            if ($invoice) {
-                $user->notify(new PaymentReceivedNotification($invoice));
+            if ($invoice && $payment) {
+                $user->notify(new PaymentReceivedNotification($payment, $invoice));
                 $count++;
             } else {
-                $this->warn('  ⚠ Skipped: No invoice data found');
+                $this->warn('  ⚠ Skipped: No invoice/payment data found');
             }
         }
 
