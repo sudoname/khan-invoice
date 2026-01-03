@@ -27,11 +27,20 @@ class LogSentEmail
 
             // Get body excerpt (first 500 chars, strip HTML)
             $body = $message->getBody();
+            $bodyExcerpt = null;
+
             if ($body) {
-                $bodyText = strip_tags($body);
-                $bodyExcerpt = mb_substr($bodyText, 0, 500);
-            } else {
-                $bodyExcerpt = null;
+                // Handle different body types
+                if (is_string($body)) {
+                    $bodyText = strip_tags($body);
+                    $bodyExcerpt = mb_substr($bodyText, 0, 500);
+                } elseif (method_exists($body, 'bodyToString')) {
+                    $bodyText = strip_tags($body->bodyToString());
+                    $bodyExcerpt = mb_substr($bodyText, 0, 500);
+                } elseif (method_exists($body, 'toString')) {
+                    $bodyText = strip_tags($body->toString());
+                    $bodyExcerpt = mb_substr($bodyText, 0, 500);
+                }
             }
 
             // Determine message type from subject or notification data
