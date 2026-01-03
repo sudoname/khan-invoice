@@ -3,6 +3,7 @@
 namespace App\Observers;
 
 use App\Models\User;
+use App\Notifications\WelcomeNotification;
 
 class UserObserver
 {
@@ -19,9 +20,15 @@ class UserObserver
      */
     public function updated(User $user): void
     {
-        // Automatically enable API access when user verifies their email
-        if ($user->wasChanged('email_verified_at') && $user->email_verified_at !== null && !$user->api_enabled) {
-            $user->updateQuietly(['api_enabled' => true]);
+        // When user verifies their email for the first time
+        if ($user->wasChanged('email_verified_at') && $user->email_verified_at !== null) {
+            // Enable API access
+            if (!$user->api_enabled) {
+                $user->updateQuietly(['api_enabled' => true]);
+            }
+
+            // Send welcome email
+            $user->notify(new WelcomeNotification($user));
         }
     }
 

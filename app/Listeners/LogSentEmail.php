@@ -125,6 +125,12 @@ class LogSentEmail
             if (str_contains($notificationClass, 'VerifyEmail')) {
                 return 'verification';
             }
+            if (str_contains($notificationClass, 'WelcomeNotification')) {
+                return 'welcome';
+            }
+            if (str_contains($notificationClass, 'SubscriptionChanged')) {
+                return 'subscription_changed';
+            }
         }
 
         // Fallback: Analyze subject line
