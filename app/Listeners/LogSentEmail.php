@@ -53,7 +53,15 @@ class LogSentEmail
             $metadata = $this->extractMetadata($event->data);
 
             // Get message ID from headers if available
-            $messageId = $message->getId();
+            $messageId = null;
+            try {
+                $headers = $message->getHeaders();
+                if ($headers->has('Message-ID')) {
+                    $messageId = $headers->get('Message-ID')->getBodyAsString();
+                }
+            } catch (\Exception $e) {
+                // Ignore if we can't get message ID
+            }
 
             // Create email log
             EmailLog::create([
