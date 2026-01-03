@@ -17,11 +17,13 @@ return Application::configure(basePath: dirname(__DIR__))
             'admin' => \App\Http\Middleware\EnsureUserIsAdmin::class,
             'api.rate.limit' => \App\Http\Middleware\ApiRateLimit::class,
             'subscription.limit' => \App\Http\Middleware\EnforceSubscriptionLimits::class,
+            'verify.payment.webhook' => \App\Http\Middleware\VerifyPaymentWebhookSignature::class,
         ]);
 
         $middleware->validateCsrfTokens(except: [
             'payment/webhook',
             'webhook/public-invoice/paystack',
+            'webhooks/payment/*',
             'invoice-generator/preview',
         ]);
     })

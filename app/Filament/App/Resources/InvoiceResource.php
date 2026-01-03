@@ -266,6 +266,30 @@ class InvoiceResource extends Resource
                     ->collapsible()
                     ->persistCollapsed(),
 
+                // Step 7: Payment Settings (Phase 3)
+                Forms\Components\Section::make('Online Payment Settings')
+                    ->description('Control how customers can pay this invoice online')
+                    ->schema([
+                        Forms\Components\Toggle::make('payment_enabled')
+                            ->label('Enable Online Payments')
+                            ->default(true)
+                            ->live()
+                            ->helperText('Allow customers to pay via Paystack "Pay Now" button')
+                            ->columnSpanFull(),
+
+                        Forms\Components\DateTimePicker::make('payment_expires_at')
+                            ->label('Payment Link Expires At')
+                            ->native(false)
+                            ->seconds(false)
+                            ->helperText('After this date, online payment will be disabled. Leave empty for no expiration.')
+                            ->visible(fn (Get $get) => $get('payment_enabled') === true)
+                            ->columnSpanFull(),
+                    ])
+                    ->icon('heroicon-o-credit-card')
+                    ->collapsed()
+                    ->collapsible()
+                    ->persistCollapsed(),
+
                 // Fee Notice
                 Forms\Components\Placeholder::make('fee_notice')
                     ->label('')
@@ -345,6 +369,23 @@ class InvoiceResource extends Resource
                     ->copyable()
                     ->copyMessage('Link copied!')
                     ->formatStateUsing(fn ($state) => url("/inv/{$state}")),
+                Tables\Columns\IconColumn::make('payment_enabled')
+                    ->label('Online Pay')
+                    ->boolean()
+                    ->trueIcon('heroicon-o-check-circle')
+                    ->falseIcon('heroicon-o-x-circle')
+                    ->trueColor('success')
+                    ->falseColor('danger')
+                    ->toggleable()
+                    ->tooltip(fn ($record) => $record->payment_enabled ? 'Online payment enabled' : 'Online payment disabled'),
+                Tables\Columns\TextColumn::make('payment_expires_at')
+                    ->label('Payment Expires')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->placeholder('Never')
+                    ->color(fn ($record) => $record->payment_expires_at && $record->payment_expires_at < now() ? 'danger' : null)
+                    ->description(fn ($record) => $record->payment_expires_at && $record->payment_expires_at < now() ? 'Expired' : null),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('status')

@@ -182,13 +182,49 @@
             </button>
 
             <!-- Pay Now -->
-            <button type="button" onclick="openPaymentModal()" class="bg-gradient-to-r from-green-500 to-green-600 text-white px-3 py-3 rounded-lg font-semibold hover:from-green-600 hover:to-green-700 transition flex items-center justify-center gap-2 text-xs sm:text-sm">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
-                </svg>
-                <span class="hidden sm:inline">Pay</span>
-            </button>
+            @php
+                $canPay = $invoice->payment_status !== 'paid'
+                    && $invoice->payment_enabled
+                    && (!$invoice->payment_expires_at || $invoice->payment_expires_at > now());
+            @endphp
+
+            @if($canPay)
+                <button type="button" onclick="openPaymentModal()" class="bg-gradient-to-r from-green-500 to-green-600 text-white px-3 py-3 rounded-lg font-semibold hover:from-green-600 hover:to-green-700 transition flex items-center justify-center gap-2 text-xs sm:text-sm">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
+                    </svg>
+                    <span class="hidden sm:inline">Pay</span>
+                </button>
+            @else
+                <div class="bg-gray-100 text-gray-600 px-3 py-3 rounded-lg font-semibold flex items-center justify-center gap-2 text-xs sm:text-sm cursor-not-allowed" title="@if($invoice->payment_status === 'paid') Already paid @elseif(!$invoice->payment_enabled) Online payment disabled @elseif($invoice->payment_expires_at && $invoice->payment_expires_at <= now()) Payment link expired @endif">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                    </svg>
+                    <span class="hidden sm:inline">Pay</span>
+                </div>
+            @endif
         </div>
+
+        <!-- Payment Disabled/Expired Notice -->
+        @if(!$canPay && $invoice->payment_status !== 'paid')
+            <div class="mb-6 bg-yellow-50 border-l-4 border-yellow-500 rounded-r-lg p-4">
+                <div class="flex items-start">
+                    <svg class="w-6 h-6 text-yellow-600 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                    </svg>
+                    <div>
+                        <h4 class="text-sm font-bold text-yellow-900 mb-1">Online Payment Not Available</h4>
+                        <p class="text-sm text-yellow-800">
+                            @if(!$invoice->payment_enabled)
+                                The merchant has disabled online payments for this invoice. Please contact them for alternative payment methods.
+                            @elseif($invoice->payment_expires_at && $invoice->payment_expires_at <= now())
+                                The payment link for this invoice expired on {{ $invoice->payment_expires_at->format('M d, Y \a\t g:i A') }}. Please contact the merchant to reactivate online payments.
+                            @endif
+                        </p>
+                    </div>
+                </div>
+            </div>
+        @endif
 
         <!-- Next Step Strip (for logged-out users after generation) -->
         @guest

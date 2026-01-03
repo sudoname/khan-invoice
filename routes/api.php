@@ -10,6 +10,8 @@ use App\Http\Controllers\Api\V1\PaymentController;
 use App\Http\Controllers\Api\V1\ReportController;
 use App\Http\Controllers\Api\V1\SubscriptionController;
 use App\Http\Controllers\Api\V1\SocialAuthController;
+use App\Http\Controllers\Api\PaymentController as NewPaymentController;
+use App\Http\Controllers\Api\PaymentWebhookController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\PaystackWebhookController;
 use Illuminate\Support\Facades\Route;
@@ -22,6 +24,15 @@ use Illuminate\Support\Facades\Route;
 
 // Webhook routes (no auth middleware)
 Route::post('/webhooks/paystack', [PaystackWebhookController::class, 'handle']);
+
+// Payment Orchestration Webhooks (with signature verification)
+Route::prefix('webhooks/payment')->group(function () {
+    Route::post('/paystack', [PaymentWebhookController::class, 'handlePaystackWebhook'])
+        ->middleware('verify.payment.webhook:paystack');
+
+    Route::post('/flutterwave', [PaymentWebhookController::class, 'handleFlutterwaveWebhook'])
+        ->middleware('verify.payment.webhook:flutterwave');
+});
 
 // Public routes
 Route::prefix('v1')->group(function () {
@@ -74,4 +85,11 @@ Route::prefix('v1')->middleware(['auth:sanctum', 'api.rate.limit'])->group(funct
     // Subscription & Plans
     Route::get('/subscription', [SubscriptionController::class, 'current']);
     Route::get('/plans', [SubscriptionController::class, 'plans']);
+
+    // Payment Orchestration (Feature Flagged)
+    Route::prefix('payments')->group(function () {
+        Route::post('/invoices/{invoiceUuid}/initialize', [NewPaymentController::class, 'initializePayment']);
+        Route::get('/verify/{reference}', [NewPaymentController::class, 'verifyPayment']);
+        Route::get('/invoices/{invoiceUuid}/attempts', [NewPaymentController::class, 'getPaymentAttempts']);
+    });
 });

@@ -28,6 +28,7 @@ class Invoice extends Model
         'wht_amount',
         'total_amount',
         'amount_paid',
+        'amount_due',
         'notes',
         'footer',
         'public_id',
@@ -35,12 +36,18 @@ class Invoice extends Model
         'payment_status',
         'payment_gateway',
         'paid_at',
+        'last_payment_at',
+        'payment_expires_at',
+        'payment_enabled',
     ];
 
     protected $casts = [
         'issue_date' => 'date',
         'due_date' => 'date',
         'paid_at' => 'datetime',
+        'last_payment_at' => 'datetime',
+        'payment_expires_at' => 'datetime',
+        'payment_enabled' => 'boolean',
         'sub_total' => 'decimal:2',
         'discount_total' => 'decimal:2',
         'vat_rate' => 'decimal:2',
@@ -49,6 +56,7 @@ class Invoice extends Model
         'wht_amount' => 'decimal:2',
         'total_amount' => 'decimal:2',
         'amount_paid' => 'decimal:2',
+        'amount_due' => 'decimal:2',
     ];
 
     protected static function boot()
@@ -156,6 +164,21 @@ class Invoice extends Model
     public function expenses(): HasMany
     {
         return $this->hasMany(Expense::class, 'received_invoice_id');
+    }
+
+    public function paymentAttempts(): HasMany
+    {
+        return $this->hasMany(\App\Models\Payment\PaymentAttempt::class);
+    }
+
+    public function invoicePayments(): HasMany
+    {
+        return $this->hasMany(\App\Models\Payment\InvoicePayment::class);
+    }
+
+    public function reminders(): HasMany
+    {
+        return $this->hasMany(Reminder::class);
     }
 
     // Calculate totals
