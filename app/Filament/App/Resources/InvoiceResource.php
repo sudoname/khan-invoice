@@ -336,7 +336,9 @@ class InvoiceResource extends Resource
                 Tables\Columns\TextColumn::make('amount_remaining')
                     ->label('Amount Remaining')
                     ->money('NGN')
-                    ->sortable()
+                    ->sortable(query: function ($query, string $direction): void {
+                        $query->orderByRaw("(total_amount - amount_paid) {$direction}");
+                    })
                     ->state(fn (Invoice $record): float => $record->total_amount - $record->amount_paid)
                     ->color(fn (Invoice $record): string => $record->total_amount - $record->amount_paid > 0 ? 'warning' : 'success'),
                 Tables\Columns\BadgeColumn::make('status')
