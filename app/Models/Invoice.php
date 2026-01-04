@@ -72,6 +72,11 @@ class Invoice extends Model
             if (empty($invoice->invoice_number)) {
                 $invoice->invoice_number = static::generateInvoiceNumber();
             }
+
+            // Set amount_due to total_amount if not set
+            if (empty($invoice->amount_due)) {
+                $invoice->amount_due = $invoice->total_amount ?? 0;
+            }
         });
 
         static::updating(function ($invoice) {
