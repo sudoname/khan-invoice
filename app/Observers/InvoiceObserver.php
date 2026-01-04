@@ -10,6 +10,28 @@ use App\Models\User;
 class InvoiceObserver
 {
     /**
+     * Handle the Invoice "creating" event.
+     * Set default values for totals before first save
+     */
+    public function creating(Invoice $invoice): void
+    {
+        // Set default values for totals if not already set
+        // These will be recalculated when items are added via InvoiceItemObserver
+        if (!isset($invoice->sub_total)) {
+            $invoice->sub_total = 0;
+        }
+        if (!isset($invoice->vat_amount)) {
+            $invoice->vat_amount = 0;
+        }
+        if (!isset($invoice->wht_amount)) {
+            $invoice->wht_amount = 0;
+        }
+        if (!isset($invoice->total_amount)) {
+            $invoice->total_amount = 0;
+        }
+    }
+
+    /**
      * Handle the Invoice "created" event.
      * Auto-create expense for recipient if they're a registered user
      */
