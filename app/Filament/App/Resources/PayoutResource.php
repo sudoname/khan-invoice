@@ -110,15 +110,28 @@ class PayoutResource extends Resource
 
                         Forms\Components\Select::make('payout_type')
                             ->label('Payout Type')
-                            ->options([
-                                'MANUAL' => 'Manual (Free, 1-3 business days)',
-                                'STANDARD' => 'Standard (Free, T+1)',
-                                'INSTANT' => 'Instant (2% fee, within 1 hour)',
-                            ])
+                            ->options(function () {
+                                $options = [
+                                    'MANUAL' => 'Manual (Free, 1-3 business days)',
+                                    'STANDARD' => 'Standard (Free, T+1)',
+                                ];
+
+                                // Only show instant payout option if feature flag is enabled
+                                if (\App\Models\FeatureFlag::isEnabledForEnvironment('instant_payouts')) {
+                                    $options['INSTANT'] = 'Instant (2% fee, within 1 hour) ⚡';
+                                }
+
+                                return $options;
+                            })
                             ->required()
                             ->default('MANUAL')
                             ->live()
-                            ->helperText('Choose your payout speed')
+                            ->helperText(function () {
+                                if (\App\Models\FeatureFlag::isEnabledForEnvironment('instant_payouts')) {
+                                    return 'Choose your payout speed';
+                                }
+                                return 'Instant payouts are currently unavailable. Contact support to enable this premium feature.';
+                            })
                             ->disabled(fn () => request()->routeIs('*.edit')),
 
                         Forms\Components\TextInput::make('gross_amount')

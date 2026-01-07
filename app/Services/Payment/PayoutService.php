@@ -26,6 +26,12 @@ class PayoutService
         try {
             DB::beginTransaction();
 
+            // Validate instant payout feature flag
+            $payoutType = $data['payout_type'] ?? 'STANDARD';
+            if ($payoutType === 'INSTANT' && !\App\Models\FeatureFlag::isEnabledForEnvironment('instant_payouts')) {
+                return $this->error('Instant payouts are currently not available. Please contact support to enable this premium feature.');
+            }
+
             // Validate merchant account
             $merchantAccount = MerchantAccount::find($data['merchant_account_id']);
 

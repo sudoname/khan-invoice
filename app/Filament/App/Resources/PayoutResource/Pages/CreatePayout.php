@@ -4,6 +4,7 @@ namespace App\Filament\App\Resources\PayoutResource\Pages;
 
 use App\Filament\App\Resources\PayoutResource;
 use App\Models\Payment\MerchantAccount;
+use App\Models\FeatureFlag;
 use Filament\Resources\Pages\CreateRecord;
 use Filament\Notifications\Notification;
 
@@ -27,6 +28,18 @@ class CreatePayout extends CreateRecord
 
     protected function beforeCreate(): void
     {
+        // Validate instant payout feature flag
+        if ($this->data['payout_type'] === 'INSTANT' && !FeatureFlag::isEnabledForEnvironment('instant_payouts')) {
+            Notification::make()
+                ->danger()
+                ->title('Feature not available')
+                ->body('Instant payouts are currently not available. Please contact support to enable this premium feature.')
+                ->persistent()
+                ->send();
+
+            $this->halt();
+        }
+
         // Validate that user has a verified account
         $account = MerchantAccount::where('user_id', auth()->id())
             ->where('is_active', true)
