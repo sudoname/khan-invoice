@@ -31,6 +31,10 @@
     <meta name="robots" content="index, follow">
     <meta name="theme-color" content="#667eea">
 
+    <!-- Google AdSense -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8164278094998913"
+     crossorigin="anonymous"></script>
+
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         .gradient-bg {
