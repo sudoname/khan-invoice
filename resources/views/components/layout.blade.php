@@ -42,7 +42,8 @@
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
 
-      gtag('config', 'G-0K2QWREN6J');
+      // Enable debug mode so events show up in GA4 DebugView immediately
+      gtag('config', 'G-0K2QWREN6J', { debug_mode: true });
     </script>
 
     <script src="https://cdn.tailwindcss.com"></script>
