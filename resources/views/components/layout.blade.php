@@ -35,6 +35,16 @@
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8164278094998913"
      crossorigin="anonymous"></script>
 
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-0K2QWREN6J"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-0K2QWREN6J');
+    </script>
+
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         .gradient-bg {
