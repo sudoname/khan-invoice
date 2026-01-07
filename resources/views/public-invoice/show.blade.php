@@ -101,6 +101,14 @@
             </div>
         </div>
         <script>
+            // Track GA4 event: invoice_generated
+            if (typeof gtag !== 'undefined') {
+                gtag('event', 'invoice_generated', {
+                    event_category: 'invoice',
+                    event_label: 'invoice_created'
+                });
+            }
+
             // Show conversion banner if not dismissed in this session
             if (!sessionStorage.getItem('conversionBannerDismissed')) {
                 document.getElementById('conversionBanner').style.display = 'block';
@@ -789,6 +797,14 @@
 
         // Handle PDF download
         function handleDownload(event, url) {
+            // Track GA4 event
+            if (typeof gtag !== 'undefined') {
+                gtag('event', 'invoice_pdf_downloaded', {
+                    event_category: 'invoice',
+                    event_label: 'pdf'
+                });
+            }
+
             // Track analytics event
             if (window.KinvoiceAnalytics) {
                 window.KinvoiceAnalytics.track('invoice_pdf_downloaded', {
@@ -892,6 +908,14 @@
             const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(fullMessage)}`;
 
             console.log('[WhatsApp] Generated link:', whatsappUrl);
+
+            // Track GA4 event
+            if (typeof gtag !== 'undefined') {
+                gtag('event', 'invoice_shared_whatsapp', {
+                    event_category: 'invoice',
+                    event_label: 'whatsapp'
+                });
+            }
 
             // Track analytics event
             if (window.KinvoiceAnalytics) {

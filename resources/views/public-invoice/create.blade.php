@@ -412,6 +412,14 @@
 
     <!-- JavaScript for Dynamic Items -->
     <script>
+        // Track GA4 event: invoice_started
+        if (typeof gtag !== 'undefined') {
+            gtag('event', 'invoice_started', {
+                event_category: 'invoice',
+                event_label: 'invoice_creation_started'
+            });
+        }
+
         let itemCount = 1;
 
         document.getElementById('addItem').addEventListener('click', function() {
