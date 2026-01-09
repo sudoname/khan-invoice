@@ -53,29 +53,62 @@
 function copyHashToClipboard() {
     const hashElement = document.getElementById('document-hash');
     const hash = hashElement.textContent;
+    const button = event.target.closest('button');
+    const originalHTML = button.innerHTML;
 
-    navigator.clipboard.writeText(hash).then(() => {
-        // Show success feedback
-        const button = event.target.closest('button');
-        const originalHTML = button.innerHTML;
+    // Try modern clipboard API first
+    if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(hash).then(() => {
+            showCopySuccess(button, originalHTML);
+        }).catch(err => {
+            console.error('Clipboard API failed:', err);
+            fallbackCopyTextToClipboard(hash, button, originalHTML);
+        });
+    } else {
+        // Fallback for older browsers or non-HTTPS
+        fallbackCopyTextToClipboard(hash, button, originalHTML);
+    }
+}
 
-        button.innerHTML = `
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-            </svg>
-            Copied!
-        `;
-        button.classList.add('bg-green-600');
-        button.classList.remove('bg-purple-600', 'hover:bg-purple-700');
+function fallbackCopyTextToClipboard(text, button, originalHTML) {
+    const textArea = document.createElement('textarea');
+    textArea.value = text;
+    textArea.style.position = 'fixed';
+    textArea.style.left = '-999999px';
+    textArea.style.top = '-999999px';
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
 
-        setTimeout(() => {
-            button.innerHTML = originalHTML;
-            button.classList.remove('bg-green-600');
-            button.classList.add('bg-purple-600', 'hover:bg-purple-700');
-        }, 2000);
-    }).catch(err => {
-        alert('Failed to copy hash to clipboard');
-        console.error('Copy failed:', err);
-    });
+    try {
+        const successful = document.execCommand('copy');
+        if (successful) {
+            showCopySuccess(button, originalHTML);
+        } else {
+            alert('Copy failed. Please select and copy manually: ' + text);
+        }
+    } catch (err) {
+        alert('Copy failed. Please select and copy manually: ' + text);
+        console.error('Fallback copy failed:', err);
+    }
+
+    document.body.removeChild(textArea);
+}
+
+function showCopySuccess(button, originalHTML) {
+    button.innerHTML = `
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+        </svg>
+        Copied!
+    `;
+    button.classList.add('bg-green-600');
+    button.classList.remove('bg-purple-600', 'hover:bg-purple-700');
+
+    setTimeout(() => {
+        button.innerHTML = originalHTML;
+        button.classList.remove('bg-green-600');
+        button.classList.add('bg-purple-600', 'hover:bg-purple-700');
+    }, 2000);
 }
 </script>

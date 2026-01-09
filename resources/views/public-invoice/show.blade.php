@@ -17,7 +17,7 @@
 
         /* Print styles - hide UI elements */
         @media print {
-            nav, .action-buttons, button, a.button {
+            nav, .action-buttons, button, a.button, .no-print {
                 display: none !important;
             }
             .invoice-container {
@@ -191,9 +191,9 @@
 
             <!-- Pay Now -->
             @php
+                // Enable payment if Paystack subaccount is configured and invoice isn't paid
                 $canPay = $invoice->payment_status !== 'paid'
-                    && $invoice->payment_enabled
-                    && (!$invoice->payment_expires_at || $invoice->payment_expires_at > now());
+                    && !empty($invoice->paystack_subaccount_code);
             @endphp
 
             @if($canPay)
@@ -223,11 +223,7 @@
                     <div>
                         <h4 class="text-sm font-bold text-yellow-900 mb-1">Online Payment Not Available</h4>
                         <p class="text-sm text-yellow-800">
-                            @if(!$invoice->payment_enabled)
-                                The merchant has disabled online payments for this invoice. Please contact them for alternative payment methods.
-                            @elseif($invoice->payment_expires_at && $invoice->payment_expires_at <= now())
-                                The payment link for this invoice expired on {{ $invoice->payment_expires_at->format('M d, Y \a\t g:i A') }}. Please contact the merchant to reactivate online payments.
-                            @endif
+                            The merchant has not configured online payments for this invoice. Please contact them for alternative payment methods or bank transfer details shown above.
                         </p>
                     </div>
                 </div>
@@ -455,11 +451,13 @@
             </div>
             @endif
 
-            <!-- Document Verification -->
-            <x-invoice-verification
-                :hash="$invoice->document_hash"
-                :updatedAt="$invoice->document_hash_updated_at"
-            />
+            <!-- Document Verification (hidden on print/PDF) -->
+            <div class="no-print">
+                <x-invoice-verification
+                    :hash="$invoice->document_hash"
+                    :updatedAt="$invoice->document_hash_updated_at"
+                />
+            </div>
             </div>
         </div>
 
