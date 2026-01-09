@@ -32,6 +32,7 @@
     <meta name="theme-color" content="#667eea">
 
     <!-- Google AdSense -->
+    <meta name="google-adsense-account" content="ca-pub-8164278094998913">
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8164278094998913"
      crossorigin="anonymous"></script>
 
