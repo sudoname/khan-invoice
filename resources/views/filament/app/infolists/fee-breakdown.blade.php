@@ -1,6 +1,7 @@
 @php
-    $invoiceAmount = $getState()['invoice_amount'] ?? 0;
-    $breakdown = $getState()['breakdown'] ?? [];
+    // Data is passed via viewData(), so access directly as variables
+    $invoiceAmount = $invoice_amount ?? 0;
+    $breakdown = $breakdown ?? [];
 @endphp
 
 <div class="rounded-lg bg-gray-50 p-4 space-y-4">
