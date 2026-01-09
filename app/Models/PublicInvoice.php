@@ -57,6 +57,7 @@ class PublicInvoice extends Model
         'total_amount' => 'decimal:2',
         'amount_paid' => 'decimal:2',
         'paid_at' => 'datetime',
+        'document_hash_updated_at' => 'datetime',
         'simple_mode' => 'boolean',
         'sent_at' => 'datetime',
     ];

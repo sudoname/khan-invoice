@@ -36,7 +36,7 @@
                     @if($updatedAt)
                         <div>
                             <label class="text-xs font-medium text-gray-600 block mb-1">Hash Last Updated</label>
-                            <p class="text-xs text-gray-700">{{ $updatedAt->format('F j, Y \a\t g:i A') }}</p>
+                            <p class="text-xs text-gray-700">{{ is_string($updatedAt) ? \Carbon\Carbon::parse($updatedAt)->format('F j, Y \a\t g:i A') : $updatedAt->format('F j, Y \a\t g:i A') }}</p>
                         </div>
                     @endif
                 </div>
