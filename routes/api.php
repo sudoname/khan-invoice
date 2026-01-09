@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\V1\AISuggestionController;
 use App\Http\Controllers\Api\V1\AnalyticsEventController;
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\BusinessProfileController;
@@ -91,5 +92,23 @@ Route::prefix('v1')->middleware(['auth:sanctum', 'api.rate.limit'])->group(funct
         Route::post('/invoices/{invoiceUuid}/initialize', [NewPaymentController::class, 'initializePayment']);
         Route::get('/verify/{reference}', [NewPaymentController::class, 'verifyPayment']);
         Route::get('/invoices/{invoiceUuid}/attempts', [NewPaymentController::class, 'getPaymentAttempts']);
+    });
+
+    // AI Features (with custom rate limiting)
+    Route::prefix('ai')->group(function () {
+        // Smart Suggestions
+        Route::get('/suggest/customers', [AISuggestionController::class, 'suggestCustomers']);
+        Route::get('/suggest/items', [AISuggestionController::class, 'suggestItems']);
+        Route::get('/suggest/due-date', [AISuggestionController::class, 'suggestDueDate']);
+
+        // Payment Reminders
+        Route::get('/reminders/plan/{invoice}', [AISuggestionController::class, 'planReminders']);
+        Route::post('/reminders/{invoice}', [AISuggestionController::class, 'createReminderPlan']);
+
+        // Insights & Analytics
+        Route::get('/insights', [AISuggestionController::class, 'getInsights']);
+
+        // Statistics
+        Route::get('/stats', [AISuggestionController::class, 'getStatistics']);
     });
 });

@@ -454,6 +454,12 @@
                 <p class="text-sm text-gray-600">{{ $invoice->notes }}</p>
             </div>
             @endif
+
+            <!-- Document Verification -->
+            <x-invoice-verification
+                :hash="$invoice->document_hash"
+                :updatedAt="$invoice->document_hash_updated_at"
+            />
             </div>
         </div>
 

@@ -285,6 +285,12 @@
                     </div>
                 @endif
 
+                <!-- Document Verification -->
+                <x-invoice-verification
+                    :hash="$invoice->document_hash"
+                    :updatedAt="$invoice->document_hash_updated_at"
+                />
+
                 <!-- Footer -->
                 <div class="mt-8 pt-8 border-t border-gray-200 text-center text-sm text-gray-500">
                     <p>Thank you for your business!</p>

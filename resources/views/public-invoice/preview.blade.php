@@ -36,6 +36,7 @@
                         @endif
                     @endforeach
                     <button type="submit"
+                        onclick="if(typeof gtag !== 'undefined'){gtag('event','invoice_pdf_downloaded',{page: location.pathname, event_category: 'invoice', event_label: 'pdf_download'});}"
                         class="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white px-4 py-3 rounded-lg font-semibold hover:from-purple-700 hover:to-blue-700 transition flex items-center justify-center gap-2">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
@@ -258,6 +259,18 @@
     </div>
 
     <script>
+        // Track GA4 event: invoice_generated (fires on page load after successful creation)
+        window.addEventListener('load', function() {
+            if (typeof gtag !== 'undefined') {
+                gtag('event', 'invoice_generated', {
+                    method: 'web',
+                    page: location.pathname,
+                    event_category: 'invoice',
+                    event_label: 'invoice_creation_completed'
+                });
+            }
+        });
+
         // WhatsApp Share Function
         function shareWhatsApp() {
             const invoiceNumber = "{{ $invoice_number }}";
@@ -275,6 +288,16 @@
                            `Generated with Khan Invoice - https://kinvoice.ng`;
 
             const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
+
+            // Track GA4 event: invoice_shared_whatsapp
+            if (typeof gtag !== 'undefined') {
+                gtag('event', 'invoice_shared_whatsapp', {
+                    page: location.pathname,
+                    event_category: 'invoice',
+                    event_label: 'whatsapp_share'
+                });
+            }
+
             window.open(whatsappUrl, '_blank');
         }
 

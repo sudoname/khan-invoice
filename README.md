@@ -1,59 +1,349 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Khan Invoice
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+A modern, feature-rich invoicing application built with Laravel. Khan Invoice helps businesses create, manage, and track invoices with built-in AI-powered features for automation and insights.
 
-## About Laravel
+## Features
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+### Core Functionality
+- **Invoice Management**: Create, edit, and manage professional invoices
+- **Customer Management**: Track customer information and history
+- **Business Profiles**: Support for multiple business profiles
+- **Payment Tracking**: Monitor payments and invoice status
+- **PDF Generation**: Generate professional PDF invoices
+- **Public Invoice Links**: Share invoices via unique public URLs
+- **Invoice Verification**: SHA-256 document hash for invoice authenticity
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+### AI-Powered Features
+Khan Invoice includes three deterministic AI modules that use historical data to provide intelligent suggestions and insights:
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+1. **Smart Suggestions**
+   - Customer autofill based on usage patterns
+   - Line item suggestions from history
+   - Due date recommendations based on payment patterns
+   - Weighted scoring (recency: 70%, frequency: 30%)
 
-## Learning Laravel
+2. **Payment Reminders**
+   - Automated reminder scheduling
+   - Multi-channel support (Email, WhatsApp, SMS)
+   - Business hours and weekend handling
+   - Customizable reminder schedule
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+3. **Analytics Insights**
+   - Payment pattern analysis
+   - Late payment identification
+   - Revenue trend analysis (12 months)
+   - Top customer rankings
+   - Invoice statistics
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## Requirements
 
-## Laravel Sponsors
+- PHP 8.2+
+- Composer
+- MySQL/PostgreSQL (or SQLite for development)
+- Node.js & NPM (for frontend assets)
+- Queue worker (for background jobs)
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+## Installation
 
-### Premium Partners
+1. Clone the repository:
+```bash
+git clone https://github.com/yourusername/khan-invoice.git
+cd khan-invoice
+```
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+2. Install dependencies:
+```bash
+composer install
+npm install
+```
+
+3. Create environment file:
+```bash
+cp .env.example .env
+```
+
+4. Generate application key:
+```bash
+php artisan key:generate
+```
+
+5. Configure your database in `.env`:
+```env
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=khan_invoice
+DB_USERNAME=root
+DB_PASSWORD=
+```
+
+6. Run migrations:
+```bash
+php artisan migrate
+```
+
+7. Seed the database (optional):
+```bash
+php artisan db:seed
+```
+
+8. Build frontend assets:
+```bash
+npm run build
+```
+
+9. Start the development server:
+```bash
+php artisan serve
+```
+
+10. Start the queue worker (required for AI features):
+```bash
+php artisan queue:work
+```
+
+## Configuration
+
+### AI Features
+
+AI features can be enabled/disabled via environment variables in your `.env` file:
+
+```env
+# Master toggle for all AI features
+KINVOICE_AI_ENABLED=true
+
+# Smart Suggestions (Customer/Item autofill, Due date suggestions)
+KINVOICE_AI_SUGGESTIONS_ENABLED=true
+
+# Payment Reminders
+KINVOICE_AI_REMINDERS_ENABLED=false
+KINVOICE_AI_REMINDERS_AUTO_SEND=false
+
+# Analytics Insights
+KINVOICE_AI_INSIGHTS_ENABLED=true
+```
+
+**Important**: Payment reminders require configured email/SMS/WhatsApp services. Keep `KINVOICE_AI_REMINDERS_AUTO_SEND=false` until you've tested your messaging configuration.
+
+### Queue Configuration
+
+AI features use Laravel queues for background processing. Ensure you have a queue worker running:
+
+```bash
+# Development
+php artisan queue:work
+
+# Production (with supervisor)
+# See: https://laravel.com/docs/queues#supervisor-configuration
+```
+
+### Payment Gateway Configuration
+
+Khan Invoice supports Paystack and Flutterwave. Configure in your `.env`:
+
+```env
+PAYSTACK_PUBLIC_KEY=pk_test_xxxxx
+PAYSTACK_SECRET_KEY=sk_test_xxxxx
+```
+
+### Social Authentication
+
+Configure OAuth providers in `.env`:
+
+```env
+FACEBOOK_CLIENT_ID=your_facebook_app_id
+FACEBOOK_CLIENT_SECRET=your_facebook_app_secret
+FACEBOOK_REDIRECT_URI="${APP_URL}/auth/facebook/callback"
+
+GOOGLE_CLIENT_ID=your_google_client_id
+GOOGLE_CLIENT_SECRET=your_google_client_secret
+GOOGLE_REDIRECT_URI="${APP_URL}/auth/google/callback"
+```
+
+## API Documentation
+
+### Authentication
+
+All API endpoints require authentication via Laravel Sanctum. Include your API token in the request header:
+
+```
+Authorization: Bearer YOUR_API_TOKEN
+```
+
+### AI Endpoints
+
+#### Smart Suggestions
+
+**Suggest Customers**
+```http
+GET /api/v1/ai/suggest/customers?q=search_term
+```
+
+Response:
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": 1,
+      "name": "Acme Corporation",
+      "email": "contact@acme.com",
+      "score": 0.95
+    }
+  ],
+  "meta": {
+    "count": 1,
+    "query": "Acme",
+    "duration_ms": 45.2
+  }
+}
+```
+
+**Suggest Line Items**
+```http
+GET /api/v1/ai/suggest/items?q=search_term&customer_id=123
+```
+
+**Suggest Due Date**
+```http
+GET /api/v1/ai/suggest/due-date?customer_id=123
+```
+
+#### Payment Reminders
+
+**Plan Reminders (Preview)**
+```http
+GET /api/v1/ai/reminders/plan/{invoice_id}
+```
+
+**Create Reminder Plan**
+```http
+POST /api/v1/ai/reminders/{invoice_id}
+Content-Type: application/json
+
+{
+  "channel": "email"
+}
+```
+
+#### Analytics Insights
+
+**Get All Insights**
+```http
+GET /api/v1/ai/insights
+```
+
+**Get Statistics**
+```http
+GET /api/v1/ai/stats
+```
+
+### Rate Limiting
+
+AI endpoints have separate rate limits:
+- Suggestions: 60 requests/minute per user
+- Reminders: 10 requests/minute per user
+- Insights: 30 requests/minute per user
+
+## Invoice Document Hash
+
+Khan Invoice implements SHA-256 document hashing for invoice verification:
+
+### Features
+- Deterministic hash generation from invoice content
+- Automatic hash updates when invoice data changes
+- Public display of hash on invoice views
+- Backfill command for existing invoices
+
+### Usage
+
+**Backfill Hashes**
+```bash
+# Backfill all invoices
+php artisan invoices:backfill-hashes
+
+# Backfill only private invoices
+php artisan invoices:backfill-hashes --type=private
+
+# Force rehash even if hash exists
+php artisan invoices:backfill-hashes --force
+```
+
+**Verify Invoice**
+
+The document hash is displayed on both authenticated and public invoice views. Users can copy the hash to verify invoice authenticity.
+
+For detailed implementation information, see [INVOICE_HASH_IMPLEMENTATION.md](./INVOICE_HASH_IMPLEMENTATION.md).
+
+## Testing
+
+Run the test suite:
+
+```bash
+# Run all tests
+php artisan test
+
+# Run specific test suites
+php artisan test --testsuite=Unit
+php artisan test --testsuite=Feature
+
+# Run AI module tests
+php artisan test tests/Unit/SuggestionServiceTest.php
+php artisan test tests/Unit/ReminderPlannerServiceTest.php
+php artisan test tests/Unit/InsightsServiceTest.php
+php artisan test tests/Feature/AIApiTest.php
+```
+
+## Deployment
+
+### Production Checklist
+
+1. Set `APP_ENV=production` and `APP_DEBUG=false`
+2. Configure production database
+3. Set up queue workers with Supervisor
+4. Configure email/SMS services for reminders
+5. Set up cron for scheduled tasks:
+```bash
+* * * * * cd /path-to-your-project && php artisan schedule:run >> /dev/null 2>&1
+```
+6. Run migrations:
+```bash
+php artisan migrate --force
+```
+7. Optimize Laravel:
+```bash
+php artisan config:cache
+php artisan route:cache
+php artisan view:cache
+```
+8. Set proper file permissions
+9. Configure SSL certificate
+10. Backfill invoice hashes:
+```bash
+php artisan invoices:backfill-hashes
+```
 
 ## Contributing
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+Contributions are welcome! Please follow these guidelines:
 
-## Code of Conduct
-
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
 ## License
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Support
+
+For issues, questions, or feature requests, please open an issue on GitHub.
+
+## Acknowledgments
+
+- Built with [Laravel](https://laravel.com)
+- PDF generation via [DomPDF](https://github.com/dompdf/dompdf)
+- Payment processing by [Paystack](https://paystack.com) and [Flutterwave](https://flutterwave.com)
+- Analytics tracking with [Google Analytics 4](https://analytics.google.com)

@@ -2,6 +2,7 @@
 
 namespace App\Observers;
 
+use App\Jobs\InvoiceRehashJob;
 use App\Models\Invoice;
 use App\Models\Expense;
 use App\Models\Income;
@@ -38,6 +39,9 @@ class InvoiceObserver
     public function created(Invoice $invoice): void
     {
         $this->createExpenseForRecipient($invoice);
+
+        // Dispatch job to compute document hash
+        InvoiceRehashJob::dispatch($invoice);
     }
 
     /**
@@ -67,6 +71,38 @@ class InvoiceObserver
                 $this->createIncomeForPaidInvoice($invoice);
             }
         }
+
+        // Dispatch rehash job if hash-impacting fields changed
+        if ($this->shouldRehash($invoice)) {
+            InvoiceRehashJob::dispatch($invoice);
+        }
+    }
+
+    /**
+     * Determine if invoice should be rehashed based on changed fields
+     */
+    protected function shouldRehash(Invoice $invoice): bool
+    {
+        // Fields that impact the document hash
+        $hashImpactingFields = [
+            'invoice_number',
+            'issue_date',
+            'due_date',
+            'currency',
+            'sub_total',
+            'discount_total',
+            'vat_rate',
+            'vat_amount',
+            'wht_rate',
+            'wht_amount',
+            'total_amount',
+            'notes',
+            'footer',
+            'customer_id',
+            'business_profile_id',
+        ];
+
+        return $invoice->isDirty($hashImpactingFields);
     }
 
     /**
