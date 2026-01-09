@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('public_invoices', function (Blueprint $table) {
-            $table->string('document_hash', 64)->nullable()->index()->after('status');
+            $table->string('document_hash', 64)->nullable()->index()->after('payment_status');
             $table->timestamp('document_hash_updated_at')->nullable()->after('document_hash');
             $table->unsignedTinyInteger('document_hash_version')->default(1)->after('document_hash_updated_at');
         });
