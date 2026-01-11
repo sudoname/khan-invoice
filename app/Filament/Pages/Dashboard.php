@@ -9,10 +9,7 @@ class Dashboard extends BaseDashboard
 {
     protected static ?string $navigationIcon = 'heroicon-o-home';
 
-    protected static string $view = 'filament.pages.dashboard';
-
-    // Removed mount() to prevent potential errors
-    // Analytics tracking moved to a lifecycle hook
+    // Don't override view - let Filament use default dashboard rendering
 
     public function getWidgets(): array
     {
