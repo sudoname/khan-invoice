@@ -138,12 +138,6 @@
                                     <p class="font-semibold text-lg">{{ $businessProfile->bank_account_number }}</p>
                                 </div>
                             @endif
-                            @if($businessProfile->bank_account_type)
-                                <div>
-                                    <p class="text-gray-600 text-sm">Account Type:</p>
-                                    <p class="font-semibold">{{ ucfirst($businessProfile->bank_account_type) }}</p>
-                                </div>
-                            @endif
                         </div>
                     </div>
                     @else
