@@ -43,8 +43,17 @@ class WelcomePanel extends Widget
         // Check if user has dismissed the welcome panel
         $dismissed = $user->settings['welcome_dismissed'] ?? false;
 
-        // Show if never dismissed and user is new (registered within last 7 days)
-        return !$dismissed && $user->created_at->isAfter(now()->subDays(7));
+        if ($dismissed) {
+            return false;
+        }
+
+        // Always show for users with no invoices (onboarding experience)
+        if ($user->invoices()->count() === 0) {
+            return true;
+        }
+
+        // Show if user is new (registered within last 7 days)
+        return $user->created_at->isAfter(now()->subDays(7));
     }
 
     public function dismiss()
