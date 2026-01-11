@@ -105,22 +105,87 @@ class InvoiceResource extends Resource
                             ->placeholder('Skip for now (you can add later)')
                             ->helperText('Leave blank to invoice without business branding. You can add your business details anytime.')
                             ->createOptionForm([
-                                Forms\Components\TextInput::make('business_name')
-                                    ->required()
-                                    ->label('Business Name'),
-                                Forms\Components\TextInput::make('email')
-                                    ->email()
-                                    ->label('Business Email'),
-                                Forms\Components\TextInput::make('phone')
-                                    ->label('Business Phone'),
-                                Forms\Components\Textarea::make('address')
-                                    ->label('Business Address'),
+                                Forms\Components\Hidden::make('user_id')
+                                    ->default(auth()->id()),
+
+                                Forms\Components\Section::make('Business Information')
+                                    ->schema([
+                                        Forms\Components\TextInput::make('business_name')
+                                            ->required()
+                                            ->label('Business Name')
+                                            ->placeholder('e.g., Khan Innovations Nigeria Limited')
+                                            ->maxLength(255),
+                                        Forms\Components\TextInput::make('email')
+                                            ->email()
+                                            ->label('Business Email')
+                                            ->placeholder('contact@yourbusiness.com'),
+                                        Forms\Components\TextInput::make('phone')
+                                            ->label('Business Phone')
+                                            ->tel()
+                                            ->placeholder('+234 XXX XXX XXXX'),
+                                        Forms\Components\FileUpload::make('logo_url')
+                                            ->label('Logo (Optional)')
+                                            ->image()
+                                            ->directory('business-logos')
+                                            ->maxSize(2048)
+                                            ->helperText('Max 2MB, JPG or PNG'),
+                                    ])
+                                    ->columns(2),
+
+                                Forms\Components\Section::make('Address')
+                                    ->schema([
+                                        Forms\Components\TextInput::make('address_line1')
+                                            ->label('Street Address')
+                                            ->placeholder('123 Business Street'),
+                                        Forms\Components\TextInput::make('city')
+                                            ->label('City')
+                                            ->placeholder('Lagos'),
+                                        Forms\Components\TextInput::make('state')
+                                            ->label('State')
+                                            ->placeholder('Lagos'),
+                                    ])
+                                    ->columns(3),
+
+                                Forms\Components\Section::make('Banking Details (Optional)')
+                                    ->description('For receiving payments')
+                                    ->schema([
+                                        Forms\Components\TextInput::make('bank_name')
+                                            ->label('Bank Name')
+                                            ->placeholder('e.g., Providus Bank'),
+                                        Forms\Components\TextInput::make('bank_account_name')
+                                            ->label('Account Name')
+                                            ->placeholder('Khan Innovations Nigeria Limited'),
+                                        Forms\Components\TextInput::make('bank_account_number')
+                                            ->label('Account Number')
+                                            ->placeholder('1234567890')
+                                            ->numeric()
+                                            ->maxLength(10),
+                                    ])
+                                    ->columns(3)
+                                    ->collapsed()
+                                    ->collapsible(),
+
+                                Forms\Components\Section::make('Tax Information (Optional)')
+                                    ->schema([
+                                        Forms\Components\TextInput::make('cac_number')
+                                            ->label('CAC Registration Number')
+                                            ->placeholder('RC XXXXXX'),
+                                        Forms\Components\TextInput::make('tin')
+                                            ->label('Tax Identification Number (TIN)')
+                                            ->placeholder('XXXXXXXXXX-XXXX'),
+                                    ])
+                                    ->columns(2)
+                                    ->collapsed()
+                                    ->collapsible(),
                             ])
-                            ->createOptionModalHeading('Add New Business Profile')
+                            ->createOptionModalHeading('Create Business Profile')
                             ->createOptionAction(function ($action) {
                                 return $action
                                     ->label('+ Create Business Profile')
-                                    ->modalWidth('lg');
+                                    ->modalWidth('3xl')
+                                    ->icon('heroicon-o-plus-circle')
+                                    ->modalSubmitActionLabel('Create Profile')
+                                    ->modalDescription('Add your business details to appear on invoices');
                             })
                             ->columnSpanFull(),
                     ])
