@@ -37,9 +37,13 @@ class AppPanelProvider extends PanelProvider
             ->pages([
                 \App\Filament\Pages\Dashboard::class,
             ])
-            ->discoverWidgets(in: app_path('Filament/App/Widgets'), for: 'App\\Filament\\App\\Widgets')
+            ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->widgets([
-                // Custom dashboard widgets
+                \App\Filament\Widgets\WelcomePanel::class,
+                \App\Filament\Widgets\StatsOverview::class,
+                \App\Filament\Widgets\RevenueChartWidget::class,
+                \App\Filament\Widgets\OverdueInvoicesWidget::class,
+                \App\Filament\Widgets\RecentInvoices::class,
             ])
             ->middleware([
                 EncryptCookies::class,
