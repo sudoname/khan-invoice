@@ -13,8 +13,6 @@ class Dashboard extends BaseDashboard
 
     public function mount(): void
     {
-        parent::mount();
-
         // Track dashboard view
         $this->trackDashboardView();
     }
