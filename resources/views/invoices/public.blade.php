@@ -89,8 +89,9 @@
 
             <!-- Invoice Info & Customer -->
             <div class="p-8">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-                    <!-- Bill To -->
+                <!-- 3-Column Layout: Bill To, Payment Info, Invoice Details -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <!-- Column 1: Bill To -->
                     <div>
                         <h3 class="text-sm font-semibold text-gray-500 uppercase mb-2">Bill To</h3>
                         <div class="text-gray-900">
@@ -116,7 +117,7 @@
                         </div>
                     </div>
 
-                    <!-- Payment Information -->
+                    <!-- Column 2: Payment Information -->
                     @if($businessProfile && $businessProfile->bank_name)
                     <div>
                         <h3 class="text-sm font-semibold text-gray-500 uppercase mb-2">Payment Information</h3>
@@ -145,14 +146,15 @@
                             @endif
                         </div>
                     </div>
-                    @endif
-                </div>
-
-                <!-- Invoice Details -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                    @else
+                    <!-- Empty column if no payment info -->
                     <div></div>
-                    <div class="md:text-right">
-                        <div class="inline-block text-left">
+                    @endif
+
+                    <!-- Column 3: Invoice Details -->
+                    <div>
+                        <h3 class="text-sm font-semibold text-gray-500 uppercase mb-2">Invoice Details</h3>
+                        <div class="text-gray-900">
                             <div class="mb-2">
                                 <span class="text-gray-600">Issue Date:</span>
                                 <span class="font-semibold ml-2">{{ $invoice->issue_date->format('M d, Y') }}</span>

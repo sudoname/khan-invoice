@@ -47,7 +47,7 @@ class Register extends BaseRegister
             return route('filament.app.resources.invoices.create');
         }
 
-        // Otherwise, redirect to default (dashboard)
-        return parent::getRedirectUrl();
+        // Default redirect after sign-up: Quick Invoice page
+        return route('app.invoices.quick.create', ['from' => 'signup']);
     }
 }

@@ -6,6 +6,7 @@ use App\Models\Invoice;
 use App\Models\Customer;
 use App\Models\InvoiceItem;
 use App\Models\BusinessProfile;
+use App\Services\AnalyticsService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -132,8 +133,14 @@ class QuickInvoiceController extends Controller
 
             DB::commit();
 
-            // Track analytics (server-side if available)
-            // AnalyticsService::trackEvent(...) - will add in Phase 3
+            // Track analytics (server-side)
+            $analytics = app(AnalyticsService::class);
+            $analytics->trackInvoiceCreated($invoice, 'quick');
+
+            // Track time to first invoice if this is the user's first invoice
+            if (auth()->user()->invoices()->count() === 1) {
+                $analytics->trackTimeToFirstInvoice(auth()->user(), $invoice);
+            }
 
             // Redirect to success with session data
             return redirect()->route('app.invoices.success', $invoice)

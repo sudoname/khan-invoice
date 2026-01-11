@@ -369,6 +369,180 @@
                     items_count: itemsCount
                 });
             }
+
+            // Clear draft after successful submission
+            localStorage.removeItem('quickInvoiceDraft');
+        });
+
+        // ============================================
+        // DRAFT SAVING & RESTORATION FEATURE
+        // ============================================
+        const DRAFT_KEY = 'quickInvoiceDraft';
+        const DRAFT_SAVE_INTERVAL = 2000; // Save every 2 seconds
+        let saveDraftTimeout = null;
+
+        // Fields to save in draft (excluding CSRF token)
+        const DRAFT_FIELDS = [
+            'customer_name', 'customer_email', 'customer_phone', 'customer_address',
+            'customer_id', 'business_profile_id', 'invoice_number',
+            'issue_date', 'due_date', 'simple_mode', 'vat_rate', 'wht_rate',
+            'discount_total', 'notes'
+        ];
+
+        // Save draft to localStorage
+        function saveDraft() {
+            const form = document.getElementById('quickInvoiceForm');
+            const formData = new FormData(form);
+            const draft = {
+                timestamp: Date.now(),
+                fields: {}
+            };
+
+            // Save regular fields
+            DRAFT_FIELDS.forEach(field => {
+                const input = form.querySelector(`[name="${field}"]`);
+                if (input) {
+                    draft.fields[field] = input.value;
+                }
+            });
+
+            // Save line items
+            const items = [];
+            document.querySelectorAll('.item-row').forEach((row, index) => {
+                items.push({
+                    description: row.querySelector('[name="items[' + index + '][description]"]')?.value || '',
+                    quantity: row.querySelector('[name="items[' + index + '][quantity]"]')?.value || '',
+                    unit_price: row.querySelector('[name="items[' + index + '][unit_price]"]')?.value || '',
+                    discount: row.querySelector('[name="items[' + index + '][discount]"]')?.value || ''
+                });
+            });
+            draft.items = items;
+
+            try {
+                localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
+                showDraftSavedIndicator();
+            } catch (e) {
+                console.warn('Failed to save draft:', e);
+            }
+        }
+
+        // Restore draft from localStorage
+        function restoreDraft() {
+            try {
+                const draftJson = localStorage.getItem(DRAFT_KEY);
+                if (!draftJson) return false;
+
+                const draft = JSON.parse(draftJson);
+                const form = document.getElementById('quickInvoiceForm');
+
+                // Check if draft is less than 7 days old
+                const sevenDaysAgo = Date.now() - (7 * 24 * 60 * 60 * 1000);
+                if (draft.timestamp < sevenDaysAgo) {
+                    localStorage.removeItem(DRAFT_KEY);
+                    return false;
+                }
+
+                // Restore regular fields
+                Object.keys(draft.fields).forEach(field => {
+                    const input = form.querySelector(`[name="${field}"]`);
+                    if (input && draft.fields[field]) {
+                        input.value = draft.fields[field];
+                    }
+                });
+
+                // Restore line items
+                if (draft.items && draft.items.length > 0) {
+                    // Clear existing items first
+                    const itemsContainer = document.getElementById('itemsContainer');
+                    itemsContainer.innerHTML = '';
+
+                    // Add draft items
+                    draft.items.forEach((item, index) => {
+                        addItem();
+                        const row = document.querySelectorAll('.item-row')[index];
+                        if (row) {
+                            row.querySelector('[name="items[' + index + '][description]"]').value = item.description || '';
+                            row.querySelector('[name="items[' + index + '][quantity]"]').value = item.quantity || '';
+                            row.querySelector('[name="items[' + index + '][unit_price]"]').value = item.unit_price || '';
+                            row.querySelector('[name="items[' + index + '][discount]"]').value = item.discount || '';
+                        }
+                    });
+
+                    updateTotals();
+                }
+
+                // Show restoration message
+                showDraftRestoredMessage(draft.timestamp);
+
+                // Track restoration
+                if (window.KinvoiceAnalytics) {
+                    const minutesAgo = Math.round((Date.now() - draft.timestamp) / 60000);
+                    window.KinvoiceAnalytics.track('quick_invoice_draft_restored', {
+                        minutes_since_saved: minutesAgo
+                    });
+                }
+
+                return true;
+            } catch (e) {
+                console.warn('Failed to restore draft:', e);
+                return false;
+            }
+        }
+
+        // Show "Draft Saved" indicator
+        function showDraftSavedIndicator() {
+            let indicator = document.getElementById('draftSavedIndicator');
+            if (!indicator) {
+                indicator = document.createElement('div');
+                indicator.id = 'draftSavedIndicator';
+                indicator.style.cssText = 'position: fixed; bottom: 20px; right: 20px; background: #10b981; color: white; padding: 12px 20px; rounded: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); z-index: 9999; font-size: 14px; border-radius: 8px;';
+                indicator.innerHTML = '✓ Draft saved';
+                document.body.appendChild(indicator);
+            }
+            indicator.style.display = 'block';
+            setTimeout(() => {
+                indicator.style.display = 'none';
+            }, 2000);
+        }
+
+        // Show draft restored message
+        function showDraftRestoredMessage(timestamp) {
+            const minutesAgo = Math.round((Date.now() - timestamp) / 60000);
+            const timeText = minutesAgo < 1 ? 'just now' : `${minutesAgo} minute${minutesAgo !== 1 ? 's' : ''} ago`;
+
+            const banner = document.createElement('div');
+            banner.style.cssText = 'background: #3b82f6; color: white; padding: 16px 20px; text-align: center; position: relative; margin-bottom: 20px; border-radius: 8px;';
+            banner.innerHTML = `
+                <strong>Draft restored!</strong> Your invoice draft from ${timeText} has been restored.
+                <button onclick="this.parentElement.remove(); localStorage.removeItem('${DRAFT_KEY}');" style="margin-left: 12px; background: rgba(255,255,255,0.2); border: 1px solid white; color: white; padding: 4px 12px; border-radius: 4px; cursor: pointer;">Clear Draft</button>
+            `;
+
+            const form = document.getElementById('quickInvoiceForm');
+            form.parentElement.insertBefore(banner, form);
+        }
+
+        // Auto-save draft on input changes
+        function scheduleDraftSave() {
+            if (saveDraftTimeout) {
+                clearTimeout(saveDraftTimeout);
+            }
+            saveDraftTimeout = setTimeout(saveDraft, DRAFT_SAVE_INTERVAL);
+        }
+
+        // Attach auto-save listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            // Try to restore draft first
+            const restored = restoreDraft();
+
+            // Attach listeners for auto-save
+            const form = document.getElementById('quickInvoiceForm');
+            form.addEventListener('input', scheduleDraftSave);
+            form.addEventListener('change', scheduleDraftSave);
+
+            // Track draft feature usage
+            if (window.KinvoiceAnalytics && !restored) {
+                window.KinvoiceAnalytics.track('quick_invoice_draft_feature_loaded');
+            }
         });
     </script>
     @endpush

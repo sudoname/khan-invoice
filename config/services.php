@@ -66,4 +66,11 @@ return [
         // NOTE: Twilio is no longer used - Termii handles all messaging
     ],
 
+    'google_analytics' => [
+        'measurement_id' => env('GA4_MEASUREMENT_ID'),
+        'api_secret' => env('GA4_API_SECRET'),
+        // For server-side tracking via Measurement Protocol
+        // Get API secret from: Analytics > Admin > Data Streams > [your stream] > Measurement Protocol API secrets
+    ],
+
 ];

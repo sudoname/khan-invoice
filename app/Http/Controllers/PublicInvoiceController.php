@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\AnalyticsEvent;
 use App\Models\PublicInvoice;
+use App\Services\AnalyticsService;
 use App\Services\PaystackService;
 use App\Services\PaystackSubaccountService;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -18,6 +19,16 @@ class PublicInvoiceController extends Controller
      */
     public function create()
     {
+        // Track deflection if user is authenticated
+        if (auth()->check()) {
+            $analytics = app(AnalyticsService::class);
+            $analytics->track('auth_user_public_form_viewed', [
+                'user_id_hash' => hash('sha256', auth()->id()),
+                'user_has_invoices' => auth()->user()->invoices()->count() > 0,
+                'user_invoice_count' => auth()->user()->invoices()->count(),
+            ], null, auth()->id());
+        }
+
         return view('public-invoice.create');
     }
 
@@ -139,6 +150,12 @@ class PublicInvoiceController extends Controller
             'has_wht' => $publicInvoice->wht_percentage > 0,
             'total_amount' => $publicInvoice->total_amount,
         ]);
+
+        // Track deflection if authenticated user created a public invoice
+        if (auth()->check()) {
+            $analytics = app(AnalyticsService::class);
+            $analytics->trackAuthUserDeflection(auth()->id(), $publicInvoice->public_id);
+        }
 
         // Check if this is an API/AJAX request (from mobile app)
         if ($request->wantsJson() || $request->header('X-Requested-With') === 'XMLHttpRequest') {

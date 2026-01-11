@@ -36,22 +36,35 @@
                             <h3 class="font-bold text-gray-900 text-lg mb-1">Create your first invoice</h3>
                             <p class="text-sm text-gray-600 mb-3">Start invoicing immediately - no setup required</p>
 
-                            <!-- Dual Buttons -->
-                            <div class="space-y-2">
-                                <a href="{{ route('app.invoices.quick.create') }}?from=dashboard_cta"
-                                   onclick="if (window.KinvoiceAnalytics) { window.KinvoiceAnalytics.track('dashboard_quick_invoice_clicked'); }"
+                            <!-- A/B Test: Control = Dual CTAs, Variant = Quick Only -->
+                            @if($abTestVariant === 'variant_quick_only')
+                                <!-- Variant: Quick Invoice Only -->
+                                <a href="{{ route('app.invoices.quick.create') }}?from=dashboard_cta&variant=quick_only"
+                                   onclick="if (window.KinvoiceAnalytics) { window.KinvoiceAnalytics.track('dashboard_quick_invoice_clicked', {ab_variant: 'quick_only'}); }"
                                    class="inline-flex items-center justify-center w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white px-4 py-3 rounded-lg font-bold hover:from-purple-700 hover:to-blue-700 transition shadow-lg transform hover:scale-105 text-sm">
                                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
                                     </svg>
-                                    Quick Invoice (Recommended)
+                                    Create Invoice
                                 </a>
-                                <a href="{{ route('filament.app.resources.invoices.create') }}"
-                                   onclick="if (window.KinvoiceAnalytics) { window.KinvoiceAnalytics.track('dashboard_advanced_invoice_clicked'); }"
-                                   class="inline-flex items-center justify-center w-full bg-white border-2 border-purple-300 text-purple-700 px-4 py-2.5 rounded-lg font-semibold hover:bg-purple-50 transition text-sm">
-                                    Advanced Invoice
-                                </a>
-                            </div>
+                            @else
+                                <!-- Control: Dual Buttons -->
+                                <div class="space-y-2">
+                                    <a href="{{ route('app.invoices.quick.create') }}?from=dashboard_cta&variant=dual"
+                                       onclick="if (window.KinvoiceAnalytics) { window.KinvoiceAnalytics.track('dashboard_quick_invoice_clicked', {ab_variant: 'control_dual'}); }"
+                                       class="inline-flex items-center justify-center w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white px-4 py-3 rounded-lg font-bold hover:from-purple-700 hover:to-blue-700 transition shadow-lg transform hover:scale-105 text-sm">
+                                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                                        </svg>
+                                        Quick Invoice (Recommended)
+                                    </a>
+                                    <a href="{{ route('filament.app.resources.invoices.create') }}?variant=dual"
+                                       onclick="if (window.KinvoiceAnalytics) { window.KinvoiceAnalytics.track('dashboard_advanced_invoice_clicked', {ab_variant: 'control_dual'}); }"
+                                       class="inline-flex items-center justify-center w-full bg-white border-2 border-purple-300 text-purple-700 px-4 py-2.5 rounded-lg font-semibold hover:bg-purple-50 transition text-sm">
+                                        Advanced Invoice
+                                    </a>
+                                </div>
+                            @endif
                         </div>
                     </div>
                 </div>

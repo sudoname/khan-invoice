@@ -2,6 +2,7 @@
 
 namespace App\Filament\Widgets;
 
+use App\Services\AbTestingService;
 use Filament\Widgets\Widget;
 
 class WelcomePanel extends Widget
@@ -9,6 +10,26 @@ class WelcomePanel extends Widget
     protected static string $view = 'filament.widgets.welcome-panel';
 
     protected int | string | array $columnSpan = 'full';
+
+    public string $abTestVariant;
+
+    public function mount(): void
+    {
+        // Assign A/B test variant for dashboard CTA
+        $abTestService = app(AbTestingService::class);
+
+        // Only run A/B test if test is active
+        if ($abTestService->isTestActive('dashboard_cta')) {
+            $this->abTestVariant = $abTestService->getVariant(
+                'dashboard_cta',
+                ['control', 'variant_quick_only'], // control = dual CTA, variant = quick only
+                [50, 50] // 50/50 split
+            );
+        } else {
+            // Default to control if test not active
+            $this->abTestVariant = 'control';
+        }
+    }
 
     public static function canView(): bool
     {
