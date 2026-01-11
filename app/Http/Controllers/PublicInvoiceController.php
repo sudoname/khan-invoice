@@ -19,9 +19,15 @@ class PublicInvoiceController extends Controller
      */
     public function create()
     {
+        // Track public invoice started
+        $analytics = app(AnalyticsService::class);
+        $analytics->track('public_invoice_started', [
+            'is_authenticated' => auth()->check(),
+            'user_id_hash' => auth()->check() ? hash('sha256', auth()->id()) : null,
+        ]);
+
         // Track deflection if user is authenticated
         if (auth()->check()) {
-            $analytics = app(AnalyticsService::class);
             $analytics->track('auth_user_public_form_viewed', [
                 'user_id_hash' => hash('sha256', auth()->id()),
                 'user_has_invoices' => auth()->user()->invoices()->count() > 0,
