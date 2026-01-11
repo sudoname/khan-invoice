@@ -56,7 +56,16 @@ class RecentInvoices extends BaseWidget
                 Tables\Actions\Action::make('view')
                     ->label('View')
                     ->icon('heroicon-o-eye')
-                    ->url(fn (Invoice $record): string => route('filament.admin.resources.invoices.edit', ['record' => $record])),
+                    ->url(function (Invoice $record): string {
+                        // Detect current panel and use appropriate route
+                        $panelId = \Filament\Facades\Filament::getCurrentPanel()->getId();
+
+                        if ($panelId === 'admin') {
+                            return route('filament.admin.resources.invoices.edit', ['record' => $record]);
+                        }
+
+                        return route('filament.app.resources.invoices.edit', ['record' => $record]);
+                    }),
             ]);
     }
 }
