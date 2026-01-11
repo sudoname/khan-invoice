@@ -11,11 +11,8 @@ class Dashboard extends BaseDashboard
 
     protected static string $view = 'filament.pages.dashboard';
 
-    public function mount(): void
-    {
-        // Track dashboard view
-        $this->trackDashboardView();
-    }
+    // Removed mount() to prevent potential errors
+    // Analytics tracking moved to a lifecycle hook
 
     public function getWidgets(): array
     {
