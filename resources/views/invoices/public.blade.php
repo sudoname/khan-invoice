@@ -116,7 +116,41 @@
                         </div>
                     </div>
 
-                    <!-- Invoice Details -->
+                    <!-- Payment Information -->
+                    @if($businessProfile && $businessProfile->bank_name)
+                    <div>
+                        <h3 class="text-sm font-semibold text-gray-500 uppercase mb-2">Payment Information</h3>
+                        <div class="text-gray-900 space-y-2">
+                            <div>
+                                <p class="text-gray-600 text-sm">Bank Name:</p>
+                                <p class="font-semibold">{{ $businessProfile->bank_name }}</p>
+                            </div>
+                            @if($businessProfile->bank_account_name)
+                                <div>
+                                    <p class="text-gray-600 text-sm">Account Name:</p>
+                                    <p class="font-semibold">{{ $businessProfile->bank_account_name }}</p>
+                                </div>
+                            @endif
+                            @if($businessProfile->bank_account_number)
+                                <div>
+                                    <p class="text-gray-600 text-sm">Account Number:</p>
+                                    <p class="font-semibold text-lg">{{ $businessProfile->bank_account_number }}</p>
+                                </div>
+                            @endif
+                            @if($businessProfile->bank_account_type)
+                                <div>
+                                    <p class="text-gray-600 text-sm">Account Type:</p>
+                                    <p class="font-semibold">{{ ucfirst($businessProfile->bank_account_type) }}</p>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+                    @endif
+                </div>
+
+                <!-- Invoice Details -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                    <div></div>
                     <div class="md:text-right">
                         <div class="inline-block text-left">
                             <div class="mb-2">
@@ -244,37 +278,6 @@
                                 Pay Now - ₦{{ number_format($balanceDue, 2) }}
                             </button>
                         </form>
-                    </div>
-                @endif
-
-                <!-- Banking Information -->
-                @if($businessProfile && $businessProfile->bank_name)
-                    <div class="mt-8 p-6 bg-blue-50 rounded-lg">
-                        <h3 class="font-semibold text-lg mb-3 text-gray-900">Payment Information</h3>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                            <div>
-                                <p class="text-gray-600">Bank Name:</p>
-                                <p class="font-semibold">{{ $businessProfile->bank_name }}</p>
-                            </div>
-                            @if($businessProfile->bank_account_name)
-                                <div>
-                                    <p class="text-gray-600">Account Name:</p>
-                                    <p class="font-semibold">{{ $businessProfile->bank_account_name }}</p>
-                                </div>
-                            @endif
-                            @if($businessProfile->bank_account_number)
-                                <div>
-                                    <p class="text-gray-600">Account Number:</p>
-                                    <p class="font-semibold text-lg">{{ $businessProfile->bank_account_number }}</p>
-                                </div>
-                            @endif
-                            @if($businessProfile->bank_account_type)
-                                <div>
-                                    <p class="text-gray-600">Account Type:</p>
-                                    <p class="font-semibold">{{ ucfirst($businessProfile->bank_account_type) }}</p>
-                                </div>
-                            @endif
-                        </div>
                     </div>
                 @endif
 
