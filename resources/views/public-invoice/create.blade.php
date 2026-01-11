@@ -15,47 +15,52 @@
     <!-- Free Mode Awareness Banner (for logged-out users) -->
     @guest
     <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
-        <div class="bg-gradient-to-r from-blue-50 to-purple-50 border-2 border-blue-300 rounded-xl p-4 sm:p-6 shadow-md">
+        <div class="bg-gradient-to-r from-amber-50 to-orange-50 border-2 border-amber-400 rounded-xl p-4 sm:p-6 shadow-lg">
             <div class="flex items-start justify-between gap-4">
                 <div class="flex-1">
-                    <div class="flex items-center gap-2 mb-2">
-                        <div class="bg-blue-600 text-white px-3 py-1 rounded-full text-xs font-bold">
-                            FREE MODE
-                        </div>
-                        <span class="text-gray-700 font-semibold">Create unlimited invoices instantly</span>
+                    <div class="flex items-center gap-2 mb-3">
+                        <svg class="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                        </svg>
+                        <span class="text-lg font-bold text-gray-900">Save 3+ Minutes Per Invoice</span>
                     </div>
-                    <p class="text-sm text-gray-600 mb-3">
-                        Want to save customers, track payments, and create invoices faster? <strong>Create a free account in 20 seconds</strong>.
+                    <p class="text-sm text-gray-700 mb-4">
+                        <strong>Creating your 2nd invoice?</strong> Free accounts reuse customer data, track payments, and save all invoices forever.
+                        <span class="text-amber-700 font-semibold">Sign up in 20 seconds.</span>
                     </p>
-                    <div class="flex flex-wrap gap-3 items-center">
+                    <div class="flex flex-wrap gap-3 items-center mb-3">
                         <a href="{{ route('filament.app.auth.register') }}?ref=generator_banner"
                            onclick="if (window.KinvoiceAnalytics) { window.KinvoiceAnalytics.track('generator_banner_signup_clicked'); }"
-                           class="inline-flex items-center bg-gradient-to-r from-purple-600 to-blue-600 text-white px-5 py-2.5 rounded-lg font-semibold hover:from-purple-700 hover:to-blue-700 transition shadow-md text-sm">
-                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                           class="inline-flex items-center bg-gradient-to-r from-purple-600 to-blue-600 text-white px-6 py-3 rounded-lg font-bold hover:from-purple-700 hover:to-blue-700 transition shadow-lg transform hover:scale-105 text-sm">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                            </svg>
+                            Create Free Account Now
+                        </a>
+                        <button type="button" onclick="this.closest('.bg-gradient-to-r').style.display='none'"
+                                class="text-gray-600 text-sm underline hover:text-gray-800">
+                            Continue as Guest
+                        </button>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs text-gray-700">
+                        <span class="flex items-center gap-1">
+                            <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                             </svg>
-                            Create Free Account
-                        </a>
-                        <div class="flex items-center gap-4 text-xs text-gray-600">
-                            <span class="flex items-center gap-1">
-                                <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                </svg>
-                                Save customers
-                            </span>
-                            <span class="flex items-center gap-1">
-                                <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                </svg>
-                                Track payments
-                            </span>
-                            <span class="flex items-center gap-1">
-                                <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                </svg>
-                                Invoice history
-                            </span>
-                        </div>
+                            <strong>Reuse customers</strong> - never retype
+                        </span>
+                        <span class="flex items-center gap-1">
+                            <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            <strong>Track payments</strong> - who paid?
+                        </span>
+                        <span class="flex items-center gap-1">
+                            <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            <strong>Full history</strong> - never lose invoices
+                        </span>
                     </div>
                 </div>
             </div>

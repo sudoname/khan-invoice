@@ -23,48 +23,48 @@
         </div>
 
         <div class="mb-6">
-            <p class="text-base font-semibold text-gray-800 mb-4">📋 Most businesses start with:</p>
+            <p class="text-base font-semibold text-gray-800 mb-4">🚀 Get started in seconds:</p>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <!-- Step 1: Business Profile -->
-                <div class="bg-white rounded-lg p-5 border-2 border-purple-200 hover:border-purple-400 transition">
+                <!-- Step 1: First Invoice (PRIMARY ACTION) -->
+                <div class="bg-white rounded-lg p-5 border-2 border-purple-200 hover:border-purple-400 transition shadow-md">
                     <div class="flex items-start mb-3">
                         <div class="bg-purple-100 text-purple-700 rounded-full w-8 h-8 flex items-center justify-center font-bold text-sm mr-3 flex-shrink-0">
                             1
                         </div>
                         <div class="flex-1">
-                            <h3 class="font-bold text-gray-900 text-lg mb-1">Add your business profile</h3>
-                            <p class="text-sm text-gray-600">Set up your company details, logo, and bank info</p>
+                            <h3 class="font-bold text-gray-900 text-lg mb-1">Create your first invoice</h3>
+                            <p class="text-sm text-gray-600">Start invoicing immediately - no setup required</p>
                         </div>
                     </div>
-                    <a href="{{ route('filament.app.resources.business-profiles.create') }}"
-                       onclick="if (window.KinvoiceAnalytics) { window.KinvoiceAnalytics.track('registered_welcome_action', { action: 'setup_business' }); }"
-                       class="inline-flex items-center justify-center w-full bg-purple-600 text-white px-4 py-2.5 rounded-lg font-semibold hover:bg-purple-700 transition text-sm shadow-sm">
+                    <a href="{{ route('filament.app.resources.invoices.create') }}"
+                       onclick="if (window.KinvoiceAnalytics) { window.KinvoiceAnalytics.track('registered_welcome_action', { action: 'create_invoice' }); }"
+                       class="inline-flex items-center justify-center w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white px-4 py-2.5 rounded-lg font-bold hover:from-purple-700 hover:to-blue-700 transition text-sm shadow-lg transform hover:scale-105">
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
                         </svg>
-                        Set up my business
+                        Create Invoice Now
                     </a>
                 </div>
 
-                <!-- Step 2: First Invoice -->
+                <!-- Step 2: Business Profile (OPTIONAL) -->
                 <div class="bg-white rounded-lg p-5 border-2 border-blue-200 hover:border-blue-400 transition">
                     <div class="flex items-start mb-3">
                         <div class="bg-blue-100 text-blue-700 rounded-full w-8 h-8 flex items-center justify-center font-bold text-sm mr-3 flex-shrink-0">
                             2
                         </div>
                         <div class="flex-1">
-                            <h3 class="font-bold text-gray-900 text-lg mb-1">Create your first invoice</h3>
-                            <p class="text-sm text-gray-600">Add a customer, line items, and generate invoice</p>
+                            <h3 class="font-bold text-gray-900 text-lg mb-1">Add business profile <span class="text-xs font-normal text-gray-500">(Optional)</span></h3>
+                            <p class="text-sm text-gray-600">Add logo, bank details for professional invoices</p>
                         </div>
                     </div>
-                    <a href="{{ route('filament.app.resources.invoices.create') }}"
-                       onclick="if (window.KinvoiceAnalytics) { window.KinvoiceAnalytics.track('registered_welcome_action', { action: 'create_invoice' }); }"
+                    <a href="{{ route('filament.app.resources.business-profiles.create') }}"
+                       onclick="if (window.KinvoiceAnalytics) { window.KinvoiceAnalytics.track('registered_welcome_action', { action: 'setup_business' }); }"
                        class="inline-flex items-center justify-center w-full bg-blue-600 text-white px-4 py-2.5 rounded-lg font-semibold hover:bg-blue-700 transition text-sm shadow-sm">
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
                         </svg>
-                        Create my first invoice
+                        Set up business
                     </a>
                 </div>
 
@@ -75,8 +75,8 @@
                             3
                         </div>
                         <div class="flex-1">
-                            <h3 class="font-bold text-gray-900 text-lg mb-1">Record payment when paid</h3>
-                            <p class="text-sm text-gray-600">Track who paid and who still owes you money</p>
+                            <h3 class="font-bold text-gray-900 text-lg mb-1">Track payments</h3>
+                            <p class="text-sm text-gray-600">Mark invoices paid and monitor cash flow</p>
                         </div>
                     </div>
                     <div class="inline-flex items-center justify-center w-full bg-gray-100 text-gray-600 px-4 py-2.5 rounded-lg font-semibold text-sm border-2 border-gray-300">

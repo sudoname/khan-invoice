@@ -36,6 +36,32 @@ class InvoiceResource extends Resource
     {
         return $form
             ->schema([
+                // Simple Mode Toggle - Makes invoicing quick and easy
+                Forms\Components\Section::make('Invoice Mode')
+                    ->description('Choose between simple or advanced invoice mode')
+                    ->schema([
+                        Forms\Components\Toggle::make('simple_mode')
+                            ->label('Simple Mode')
+                            ->helperText('Hide tax, discounts, and advanced options for quick invoicing')
+                            ->default(false)
+                            ->live()
+                            ->afterStateUpdated(function (Get $get, Set $set, $state) {
+                                if ($state) {
+                                    // Simple mode: Set tax to 0
+                                    $set('vat_rate', 0);
+                                    $set('wht_rate', 0);
+                                    $set('discount_total', 0);
+                                } else {
+                                    // Advanced mode: Restore default VAT
+                                    $set('vat_rate', 7.5);
+                                }
+                            })
+                            ->inline(false),
+                    ])
+                    ->icon('heroicon-o-adjustments-horizontal')
+                    ->collapsible()
+                    ->collapsed(false),
+
                 // Step 1: Customer Selection (Most Important First)
                 Forms\Components\Section::make('Who is this invoice for?')
                     ->description('Select or add a new customer')
@@ -67,16 +93,17 @@ class InvoiceResource extends Resource
                     ->collapsible()
                     ->persistCollapsed(),
 
-                // Step 2: Business Profile
+                // Step 2: Business Profile (Optional - Auto-created if not selected)
                 Forms\Components\Section::make('Which business is invoicing?')
-                    ->description('Select your business profile')
+                    ->description('Optional: Select or create your business profile (you can add this later)')
                     ->schema([
                         Forms\Components\Select::make('business_profile_id')
                             ->label('Business Profile')
                             ->relationship('businessProfile', 'business_name', fn ($query) => $query->where('user_id', auth()->id()))
-                            ->required()
                             ->searchable()
                             ->preload()
+                            ->placeholder('Skip for now (you can add later)')
+                            ->helperText('Leave blank to invoice without business branding. You can add your business details anytime.')
                             ->createOptionForm([
                                 Forms\Components\TextInput::make('business_name')
                                     ->required()
@@ -90,10 +117,16 @@ class InvoiceResource extends Resource
                                     ->label('Business Address'),
                             ])
                             ->createOptionModalHeading('Add New Business Profile')
+                            ->createOptionAction(function ($action) {
+                                return $action
+                                    ->label('+ Create Business Profile')
+                                    ->modalWidth('lg');
+                            })
                             ->columnSpanFull(),
                     ])
                     ->icon('heroicon-o-building-office')
                     ->collapsible()
+                    ->collapsed()
                     ->persistCollapsed(),
 
                 // Step 3: Invoice Details
@@ -205,7 +238,7 @@ class InvoiceResource extends Resource
                     ])
                     ->icon('heroicon-o-shopping-cart'),
 
-                // Step 5: Tax & Totals (Advanced - Collapsed by Default)
+                // Step 5: Tax & Totals (Advanced - Collapsed by Default, Hidden in Simple Mode)
                 Forms\Components\Section::make('Tax & Discounts')
                     ->description('Optional: Add invoice-level tax and discounts')
                     ->schema([
@@ -243,7 +276,8 @@ class InvoiceResource extends Resource
                     ->columns(4)
                     ->collapsed()
                     ->collapsible()
-                    ->persistCollapsed(),
+                    ->persistCollapsed()
+                    ->hidden(fn (Get $get): bool => $get('simple_mode') === true),
 
                 // Step 6: Additional Information (Optional - Collapsed by Default)
                 Forms\Components\Section::make('Additional Information')

@@ -39,6 +39,7 @@ class Invoice extends Model
         'last_payment_at',
         'payment_expires_at',
         'payment_enabled',
+        'simple_mode',
     ];
 
     protected $casts = [
@@ -48,6 +49,7 @@ class Invoice extends Model
         'last_payment_at' => 'datetime',
         'payment_expires_at' => 'datetime',
         'payment_enabled' => 'boolean',
+        'simple_mode' => 'boolean',
         'sub_total' => 'decimal:2',
         'discount_total' => 'decimal:2',
         'vat_rate' => 'decimal:2',
