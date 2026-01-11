@@ -6,6 +6,7 @@ use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\PricingController;
 use App\Http\Controllers\PublicInvoiceController;
+use App\Http\Controllers\QuickInvoiceController;
 use App\Http\Controllers\SocialAuthController;
 use App\Http\Controllers\SubscriptionUpgradeController;
 use Illuminate\Support\Facades\Route;
@@ -66,6 +67,13 @@ Route::middleware('auth')->group(function () {
         ->name('subscription.upgrade.verify');
     Route::post('/subscription/downgrade', [SubscriptionUpgradeController::class, 'downgrade'])
         ->name('subscription.downgrade');
+
+    // Quick Invoice routes (authenticated users)
+    Route::prefix('app/invoices')->name('app.invoices.')->group(function () {
+        Route::get('/quick/create', [QuickInvoiceController::class, 'create'])->name('quick.create');
+        Route::post('/quick/store', [QuickInvoiceController::class, 'store'])->name('quick.store');
+        Route::get('/{invoice}/success', [QuickInvoiceController::class, 'success'])->name('success');
+    });
 });
 
 // Public Invoice Generator routes
