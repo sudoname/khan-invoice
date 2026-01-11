@@ -123,15 +123,34 @@ class CreateInvoice extends CreateRecord
         // Apply prefill data to form
         $this->form->fill($prefillData);
 
-        // Clear session
-        session()->forget(['prefill_invoice_token', 'prefill_source']);
+        // Automatically save the invoice
+        try {
+            // Get the form state and create the invoice
+            $data = $this->form->getState();
+            $this->record = $this->handleRecordCreation($data);
 
-        // Show success notification
-        Notification::make()
-            ->success()
-            ->title('Invoice prefilled!')
-            ->body('Your invoice details have been imported. Review and save when ready.')
-            ->send();
+            // Clear session
+            session()->forget(['prefill_invoice_token', 'prefill_source', 'prefill_public_invoice_id']);
+
+            // Show success notification
+            Notification::make()
+                ->success()
+                ->title('Invoice saved!')
+                ->body('Your invoice has been automatically saved and is ready to send.')
+                ->send();
+
+            // Redirect to the created invoice
+            $this->redirect($this->getRedirectUrl());
+        } catch (\Exception $e) {
+            // If auto-save fails, fall back to manual save
+            session()->forget(['prefill_invoice_token', 'prefill_source', 'prefill_public_invoice_id']);
+
+            Notification::make()
+                ->warning()
+                ->title('Invoice prefilled!')
+                ->body('Your invoice details have been imported. Please review and click Save.')
+                ->send();
+        }
     }
 
     protected function getRedirectUrl(): string
