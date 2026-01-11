@@ -180,6 +180,11 @@
                         @if($businessProfile->email)
                             <p style="font-size: 8pt;">{{ $businessProfile->email }}</p>
                         @endif
+                    @else
+                        <h2>{{ $invoice->user->name ?? 'Invoice' }}</h2>
+                        @if($invoice->user && $invoice->user->email)
+                            <p style="font-size: 8pt;">{{ $invoice->user->email }}</p>
+                        @endif
                     @endif
                 </div>
             </div>
@@ -319,12 +324,6 @@
                         <tr>
                             <td style="padding: 5px; border: none;"><span class="label">Account Number:</span></td>
                             <td style="padding: 5px; border: none;"><strong style="font-size: 12pt;">{{ $businessProfile->bank_account_number }}</strong></td>
-                        </tr>
-                    @endif
-                    @if($businessProfile->bank_account_type)
-                        <tr>
-                            <td style="padding: 5px; border: none;"><span class="label">Account Type:</span></td>
-                            <td style="padding: 5px; border: none;"><strong>{{ ucfirst($businessProfile->bank_account_type) }}</strong></td>
                         </tr>
                     @endif
                 </table>
