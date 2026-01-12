@@ -91,8 +91,8 @@ class MerchantAccountResource extends Resource
                                     'Zenith Bank' => '057',
                                     'Jaiz Bank' => '301',
                                     'Kuda Bank' => '090267',
-                                    'Opay' => '100004',
-                                    'PalmPay' => '100033',
+                                    'Opay' => '999992',
+                                    'PalmPay' => '999991',
                                     'Moniepoint' => '50515',
                                     'VFD Microfinance Bank' => '090110',
                                 ];
