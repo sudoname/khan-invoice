@@ -20,7 +20,7 @@
             padding: 20px;
         }
         .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background-color: #6b46c1;
             color: white;
             padding: 15px 20px;
             margin: -20px -20px 15px -20px;
