@@ -109,7 +109,7 @@
                     </div>
                 </div>
 
-                <h3 class="text-lg font-semibold text-gray-900 mt-6 mb-3">Bank Account Details (Optional)</h3>
+                <h3 class="text-lg font-semibold text-gray-900 mt-6 mb-3">Bank Account Details - For direct payments</h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-2">Bank Name</label>
