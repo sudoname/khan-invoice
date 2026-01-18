@@ -370,6 +370,75 @@ class PayoutService
     }
 
     /**
+     * Retry a failed payout
+     *
+     * @param int $payoutId
+     * @return array
+     */
+    public function retryPayout(int $payoutId): array
+    {
+        try {
+            DB::beginTransaction();
+
+            $failedPayout = Payout::find($payoutId);
+
+            if (!$failedPayout) {
+                return $this->error('Payout not found');
+            }
+
+            if ($failedPayout->status !== 'FAILED') {
+                return $this->error("Only failed payouts can be retried. Current status: {$failedPayout->status}");
+            }
+
+            // Reverse the failed payout's ledger entries (refund the amount)
+            $this->reversePayoutLedgerEntries($failedPayout);
+
+            // Create new payout with same details - requires admin approval
+            $newPayout = Payout::create([
+                'user_id' => $failedPayout->user_id,
+                'merchant_account_id' => $failedPayout->merchant_account_id,
+                'reference' => Payout::generateReference($failedPayout->payout_type),
+                'gross_amount' => $failedPayout->gross_amount,
+                'payout_fee' => $failedPayout->payout_fee,
+                'net_amount' => $failedPayout->net_amount,
+                'currency' => $failedPayout->currency,
+                'payout_type' => $failedPayout->payout_type,
+                'status' => 'PENDING',
+                'provider' => 'paystack',
+                'settlement_date' => now()->addDay(),
+                'period_start' => $failedPayout->period_start,
+                'period_end' => $failedPayout->period_end,
+                'requires_approval' => true, // Require admin approval for retried payouts
+            ]);
+
+            // Create ledger entries for the new payout
+            $this->createPayoutLedgerEntries($newPayout, $failedPayout->merchantAccount);
+
+            DB::commit();
+
+            Log::info('Failed payout retried, awaiting admin approval', [
+                'failed_payout_id' => $failedPayout->id,
+                'new_payout_id' => $newPayout->id,
+                'amount' => $newPayout->gross_amount,
+            ]);
+
+            return $this->success('Payout retried successfully. New payout created and awaiting approval.', [
+                'payout' => $newPayout,
+                'requires_approval' => true,
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('PayoutService::retryPayout failed', [
+                'payout_id' => $payoutId,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            return $this->error('Failed to retry payout: ' . $e->getMessage());
+        }
+    }
+
+    /**
      * Get payout statistics for a user
      *
      * @param int $userId

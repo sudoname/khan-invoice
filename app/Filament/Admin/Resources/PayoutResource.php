@@ -204,6 +204,40 @@ class PayoutResource extends Resource
                         }
                     })
                     ->visible(fn ($record) => $record->status === 'PENDING' && $record->requires_approval),
+                Tables\Actions\Action::make('retry')
+                    ->label('Retry')
+                    ->icon('heroicon-o-arrow-path')
+                    ->color('warning')
+                    ->requiresConfirmation()
+                    ->modalHeading('Retry Failed Payout')
+                    ->modalDescription('This will refund the failed payout amount and create a new payout with the same details.')
+                    ->action(function ($record) {
+                        try {
+                            $payoutService = app(\App\Services\Payment\PayoutService::class);
+                            $result = $payoutService->retryPayout($record->id);
+
+                            if ($result['success']) {
+                                Notification::make()
+                                    ->success()
+                                    ->title('Payout Retried')
+                                    ->body('A new payout has been created and is being processed.')
+                                    ->send();
+                            } else {
+                                Notification::make()
+                                    ->danger()
+                                    ->title('Retry Failed')
+                                    ->body($result['message'])
+                                    ->send();
+                            }
+                        } catch (\Exception $e) {
+                            Notification::make()
+                                ->danger()
+                                ->title('Error')
+                                ->body($e->getMessage())
+                                ->send();
+                        }
+                    })
+                    ->visible(fn ($record) => $record->status === 'FAILED'),
                 Tables\Actions\Action::make('reverse')
                     ->label('Reverse')
                     ->icon('heroicon-o-arrow-uturn-left')
