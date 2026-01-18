@@ -224,6 +224,20 @@ class PaymentService
      */
     protected function recordPaymentInLedger(Invoice $invoice, InvoicePayment $invoicePayment, $verificationResult): void
     {
+        // Check if ledger entry already exists for this payment to prevent duplicates
+        $existingEntry = LedgerEntry::where('invoice_payment_id', $invoicePayment->id)
+            ->where('entry_type', 'PAYMENT_RECEIVED')
+            ->first();
+
+        if ($existingEntry) {
+            Log::info('Ledger entry already exists for this payment, skipping', [
+                'invoice_payment_id' => $invoicePayment->id,
+                'invoice_id' => $invoice->id,
+                'existing_entry_id' => $existingEntry->id,
+            ]);
+            return;
+        }
+
         // Get merchant's current balance
         $merchantAccount = MerchantAccount::where('user_id', $invoice->user_id)
             ->where('is_primary', true)
