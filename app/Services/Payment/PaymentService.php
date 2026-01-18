@@ -6,6 +6,8 @@ use App\Models\Invoice;
 use App\Models\FeatureFlag;
 use App\Models\Payment\PaymentAttempt;
 use App\Models\Payment\InvoicePayment;
+use App\Models\Payment\MerchantAccount;
+use App\Models\Payment\LedgerEntry;
 use App\Services\Payment\Providers\ProviderFactory;
 use App\Services\Payment\Providers\PaymentProviderInterface;
 use Illuminate\Support\Facades\DB;
@@ -143,6 +145,9 @@ class PaymentService
 
                     $this->reconcileInvoice($paymentAttempt->invoice, $invoicePayment);
 
+                    // Credit merchant's ledger with payment received
+                    $this->recordPaymentInLedger($paymentAttempt->invoice, $invoicePayment, $result);
+
                     return [
                         'success' => true,
                         'message' => 'Payment verified successfully',
@@ -212,6 +217,71 @@ class PaymentService
         ]);
 
         $payment->markAsReconciled();
+    }
+
+    /**
+     * Record payment in merchant's ledger
+     */
+    protected function recordPaymentInLedger(Invoice $invoice, InvoicePayment $invoicePayment, $verificationResult): void
+    {
+        // Get merchant's current balance
+        $merchantAccount = MerchantAccount::where('user_id', $invoice->user_id)
+            ->where('is_primary', true)
+            ->first();
+
+        if (!$merchantAccount) {
+            Log::warning('No primary merchant account found for payment', [
+                'user_id' => $invoice->user_id,
+                'invoice_id' => $invoice->id,
+                'payment_amount' => $invoicePayment->net_received,
+            ]);
+            return;
+        }
+
+        $currentBalance = $merchantAccount->getAvailableBalance();
+        $netReceived = (float) $invoicePayment->net_received;
+        $balanceAfter = $currentBalance + $netReceived;
+
+        // Create ledger entry for payment received
+        LedgerEntry::create([
+            'user_id' => $invoice->user_id,
+            'entry_type' => 'PAYMENT_RECEIVED',
+            'account_type' => 'CREDIT',
+            'amount' => $netReceived,
+            'balance_after' => $balanceAfter,
+            'currency' => $invoicePayment->currency ?? 'NGN',
+            'invoice_payment_id' => $invoicePayment->id,
+            'invoice_id' => $invoice->id,
+            'description' => "Payment received for invoice {$invoice->invoice_number}",
+            'reference' => LedgerEntry::generateReference('PAYMENT'),
+            'entry_date' => now(),
+        ]);
+
+        // Record gateway fees if any
+        if ($verificationResult->fees > 0) {
+            $balanceAfterFees = $balanceAfter; // Fees already deducted in net_received
+            LedgerEntry::create([
+                'user_id' => $invoice->user_id,
+                'entry_type' => 'GATEWAY_FEE',
+                'account_type' => 'DEBIT',
+                'amount' => $verificationResult->fees,
+                'balance_after' => $balanceAfterFees,
+                'currency' => $invoicePayment->currency ?? 'NGN',
+                'invoice_payment_id' => $invoicePayment->id,
+                'invoice_id' => $invoice->id,
+                'description' => "Gateway fees for invoice {$invoice->invoice_number}",
+                'reference' => LedgerEntry::generateReference('GATEWAY_FEE'),
+                'entry_date' => now(),
+            ]);
+        }
+
+        Log::info('Payment recorded in ledger', [
+            'user_id' => $invoice->user_id,
+            'invoice_id' => $invoice->id,
+            'net_received' => $netReceived,
+            'fees' => $verificationResult->fees,
+            'new_balance' => $balanceAfter,
+        ]);
     }
 
     /**

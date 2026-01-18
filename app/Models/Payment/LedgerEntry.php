@@ -19,6 +19,7 @@ class LedgerEntry extends Model
         'balance_after',
         'currency',
         'invoice_payment_id',
+        'invoice_id',
         'payout_id',
         'description',
         'reference',
@@ -94,7 +95,8 @@ class LedgerEntry extends Model
     public static function generateReference(string $type): string
     {
         $prefix = match($type) {
-            'PAYMENT_RECEIVED' => 'PMT',
+            'PAYMENT', 'PAYMENT_RECEIVED' => 'PMT',
+            'GATEWAY_FEE' => 'GWF',
             'PLATFORM_FEE' => 'FEE',
             'PAYOUT' => 'PYT',
             'REFUND' => 'RFD',
