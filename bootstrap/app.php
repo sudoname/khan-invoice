@@ -25,6 +25,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'webhook/public-invoice/paystack',
             'webhooks/payment/*',
             'invoice-generator/preview',
+            'paystack/approve-transfer',
         ]);
     })
     ->withSchedule(function (Schedule $schedule) {

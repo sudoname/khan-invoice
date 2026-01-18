@@ -99,6 +99,9 @@ Route::post('/payment/{publicId}/initiate', [PaymentController::class, 'initiate
 Route::get('/payment/callback', [PaymentController::class, 'callback'])->name('payment.callback');
 Route::post('/payment/webhook', [PaymentController::class, 'webhook'])->name('payment.webhook');
 
+// Paystack transfer approval
+Route::post('/paystack/approve-transfer', [App\Http\Controllers\PaystackTransferApprovalController::class, 'approve'])->name('paystack.approve-transfer');
+
 // Social authentication routes (rate limited to prevent abuse)
 Route::get('/auth/{provider}/redirect', [SocialAuthController::class, 'redirect'])
     ->middleware('throttle:10,1')
