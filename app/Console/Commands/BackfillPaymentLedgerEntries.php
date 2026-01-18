@@ -27,7 +27,6 @@ class BackfillPaymentLedgerEntries extends Command
         // Find all invoices with payments but no ledger entries
         $query = Invoice::query()
             ->where('amount_paid', '>', 0)
-            ->whereNotNull('payment_reference')
             ->with('user');
 
         if ($specificUser) {
@@ -59,27 +58,40 @@ class BackfillPaymentLedgerEntries extends Command
             }
 
             try {
-                $paystackService = new PaystackService();
+                $amountPaid = (float) $invoice->amount_paid;
+                $fees = 0;
+                $netReceived = $amountPaid;
+                $paymentVerified = false;
 
-                // Try to verify payment in Paystack
-                $result = $paystackService->verifyTransaction($invoice->payment_reference);
+                // Try to verify in Paystack if we have a reference
+                if ($invoice->payment_reference) {
+                    try {
+                        $paystackService = new PaystackService();
+                        $result = $paystackService->verifyTransaction($invoice->payment_reference);
 
-                if (!$result['status'] || $result['data']['status'] !== 'success') {
-                    $this->warn("  ⊘ Payment not found or not successful in Paystack");
-                    $this->warn("    Reference: {$invoice->payment_reference}");
-                    $skipped++;
-                    continue;
+                        if ($result['status'] && $result['data']['status'] === 'success') {
+                            $data = $result['data'];
+                            $amountPaid = $data['amount'] / 100; // Convert from kobo
+                            $fees = ($data['fees'] ?? 0) / 100;
+                            $netReceived = $amountPaid - $fees;
+                            $paymentVerified = true;
+
+                            $this->info("  ✓ Payment verified in Paystack");
+                            $this->line("    Amount: ₦" . number_format($amountPaid, 2));
+                            $this->line("    Fees: ₦" . number_format($fees, 2));
+                            $this->line("    Net: ₦" . number_format($netReceived, 2));
+                        }
+                    } catch (\Exception $e) {
+                        // Paystack verification failed, use invoice amount
+                    }
                 }
 
-                $data = $result['data'];
-                $amountPaid = $data['amount'] / 100; // Convert from kobo
-                $fees = ($data['fees'] ?? 0) / 100;
-                $netReceived = $amountPaid - $fees;
-
-                $this->info("  ✓ Payment verified in Paystack");
-                $this->line("    Amount: ₦" . number_format($amountPaid, 2));
-                $this->line("    Fees: ₦" . number_format($fees, 2));
-                $this->line("    Net: ₦" . number_format($netReceived, 2));
+                if (!$paymentVerified) {
+                    $this->warn("  ⊘ Payment not verified in Paystack - using invoice amount_paid");
+                    $this->line("    Amount: ₦" . number_format($amountPaid, 2));
+                    $this->line("    Estimated fees: ₦0.00 (unknown)");
+                    $this->line("    Net: ₦" . number_format($netReceived, 2));
+                }
 
                 // Get or create primary merchant account
                 $merchantAccount = MerchantAccount::where('user_id', $invoice->user_id)
