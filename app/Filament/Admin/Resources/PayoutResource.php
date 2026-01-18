@@ -179,10 +179,10 @@ class PayoutResource extends Resource
                     ->modalDescription('This will approve and process the payout immediately.')
                     ->action(function ($record) {
                         try {
-                            $payoutService = new \App\Services\Payment\PayoutService();
+                            $payoutService = app(\App\Services\Payment\PayoutService::class);
                             $result = $payoutService->approvePayout($record->id, auth()->id());
 
-                            if ($result['status']) {
+                            if ($result['success']) {
                                 Notification::make()
                                     ->success()
                                     ->title('Payout Approved')
@@ -217,10 +217,10 @@ class PayoutResource extends Resource
                     ])
                     ->action(function ($record, array $data) {
                         try {
-                            $payoutService = new \App\Services\Payment\PayoutService();
+                            $payoutService = app(\App\Services\Payment\PayoutService::class);
                             $result = $payoutService->cancelPayout($record->id, $data['reason']);
 
-                            if ($result['status']) {
+                            if ($result['success']) {
                                 Notification::make()
                                     ->success()
                                     ->title('Payout Reversed')
