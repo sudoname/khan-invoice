@@ -43,7 +43,7 @@
                     <h1 class="text-3xl font-bold">Invoice {{ $invoice->invoice_number }}</h1>
                     <p class="text-purple-100 mt-2">View and pay invoice</p>
                 </div>
-                @if($invoice->payment_status === 'paid')
+                @if($invoice->status === 'paid')
                     <div class="bg-green-500 text-white px-4 py-2 rounded-lg font-bold text-sm">
                         ✓ PAID
                     </div>
@@ -192,7 +192,7 @@
             <!-- Pay Now -->
             @php
                 // Enable payment if Paystack subaccount is configured and invoice isn't paid
-                $canPay = $invoice->payment_status !== 'paid'
+                $canPay = $invoice->status !== 'paid'
                     && !empty($invoice->paystack_subaccount_code);
             @endphp
 
@@ -204,7 +204,7 @@
                     <span class="hidden sm:inline">Pay</span>
                 </button>
             @else
-                <div class="bg-gray-100 text-gray-600 px-3 py-3 rounded-lg font-semibold flex items-center justify-center gap-2 text-xs sm:text-sm cursor-not-allowed" title="@if($invoice->payment_status === 'paid') Already paid @elseif(!$invoice->payment_enabled) Online payment disabled @elseif($invoice->payment_expires_at && $invoice->payment_expires_at <= now()) Payment link expired @endif">
+                <div class="bg-gray-100 text-gray-600 px-3 py-3 rounded-lg font-semibold flex items-center justify-center gap-2 text-xs sm:text-sm cursor-not-allowed" title="@if($invoice->status === 'paid') Already paid @elseif(!$invoice->payment_enabled) Online payment disabled @elseif($invoice->payment_expires_at && $invoice->payment_expires_at <= now()) Payment link expired @endif">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
                     </svg>
@@ -214,7 +214,7 @@
         </div>
 
         <!-- Payment Disabled/Expired Notice -->
-        @if(!$canPay && $invoice->payment_status !== 'paid')
+        @if(!$canPay && $invoice->status !== 'paid')
             <div class="mb-6 bg-yellow-50 border-l-4 border-yellow-500 rounded-r-lg p-4">
                 <div class="flex items-start">
                     <svg class="w-6 h-6 text-yellow-600 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -223,7 +223,7 @@
                     <div>
                         <h4 class="text-sm font-bold text-yellow-900 mb-1">Online Payment Not Available</h4>
                         <p class="text-sm text-yellow-800">
-                            The merchant has not configured online payments for this invoice. Please contact them for alternative payment methods or bank transfer details shown above.
+                            The merchant has not configured online payments for this invoice. Please contact them for alternative payment methods or check the bank transfer details below.
                         </p>
                     </div>
                 </div>
@@ -959,7 +959,7 @@
         function openPaymentModal() {
             console.log('Payment button clicked');
             try {
-                const paymentStatus = '{{ $invoice->payment_status }}';
+                const invoiceStatus = '{{ $invoice->status }}';
                 const modal = document.getElementById('paymentModal');
                 console.log('Payment modal element:', modal);
 
@@ -968,7 +968,7 @@
                     return;
                 }
 
-                if (paymentStatus === 'paid') {
+                if (invoiceStatus === 'paid') {
                     if (confirm('⚠️ This invoice appears to have been paid already.\n\nPaid on: {{ $invoice->paid_at ? $invoice->paid_at->format("M d, Y h:i A") : "N/A" }}\nAmount Paid: ₦{{ number_format($invoice->amount_paid ?? 0, 2) }}\n\nDo you still want to make a payment?')) {
                         modal.classList.remove('hidden');
                     }
