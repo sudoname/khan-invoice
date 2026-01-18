@@ -4,14 +4,18 @@ namespace App\Filament\Admin\Resources;
 
 use App\Filament\Admin\Resources\ContactMessageResource\Pages;
 use App\Filament\Admin\Resources\ContactMessageResource\RelationManagers;
+use App\Mail\ContactMessageReply;
 use App\Models\ContactMessage;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
 
 class ContactMessageResource extends Resource
 {
@@ -167,22 +171,36 @@ class ContactMessageResource extends Resource
                             ->placeholder('Type your reply here...'),
                     ])
                     ->action(function (ContactMessage $record, array $data) {
-                        // Send email
-                        \Mail::to($record->email)->send(new \App\Mail\ContactMessageReply($record, $data['reply']));
+                        try {
+                            // Send email
+                            Mail::to($record->email)->send(new ContactMessageReply($record, $data['reply']));
 
-                        // Update record
-                        $record->update([
-                            'status' => 'replied',
-                            'admin_reply' => $data['reply'],
-                            'replied_by' => auth()->id(),
-                            'replied_at' => now(),
-                        ]);
+                            // Update record
+                            $record->update([
+                                'status' => 'replied',
+                                'admin_reply' => $data['reply'],
+                                'replied_by' => auth()->id(),
+                                'replied_at' => now(),
+                            ]);
 
-                        \Filament\Notifications\Notification::make()
-                            ->success()
-                            ->title('Reply Sent')
-                            ->body('Your reply has been sent to ' . $record->email)
-                            ->send();
+                            Notification::make()
+                                ->success()
+                                ->title('Reply Sent')
+                                ->body('Your reply has been sent to ' . $record->email)
+                                ->send();
+                        } catch (\Exception $e) {
+                            Log::error('Failed to send contact message reply', [
+                                'contact_message_id' => $record->id,
+                                'error' => $e->getMessage(),
+                                'trace' => $e->getTraceAsString(),
+                            ]);
+
+                            Notification::make()
+                                ->danger()
+                                ->title('Failed to Send Reply')
+                                ->body('Error: ' . $e->getMessage())
+                                ->send();
+                        }
                     })
                     ->visible(fn (ContactMessage $record) => !$record->isResolved()),
                 Tables\Actions\Action::make('markAsResolved')
@@ -199,7 +217,7 @@ class ContactMessageResource extends Resource
                             'resolved_by' => auth()->id(),
                         ]);
 
-                        \Filament\Notifications\Notification::make()
+                        Notification::make()
                             ->success()
                             ->title('Marked as Resolved')
                             ->send();
