@@ -115,21 +115,25 @@ class PayoutResource extends Resource
                     ->sortable()
                     ->weight('bold')
                     ->color('success'),
-                Tables\Columns\BadgeColumn::make('payout_type')
+                Tables\Columns\TextColumn::make('payout_type')
                     ->label('Type')
-                    ->colors([
-                        'success' => 'STANDARD',
-                        'warning' => 'INSTANT',
-                        'secondary' => 'MANUAL',
-                    ]),
-                Tables\Columns\BadgeColumn::make('status')
-                    ->colors([
-                        'warning' => 'PENDING',
-                        'info' => 'PROCESSING',
-                        'success' => 'COMPLETED',
-                        'danger' => 'FAILED',
-                        'secondary' => 'REVERSED',
-                    ]),
+                    ->badge()
+                    ->color(fn (string $state): string => match ($state) {
+                        'STANDARD' => 'success',
+                        'INSTANT' => 'warning',
+                        'MANUAL' => 'gray',
+                        default => 'gray',
+                    }),
+                Tables\Columns\TextColumn::make('status')
+                    ->badge()
+                    ->color(fn (string $state): string => match ($state) {
+                        'PENDING' => 'warning',
+                        'PROCESSING' => 'info',
+                        'COMPLETED' => 'success',
+                        'FAILED' => 'danger',
+                        'REVERSED' => 'gray',
+                        default => 'gray',
+                    }),
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Created')
                     ->dateTime()
