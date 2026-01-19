@@ -305,20 +305,22 @@ class PayoutResource extends Resource
                             ->weight('bold'),
                         Infolists\Components\TextEntry::make('payout_type')
                             ->badge()
-                            ->colors([
-                                'success' => 'STANDARD',
-                                'warning' => 'INSTANT',
-                                'secondary' => 'MANUAL',
-                            ]),
+                            ->color(fn (string $state): string => match ($state) {
+                                'STANDARD' => 'success',
+                                'INSTANT' => 'warning',
+                                'MANUAL' => 'gray',
+                                default => 'gray',
+                            }),
                         Infolists\Components\TextEntry::make('status')
                             ->badge()
-                            ->colors([
-                                'warning' => 'PENDING',
-                                'info' => 'PROCESSING',
-                                'success' => 'COMPLETED',
-                                'danger' => 'FAILED',
-                                'secondary' => 'REVERSED',
-                            ]),
+                            ->color(fn (string $state): string => match ($state) {
+                                'PENDING' => 'warning',
+                                'PROCESSING' => 'info',
+                                'COMPLETED' => 'success',
+                                'FAILED' => 'danger',
+                                'REVERSED' => 'gray',
+                                default => 'gray',
+                            }),
                     ])
                     ->columns(2),
 
