@@ -51,6 +51,18 @@ class Payout extends Model
     ];
 
     /**
+     * Get provider response as formatted JSON string for display
+     */
+    public function getProviderResponseDisplayAttribute(): string
+    {
+        if (!$this->provider_response) {
+            return 'N/A';
+        }
+
+        return json_encode($this->provider_response, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+    }
+
+    /**
      * Get the user that owns this payout
      */
     public function user(): BelongsTo
