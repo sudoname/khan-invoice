@@ -206,9 +206,24 @@ class MerchantAccountResource extends Resource
                             ->content(fn ($record) => $record?->verified_at ? $record->verified_at->format('M d, Y g:i A') : 'Not verified yet')
                             ->visible(fn ($record) => $record?->verified_at),
 
-                        Forms\Components\Placeholder::make('current_balance')
-                            ->label('Available Balance')
+                        Forms\Components\Placeholder::make('payout_balance')
+                            ->label('Payout Balance')
                             ->content(fn ($record) => $record ? '₦' . number_format($record->getAvailableBalance(), 2) : '₦0.00')
+                            ->visible(fn ($record) => $record),
+
+                        Forms\Components\Placeholder::make('pending_payouts')
+                            ->label('Pending Payouts')
+                            ->content(fn ($record) => $record ? '₦' . number_format($record->getPendingPayoutAmount(), 2) : '₦0.00')
+                            ->visible(fn ($record) => $record),
+
+                        Forms\Components\Placeholder::make('available_balance')
+                            ->label('Available Balance')
+                            ->content(fn ($record) => $record ? '₦' . number_format($record->getAvailableBalanceAfterPending(), 2) : '₦0.00')
+                            ->visible(fn ($record) => $record),
+
+                        Forms\Components\Placeholder::make('completed_payouts')
+                            ->label('Total Paid Out')
+                            ->content(fn ($record) => $record ? '₦' . number_format($record->getCompletedPayoutAmount(), 2) : '₦0.00')
                             ->visible(fn ($record) => $record),
                     ])
                     ->visible(fn ($record) => $record !== null)
@@ -239,20 +254,23 @@ class MerchantAccountResource extends Resource
                     ->limit(30)
                     ->description(fn ($record) => ucfirst($record->account_type ?? 'savings') . ' account'),
 
-                Tables\Columns\BadgeColumn::make('verification_status')
+                Tables\Columns\TextColumn::make('verification_status')
                     ->label('Status')
-                    ->colors([
-                        'warning' => 'PENDING',
-                        'success' => 'VERIFIED',
-                        'danger' => 'FAILED',
-                        'gray' => 'SUSPENDED',
-                    ])
-                    ->icons([
-                        'heroicon-o-clock' => 'PENDING',
-                        'heroicon-o-check-circle' => 'VERIFIED',
-                        'heroicon-o-x-circle' => 'FAILED',
-                        'heroicon-o-no-symbol' => 'SUSPENDED',
-                    ]),
+                    ->badge()
+                    ->color(fn (string $state): string => match ($state) {
+                        'PENDING' => 'warning',
+                        'VERIFIED' => 'success',
+                        'FAILED' => 'danger',
+                        'SUSPENDED' => 'gray',
+                        default => 'gray',
+                    })
+                    ->icon(fn (string $state): string => match ($state) {
+                        'PENDING' => 'heroicon-o-clock',
+                        'VERIFIED' => 'heroicon-o-check-circle',
+                        'FAILED' => 'heroicon-o-x-circle',
+                        'SUSPENDED' => 'heroicon-o-no-symbol',
+                        default => 'heroicon-o-question-mark-circle',
+                    }),
 
                 Tables\Columns\IconColumn::make('is_primary')
                     ->label('Primary')
@@ -263,11 +281,32 @@ class MerchantAccountResource extends Resource
                     ->falseColor('gray')
                     ->tooltip(fn ($record) => $record->is_primary ? 'Primary account' : 'Secondary account'),
 
-                Tables\Columns\TextColumn::make('available_balance')
-                    ->label('Balance')
+                Tables\Columns\TextColumn::make('payout_balance')
+                    ->label('Payout Balance')
                     ->state(fn ($record) => '₦' . number_format($record->getAvailableBalance(), 2))
                     ->weight('bold')
-                    ->color('success'),
+                    ->color('success')
+                    ->description('Current balance'),
+
+                Tables\Columns\TextColumn::make('pending_payouts')
+                    ->label('Pending Payouts')
+                    ->state(fn ($record) => '₦' . number_format($record->getPendingPayoutAmount(), 2))
+                    ->color('warning')
+                    ->description('In process'),
+
+                Tables\Columns\TextColumn::make('available_after_pending')
+                    ->label('Available Balance')
+                    ->state(fn ($record) => '₦' . number_format($record->getAvailableBalanceAfterPending(), 2))
+                    ->weight('bold')
+                    ->color(fn ($record) => $record->getAvailableBalanceAfterPending() >= 0 ? 'success' : 'danger')
+                    ->description('After pending'),
+
+                Tables\Columns\TextColumn::make('completed_payouts')
+                    ->label('Total Paid Out')
+                    ->state(fn ($record) => '₦' . number_format($record->getCompletedPayoutAmount(), 2))
+                    ->color('gray')
+                    ->description('Lifetime')
+                    ->toggleable(isToggledHiddenByDefault: false),
 
                 Tables\Columns\TextColumn::make('settlement_schedule')
                     ->label('Schedule')

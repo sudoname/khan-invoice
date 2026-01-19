@@ -194,27 +194,54 @@ class MerchantAccountResource extends Resource
                     ->copyable()
                     ->description(fn ($record) => $record->account_name . ' (' . ucfirst($record->account_type ?? 'savings') . ')'),
 
-                Tables\Columns\BadgeColumn::make('verification_status')
+                Tables\Columns\TextColumn::make('verification_status')
                     ->label('Verification')
-                    ->colors([
-                        'warning' => 'PENDING',
-                        'success' => 'VERIFIED',
-                        'danger' => 'FAILED',
-                        'gray' => 'SUSPENDED',
-                    ])
-                    ->icons([
-                        'heroicon-o-clock' => 'PENDING',
-                        'heroicon-o-check-circle' => 'VERIFIED',
-                        'heroicon-o-x-circle' => 'FAILED',
-                        'heroicon-o-no-symbol' => 'SUSPENDED',
-                    ])
+                    ->badge()
+                    ->color(fn (string $state): string => match ($state) {
+                        'PENDING' => 'warning',
+                        'VERIFIED' => 'success',
+                        'FAILED' => 'danger',
+                        'SUSPENDED' => 'gray',
+                        default => 'gray',
+                    })
+                    ->icon(fn (string $state): string => match ($state) {
+                        'PENDING' => 'heroicon-o-clock',
+                        'VERIFIED' => 'heroicon-o-check-circle',
+                        'FAILED' => 'heroicon-o-x-circle',
+                        'SUSPENDED' => 'heroicon-o-no-symbol',
+                        default => 'heroicon-o-question-mark-circle',
+                    })
                     ->sortable(),
 
-                Tables\Columns\TextColumn::make('available_balance')
-                    ->label('Balance')
+                Tables\Columns\TextColumn::make('payout_balance')
+                    ->label('Payout Balance')
                     ->state(fn ($record) => '₦' . number_format($record->getAvailableBalance(), 2))
                     ->color('success')
-                    ->weight('bold'),
+                    ->weight('bold')
+                    ->tooltip('Current balance from ledger')
+                    ->sortable(query: function ($query, string $direction) {
+                        return $query; // Can't sort by calculated field
+                    }),
+
+                Tables\Columns\TextColumn::make('pending_payouts')
+                    ->label('Pending Payouts')
+                    ->state(fn ($record) => '₦' . number_format($record->getPendingPayoutAmount(), 2))
+                    ->color('warning')
+                    ->tooltip('Amount in pending/processing payouts'),
+
+                Tables\Columns\TextColumn::make('available_after_pending')
+                    ->label('Available Balance')
+                    ->state(fn ($record) => '₦' . number_format($record->getAvailableBalanceAfterPending(), 2))
+                    ->color(fn ($record) => $record->getAvailableBalanceAfterPending() >= 0 ? 'success' : 'danger')
+                    ->weight('bold')
+                    ->tooltip('Balance after subtracting pending payouts'),
+
+                Tables\Columns\TextColumn::make('completed_payouts')
+                    ->label('Completed Payouts')
+                    ->state(fn ($record) => '₦' . number_format($record->getCompletedPayoutAmount(), 2))
+                    ->color('gray')
+                    ->tooltip('Total amount paid out')
+                    ->toggleable(isToggledHiddenByDefault: true),
 
                 Tables\Columns\IconColumn::make('is_primary')
                     ->label('Primary')

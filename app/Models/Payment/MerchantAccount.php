@@ -84,6 +84,34 @@ class MerchantAccount extends Model
     }
 
     /**
+     * Get total pending payout amount
+     */
+    public function getPendingPayoutAmount(): float
+    {
+        return (float) Payout::where('user_id', $this->user_id)
+            ->whereIn('status', ['PENDING', 'PROCESSING'])
+            ->sum('gross_amount');
+    }
+
+    /**
+     * Get total completed payout amount
+     */
+    public function getCompletedPayoutAmount(): float
+    {
+        return (float) Payout::where('user_id', $this->user_id)
+            ->where('status', 'COMPLETED')
+            ->sum('net_amount');
+    }
+
+    /**
+     * Get available balance after subtracting pending payouts
+     */
+    public function getAvailableBalanceAfterPending(): float
+    {
+        return $this->getAvailableBalance() - $this->getPendingPayoutAmount();
+    }
+
+    /**
      * Mark account as verified
      */
     public function markAsVerified(string $notes = null): void
