@@ -151,20 +151,25 @@ class PayoutService
             ]);
 
             if ($transferResult['status']) {
-                // Transfer initiated successfully
-                $payout->markAsCompleted([
+                // Transfer initiated successfully - mark as PROCESSING (not COMPLETED)
+                // Paystack will call our approval endpoint, and we'll mark as COMPLETED via webhook
+                $payout->markAsProcessing();
+
+                // Save provider details
+                $payout->update([
                     'provider_reference' => $transferResult['data']['reference'] ?? null,
                     'provider_transfer_code' => $transferResult['data']['transfer_code'] ?? null,
                     'provider_response' => $transferResult['data'],
                 ]);
 
-                Log::info('Payout processed successfully', [
+                Log::info('Payout transfer initiated, awaiting Paystack approval', [
                     'payout_id' => $payout->id,
                     'amount' => $payout->net_amount,
                     'transfer_code' => $transferResult['data']['transfer_code'] ?? null,
+                    'status' => 'PROCESSING',
                 ]);
 
-                return $this->success('Payout processed successfully', [
+                return $this->success('Payout transfer initiated successfully', [
                     'payout' => $payout->fresh(),
                     'transfer' => $transferResult['data'],
                 ]);

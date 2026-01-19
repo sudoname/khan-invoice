@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\PaymentTransaction;
 use App\Models\Subscription;
 use App\Models\User;
+use App\Models\Payment\Payout;
 use App\Services\PaystackService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -44,6 +45,9 @@ class PaystackWebhookController extends Controller
                 'invoice.create' => $this->handleInvoiceCreate($data),
                 'invoice.update' => $this->handleInvoiceUpdate($data),
                 'invoice.payment_failed' => $this->handleInvoicePaymentFailed($data),
+                'transfer.success' => $this->handleTransferSuccess($data),
+                'transfer.failed' => $this->handleTransferFailed($data),
+                'transfer.reversed' => $this->handleTransferReversed($data),
                 default => Log::info('Unhandled Paystack webhook event', ['event' => $event]),
             };
 
@@ -196,5 +200,88 @@ class PaystackWebhookController extends Controller
 
             // Send payment failed notification to user
         }
+    }
+
+    /**
+     * Handle successful transfer
+     */
+    private function handleTransferSuccess(array $data): void
+    {
+        $reference = $data['reference'];
+        $payout = Payout::where('reference', $reference)->first();
+
+        if (!$payout) {
+            Log::warning('Payout not found for transfer success', ['reference' => $reference]);
+            return;
+        }
+
+        // Only mark as completed if it's currently processing
+        if ($payout->status === 'PROCESSING') {
+            $payout->markAsCompleted([
+                'provider_reference' => $data['reference'] ?? null,
+                'provider_transfer_code' => $data['transfer_code'] ?? null,
+                'provider_response' => $data,
+            ]);
+
+            Log::info('Transfer completed successfully', [
+                'payout_id' => $payout->id,
+                'reference' => $reference,
+                'amount' => $data['amount'] / 100,
+            ]);
+        } else {
+            Log::warning('Transfer success webhook for non-processing payout', [
+                'payout_id' => $payout->id,
+                'current_status' => $payout->status,
+                'reference' => $reference,
+            ]);
+        }
+    }
+
+    /**
+     * Handle failed transfer
+     */
+    private function handleTransferFailed(array $data): void
+    {
+        $reference = $data['reference'];
+        $payout = Payout::where('reference', $reference)->first();
+
+        if (!$payout) {
+            Log::warning('Payout not found for transfer failed', ['reference' => $reference]);
+            return;
+        }
+
+        $failureReason = $data['reason'] ?? 'Transfer failed';
+
+        // Mark as failed
+        $payout->markAsFailed($failureReason);
+
+        Log::error('Transfer failed', [
+            'payout_id' => $payout->id,
+            'reference' => $reference,
+            'reason' => $failureReason,
+        ]);
+    }
+
+    /**
+     * Handle reversed transfer
+     */
+    private function handleTransferReversed(array $data): void
+    {
+        $reference = $data['reference'];
+        $payout = Payout::where('reference', $reference)->first();
+
+        if (!$payout) {
+            Log::warning('Payout not found for transfer reversed', ['reference' => $reference]);
+            return;
+        }
+
+        // Mark as failed with reversal reason
+        $payout->markAsFailed('Transfer was reversed: ' . ($data['reason'] ?? 'Unknown reason'));
+
+        Log::warning('Transfer reversed', [
+            'payout_id' => $payout->id,
+            'reference' => $reference,
+            'reason' => $data['reason'] ?? 'Unknown',
+        ]);
     }
 }
