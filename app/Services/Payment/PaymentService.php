@@ -254,14 +254,20 @@ class PaymentService
 
         $currentBalance = $merchantAccount->getAvailableBalance();
         $netReceived = (float) $invoicePayment->net_received;
-        $balanceAfter = $currentBalance + $netReceived;
 
-        // Create ledger entry for payment received
+        // Calculate platform service charge
+        $serviceCharge = \App\Models\PaymentSetting::calculateServiceCharge($invoicePayment->amount_paid);
+
+        // Net amount merchant receives after platform service charge
+        $merchantNetAmount = $netReceived - $serviceCharge;
+        $balanceAfter = $currentBalance + $merchantNetAmount;
+
+        // Create ledger entry for payment received (after all fees)
         LedgerEntry::create([
             'user_id' => $invoice->user_id,
             'entry_type' => 'PAYMENT_RECEIVED',
             'account_type' => 'CREDIT',
-            'amount' => $netReceived,
+            'amount' => $merchantNetAmount,
             'balance_after' => $balanceAfter,
             'currency' => $invoicePayment->currency ?? 'NGN',
             'invoice_payment_id' => $invoicePayment->id,
@@ -271,15 +277,15 @@ class PaymentService
             'entry_date' => now(),
         ]);
 
-        // Record gateway fees if any
+        // Record gateway fees as info (already deducted from net_received)
         if ($verificationResult->fees > 0) {
-            $balanceAfterFees = $balanceAfter; // Fees already deducted in net_received
+            $balanceAfterGatewayFee = $balanceAfter; // Fees already deducted, so balance stays same
             LedgerEntry::create([
                 'user_id' => $invoice->user_id,
                 'entry_type' => 'GATEWAY_FEE',
                 'account_type' => 'DEBIT',
                 'amount' => $verificationResult->fees,
-                'balance_after' => $balanceAfterFees,
+                'balance_after' => $balanceAfterGatewayFee,
                 'currency' => $invoicePayment->currency ?? 'NGN',
                 'invoice_payment_id' => $invoicePayment->id,
                 'invoice_id' => $invoice->id,
@@ -289,11 +295,32 @@ class PaymentService
             ]);
         }
 
+        // Record platform service charge
+        if ($serviceCharge > 0) {
+            $balanceAfterServiceCharge = $balanceAfter; // Service charge already deducted, so balance stays same
+            LedgerEntry::create([
+                'user_id' => $invoice->user_id,
+                'entry_type' => 'PLATFORM_FEE',
+                'account_type' => 'DEBIT',
+                'amount' => $serviceCharge,
+                'balance_after' => $balanceAfterServiceCharge,
+                'currency' => $invoicePayment->currency ?? 'NGN',
+                'invoice_payment_id' => $invoicePayment->id,
+                'invoice_id' => $invoice->id,
+                'description' => "Platform service charge for invoice {$invoice->invoice_number}",
+                'reference' => LedgerEntry::generateReference('PLATFORM_FEE'),
+                'entry_date' => now(),
+            ]);
+        }
+
         Log::info('Payment recorded in ledger', [
             'user_id' => $invoice->user_id,
             'invoice_id' => $invoice->id,
-            'net_received' => $netReceived,
-            'fees' => $verificationResult->fees,
+            'amount_paid' => $invoicePayment->amount_paid,
+            'net_received_from_gateway' => $netReceived,
+            'gateway_fees' => $verificationResult->fees,
+            'service_charge' => $serviceCharge,
+            'merchant_net_amount' => $merchantNetAmount,
             'new_balance' => $balanceAfter,
         ]);
     }
