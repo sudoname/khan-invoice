@@ -351,6 +351,20 @@ class PayoutService
      */
     protected function reversePayoutLedgerEntries(Payout $payout): void
     {
+        // Check if this payout has already been reversed to prevent duplicate reversals
+        $existingReversal = LedgerEntry::where('payout_id', $payout->id)
+            ->where('entry_type', 'ADJUSTMENT')
+            ->where('account_type', 'CREDIT')
+            ->exists();
+
+        if ($existingReversal) {
+            Log::warning('Payout already reversed, skipping duplicate reversal', [
+                'payout_id' => $payout->id,
+                'reference' => $payout->reference,
+            ]);
+            return;
+        }
+
         $currentBalance = $payout->merchantAccount->getAvailableBalance();
 
         // Credit back the gross amount
