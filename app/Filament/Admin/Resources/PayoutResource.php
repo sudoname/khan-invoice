@@ -290,41 +290,50 @@ class PayoutResource extends Resource
                             ->copyable(),
                         Infolists\Components\TextEntry::make('user.name')
                             ->label('Merchant')
-                            ->placeholder('N/A'),
+                            ->default('N/A')
+                            ->formatStateUsing(fn ($state) => $state ?? 'N/A'),
                         Infolists\Components\TextEntry::make('merchantAccount.bank_name')
                             ->label('Bank')
-                            ->placeholder('N/A'),
+                            ->default('N/A')
+                            ->formatStateUsing(fn ($state) => $state ?? 'N/A'),
                         Infolists\Components\TextEntry::make('merchantAccount.account_number')
                             ->label('Account Number')
-                            ->placeholder('N/A'),
+                            ->default('N/A')
+                            ->formatStateUsing(fn ($state) => $state ?? 'N/A'),
                         Infolists\Components\TextEntry::make('merchantAccount.account_name')
                             ->label('Account Name')
-                            ->placeholder('N/A'),
+                            ->default('N/A')
+                            ->formatStateUsing(fn ($state) => $state ?? 'N/A'),
                         Infolists\Components\TextEntry::make('gross_amount')
-                            ->money('NGN'),
+                            ->money('NGN')
+                            ->default(0),
                         Infolists\Components\TextEntry::make('payout_fee')
-                            ->money('NGN'),
+                            ->money('NGN')
+                            ->default(0),
                         Infolists\Components\TextEntry::make('net_amount')
                             ->money('NGN')
-                            ->weight('bold'),
+                            ->weight('bold')
+                            ->default(0),
                         Infolists\Components\TextEntry::make('payout_type')
                             ->badge()
-                            ->color(fn (string $state): string => match ($state) {
+                            ->color(fn (?string $state): string => match ($state) {
                                 'STANDARD' => 'success',
                                 'INSTANT' => 'warning',
                                 'MANUAL' => 'gray',
                                 default => 'gray',
-                            }),
+                            })
+                            ->placeholder('N/A'),
                         Infolists\Components\TextEntry::make('status')
                             ->badge()
-                            ->color(fn (string $state): string => match ($state) {
+                            ->color(fn (?string $state): string => match ($state) {
                                 'PENDING' => 'warning',
                                 'PROCESSING' => 'info',
                                 'COMPLETED' => 'success',
                                 'FAILED' => 'danger',
                                 'REVERSED' => 'gray',
                                 default => 'gray',
-                            }),
+                            })
+                            ->placeholder('N/A'),
                     ])
                     ->columns(2),
 
@@ -369,10 +378,26 @@ class PayoutResource extends Resource
                 Infolists\Components\Section::make('Provider Response')
                     ->schema([
                         Infolists\Components\TextEntry::make('provider_response')
-                            ->formatStateUsing(fn ($state) => $state ? json_encode($state, JSON_PRETTY_PRINT) : 'N/A')
+                            ->formatStateUsing(function ($state) {
+                                if (!$state) {
+                                    return 'N/A';
+                                }
+
+                                try {
+                                    if (is_string($state)) {
+                                        $decoded = json_decode($state, true);
+                                        return $decoded ? json_encode($decoded, JSON_PRETTY_PRINT) : $state;
+                                    }
+
+                                    return is_array($state) ? json_encode($state, JSON_PRETTY_PRINT) : 'N/A';
+                                } catch (\Exception $e) {
+                                    return 'Invalid JSON data';
+                                }
+                            })
                             ->columnSpanFull(),
                     ])
-                    ->collapsible(),
+                    ->collapsible()
+                    ->collapsed(),
             ]);
     }
 

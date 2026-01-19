@@ -5,6 +5,7 @@ namespace App\Filament\Admin\Resources\PayoutResource\Pages;
 use App\Filament\Admin\Resources\PayoutResource;
 use Filament\Resources\Pages\ViewRecord;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Log;
 
 class ViewPayout extends ViewRecord
 {
@@ -12,7 +13,33 @@ class ViewPayout extends ViewRecord
 
     protected function resolveRecord($key): Model
     {
-        return static::getResource()::resolveRecordRouteBinding($key)
-            ->load(['user', 'merchantAccount']);
+        try {
+            $record = static::getResource()::resolveRecordRouteBinding($key);
+
+            if (!$record) {
+                Log::error('Payout record not found', ['id' => $key]);
+                abort(404, 'Payout not found');
+            }
+
+            // Eager load relationships
+            $record->load(['user', 'merchantAccount', 'merchantAccount.user', 'approver']);
+
+            Log::info('Payout record loaded', [
+                'id' => $record->id,
+                'reference' => $record->reference,
+                'has_user' => $record->user !== null,
+                'has_merchant_account' => $record->merchantAccount !== null,
+            ]);
+
+            return $record;
+        } catch (\Exception $e) {
+            Log::error('Error loading payout record', [
+                'id' => $key,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            throw $e;
+        }
     }
 }
