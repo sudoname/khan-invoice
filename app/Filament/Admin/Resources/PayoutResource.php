@@ -289,13 +289,17 @@ class PayoutResource extends Resource
                         Infolists\Components\TextEntry::make('reference')
                             ->copyable(),
                         Infolists\Components\TextEntry::make('user.name')
-                            ->label('Merchant'),
+                            ->label('Merchant')
+                            ->placeholder('N/A'),
                         Infolists\Components\TextEntry::make('merchantAccount.bank_name')
-                            ->label('Bank'),
+                            ->label('Bank')
+                            ->placeholder('N/A'),
                         Infolists\Components\TextEntry::make('merchantAccount.account_number')
-                            ->label('Account Number'),
+                            ->label('Account Number')
+                            ->placeholder('N/A'),
                         Infolists\Components\TextEntry::make('merchantAccount.account_name')
-                            ->label('Account Name'),
+                            ->label('Account Name')
+                            ->placeholder('N/A'),
                         Infolists\Components\TextEntry::make('gross_amount')
                             ->money('NGN'),
                         Infolists\Components\TextEntry::make('payout_fee')
@@ -326,18 +330,22 @@ class PayoutResource extends Resource
 
                 Infolists\Components\Section::make('Provider Information')
                     ->schema([
-                        Infolists\Components\TextEntry::make('provider'),
+                        Infolists\Components\TextEntry::make('provider')
+                            ->placeholder('N/A'),
                         Infolists\Components\TextEntry::make('provider_reference')
-                            ->copyable(),
+                            ->copyable()
+                            ->placeholder('N/A'),
                         Infolists\Components\TextEntry::make('provider_transfer_code')
-                            ->copyable(),
+                            ->copyable()
+                            ->placeholder('N/A'),
                     ])
                     ->columns(3),
 
                 Infolists\Components\Section::make('Timestamps')
                     ->schema([
                         Infolists\Components\TextEntry::make('initiated_at')
-                            ->dateTime(),
+                            ->dateTime()
+                            ->placeholder('N/A'),
                         Infolists\Components\TextEntry::make('completed_at')
                             ->dateTime()
                             ->placeholder('Not completed'),
@@ -345,16 +353,18 @@ class PayoutResource extends Resource
                             ->dateTime()
                             ->placeholder('N/A'),
                         Infolists\Components\TextEntry::make('created_at')
-                            ->dateTime(),
+                            ->dateTime()
+                            ->placeholder('N/A'),
                     ])
                     ->columns(4),
 
                 Infolists\Components\Section::make('Failure Information')
                     ->schema([
                         Infolists\Components\TextEntry::make('failure_reason')
-                            ->columnSpanFull(),
+                            ->columnSpanFull()
+                            ->placeholder('N/A'),
                     ])
-                    ->visible(fn ($record) => $record->status === 'FAILED'),
+                    ->visible(fn ($record) => $record && $record->status === 'FAILED'),
 
                 Infolists\Components\Section::make('Provider Response')
                     ->schema([
