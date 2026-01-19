@@ -390,14 +390,14 @@ class PayoutResource extends Resource
                                         // Try to validate it's JSON
                                         $decoded = @json_decode($state, true);
                                         if (json_last_error() === JSON_ERROR_NONE && $decoded) {
-                                            return json_encode($decoded, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+                                            return '<pre>' . json_encode($decoded, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . '</pre>';
                                         }
                                         return $state;
                                     }
 
                                     // If it's an array, encode it
                                     if (is_array($state)) {
-                                        return json_encode($state, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+                                        return '<pre>' . json_encode($state, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . '</pre>';
                                     }
 
                                     return 'N/A';
@@ -409,6 +409,7 @@ class PayoutResource extends Resource
                                     return 'Error displaying response';
                                 }
                             })
+                            ->html()
                             ->columnSpanFull()
                             ->default('N/A'),
                     ])
