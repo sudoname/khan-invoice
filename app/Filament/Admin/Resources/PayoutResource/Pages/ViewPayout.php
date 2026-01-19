@@ -27,8 +27,12 @@ class ViewPayout extends ViewRecord
             Log::info('Payout record loaded', [
                 'id' => $record->id,
                 'reference' => $record->reference,
+                'status' => $record->status,
                 'has_user' => $record->user !== null,
                 'has_merchant_account' => $record->merchantAccount !== null,
+                'has_approver' => $record->approver !== null,
+                'completed_at' => $record->completed_at?->toDateTimeString(),
+                'provider_response_type' => gettype($record->provider_response),
             ]);
 
             return $record;

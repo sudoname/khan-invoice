@@ -305,15 +305,13 @@ class PayoutResource extends Resource
                             ->default('N/A')
                             ->formatStateUsing(fn ($state) => $state ?? 'N/A'),
                         Infolists\Components\TextEntry::make('gross_amount')
-                            ->money('NGN')
-                            ->default(0),
+                            ->formatStateUsing(fn ($state) => '₦' . number_format((float)($state ?? 0), 2)),
                         Infolists\Components\TextEntry::make('payout_fee')
-                            ->money('NGN')
-                            ->default(0),
+                            ->formatStateUsing(fn ($state) => '₦' . number_format((float)($state ?? 0), 2)),
                         Infolists\Components\TextEntry::make('net_amount')
-                            ->money('NGN')
+                            ->formatStateUsing(fn ($state) => '₦' . number_format((float)($state ?? 0), 2))
                             ->weight('bold')
-                            ->default(0),
+                            ->color('success'),
                         Infolists\Components\TextEntry::make('payout_type')
                             ->badge()
                             ->color(fn (?string $state): string => match ($state) {
@@ -340,13 +338,16 @@ class PayoutResource extends Resource
                 Infolists\Components\Section::make('Provider Information')
                     ->schema([
                         Infolists\Components\TextEntry::make('provider')
-                            ->placeholder('N/A'),
+                            ->default('paystack')
+                            ->formatStateUsing(fn ($state) => $state ?? 'paystack'),
                         Infolists\Components\TextEntry::make('provider_reference')
                             ->copyable()
-                            ->placeholder('N/A'),
+                            ->default('N/A')
+                            ->formatStateUsing(fn ($state) => $state ?? 'N/A'),
                         Infolists\Components\TextEntry::make('provider_transfer_code')
                             ->copyable()
-                            ->placeholder('N/A'),
+                            ->default('N/A')
+                            ->formatStateUsing(fn ($state) => $state ?? 'N/A'),
                     ])
                     ->columns(3),
 
@@ -354,16 +355,16 @@ class PayoutResource extends Resource
                     ->schema([
                         Infolists\Components\TextEntry::make('initiated_at')
                             ->dateTime()
-                            ->placeholder('N/A'),
+                            ->formatStateUsing(fn ($state) => $state ? $state->format('M d, Y g:i A') : 'N/A'),
                         Infolists\Components\TextEntry::make('completed_at')
                             ->dateTime()
-                            ->placeholder('Not completed'),
+                            ->formatStateUsing(fn ($state) => $state ? $state->format('M d, Y g:i A') : 'Not completed'),
                         Infolists\Components\TextEntry::make('failed_at')
                             ->dateTime()
-                            ->placeholder('N/A'),
+                            ->formatStateUsing(fn ($state) => $state ? $state->format('M d, Y g:i A') : 'N/A'),
                         Infolists\Components\TextEntry::make('created_at')
                             ->dateTime()
-                            ->placeholder('N/A'),
+                            ->formatStateUsing(fn ($state) => $state ? $state->format('M d, Y g:i A') : 'N/A'),
                     ])
                     ->columns(4),
 
@@ -378,26 +379,42 @@ class PayoutResource extends Resource
                 Infolists\Components\Section::make('Provider Response')
                     ->schema([
                         Infolists\Components\TextEntry::make('provider_response')
-                            ->formatStateUsing(function ($state) {
+                            ->formatStateUsing(function ($state, $record) {
                                 if (!$state) {
                                     return 'N/A';
                                 }
 
                                 try {
+                                    // If it's already a string, just return it
                                     if (is_string($state)) {
-                                        $decoded = json_decode($state, true);
-                                        return $decoded ? json_encode($decoded, JSON_PRETTY_PRINT) : $state;
+                                        // Try to validate it's JSON
+                                        $decoded = @json_decode($state, true);
+                                        if (json_last_error() === JSON_ERROR_NONE && $decoded) {
+                                            return json_encode($decoded, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+                                        }
+                                        return $state;
                                     }
 
-                                    return is_array($state) ? json_encode($state, JSON_PRETTY_PRINT) : 'N/A';
-                                } catch (\Exception $e) {
-                                    return 'Invalid JSON data';
+                                    // If it's an array, encode it
+                                    if (is_array($state)) {
+                                        return json_encode($state, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+                                    }
+
+                                    return 'N/A';
+                                } catch (\Throwable $e) {
+                                    \Log::error('Error formatting provider response', [
+                                        'payout_id' => $record->id,
+                                        'error' => $e->getMessage(),
+                                    ]);
+                                    return 'Error displaying response';
                                 }
                             })
-                            ->columnSpanFull(),
+                            ->columnSpanFull()
+                            ->default('N/A'),
                     ])
                     ->collapsible()
-                    ->collapsed(),
+                    ->collapsed()
+                    ->visible(fn ($record) => $record && $record->provider_response),
             ]);
     }
 
