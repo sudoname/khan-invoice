@@ -20,7 +20,7 @@ class EnsureUserIsAdmin
         }
 
         if (!auth()->user()->isAdmin()) {
-            abort(403, 'Unauthorized access. Admin access only.');
+            return response()->view('errors.unauthorized', [], 403);
         }
 
         return $next($request);
