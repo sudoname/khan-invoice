@@ -43,6 +43,11 @@ return Application::configure(basePath: dirname(__DIR__))
 
         // Reset subscription usage counters on the 1st of each month at 12:00 AM
         $schedule->command('subscriptions:reset-usage')->monthlyOn(1, '00:00');
+
+        // Check for orphaned invoice payments daily at 2:00 AM
+        $schedule->command('payments:detect-orphaned-invoices')
+            ->dailyAt('02:00')
+            ->emailOutputOnFailure('yomi@khan.ng');
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
