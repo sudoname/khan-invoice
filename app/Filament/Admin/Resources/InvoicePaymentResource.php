@@ -93,7 +93,6 @@ class InvoicePaymentResource extends Resource
                 Tables\Columns\TextColumn::make('invoice.invoice_number')
                     ->label('Invoice')
                     ->searchable()
-                    ->url(fn ($record) => $record->invoice ? route('filament.admin.resources.invoices.view', $record->invoice) : null)
                     ->sortable(),
                 Tables\Columns\TextColumn::make('invoice.user.name')
                     ->label('Merchant')
