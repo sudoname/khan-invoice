@@ -86,6 +86,10 @@ class InvoiceResource extends Resource
                                 Forms\Components\TextInput::make('phone')
                                     ->label('Phone Number'),
                             ])
+                            ->createOptionUsing(function (array $data) {
+                                $data['user_id'] = auth()->id();
+                                return \App\Models\Customer::create($data)->getKey();
+                            })
                             ->createOptionModalHeading('Add New Customer')
                             ->columnSpanFull(),
                     ])
