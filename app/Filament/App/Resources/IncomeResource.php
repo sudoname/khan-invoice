@@ -56,12 +56,44 @@ class IncomeResource extends Resource
                             ->maxDate(now())
                             ->native(false),
 
-                        Forms\Components\Select::make('category')
+                        Forms\Components\Select::make('income_category_id')
                             ->label('Category')
-                            ->options(Income::getCategoryOptions())
-                            ->required()
+                            ->relationship('incomeCategory', 'name', fn ($query) => $query->where('user_id', auth()->id())->where('is_active', true)->orderBy('sort_order'))
                             ->searchable()
-                            ->helperText('What type of income is this?'),
+                            ->preload()
+                            ->required()
+                            ->createOptionForm([
+                                Forms\Components\Hidden::make('user_id')
+                                    ->default(auth()->id()),
+                                Forms\Components\TextInput::make('name')
+                                    ->label('Category Name')
+                                    ->required()
+                                    ->placeholder('e.g., Cashew Export 20ft Container'),
+                                Forms\Components\TextInput::make('default_price')
+                                    ->label('Default Price (Optional)')
+                                    ->numeric()
+                                    ->prefix('₦'),
+                            ])
+                            ->createOptionModalHeading('Add New Category')
+                            ->live()
+                            ->afterStateUpdated(function ($state, callable $get, callable $set) {
+                                if ($state) {
+                                    $category = \App\Models\IncomeCategory::find($state);
+                                    if ($category && $category->default_price) {
+                                        $set('amount', $category->default_price);
+                                        $tax = floatval($get('tax_amount') ?? 0);
+                                        $set('total_amount', $category->default_price + $tax);
+                                    }
+                                }
+                            })
+                            ->helperText('Select or create what you sell/offer'),
+
+                        Forms\Components\Select::make('category')
+                            ->label('Fallback Category (Old System)')
+                            ->options(Income::getCategoryOptions())
+                            ->searchable()
+                            ->helperText('Only shown if no custom categories exist')
+                            ->hidden(fn () => \App\Models\IncomeCategory::where('user_id', auth()->id())->where('is_active', true)->exists()),
 
                         Forms\Components\Select::make('business_profile_id')
                             ->label('Business Profile')
@@ -193,17 +225,14 @@ class IncomeResource extends Resource
                     ->placeholder('—')
                     ->tooltip('Auto-created from paid invoice'),
 
-                Tables\Columns\TextColumn::make('category')
+                Tables\Columns\TextColumn::make('incomeCategory.name')
                     ->label('Category')
                     ->badge()
-                    ->colors([
-                        'success' => 'cash_sales',
-                        'info' => 'service_revenue',
-                        'warning' => 'product_sales',
-                        'primary' => fn ($state) => $state && in_array($state, ['commission', 'consulting']),
-                        'secondary' => fn ($state) => $state && in_array($state, ['interest', 'rental_income', 'refund', 'other']),
-                    ])
-                    ->formatStateUsing(fn (?string $state): string => $state ? (Income::getCategoryOptions()[$state] ?? ucwords(str_replace('_', ' ', $state))) : '—'),
+                    ->color('success')
+                    ->searchable()
+                    ->sortable()
+                    ->default(fn ($record) => $record->category ? (Income::getCategoryOptions()[$record->category] ?? ucwords(str_replace('_', ' ', $record->category))) : '—')
+                    ->tooltip('Custom category'),
 
                 Tables\Columns\TextColumn::make('description')
                     ->label('Description')

@@ -16,6 +16,7 @@ class Income extends Model
         'business_profile_id',
         'customer_id',
         'invoice_id',
+        'income_category_id',
         'income_number',
         'income_date',
         'category',
@@ -67,6 +68,14 @@ class Income extends Model
     public function invoice(): BelongsTo
     {
         return $this->belongsTo(Invoice::class);
+    }
+
+    /**
+     * Get the income category (custom user-defined category).
+     */
+    public function incomeCategory(): BelongsTo
+    {
+        return $this->belongsTo(IncomeCategory::class);
     }
 
     /**
