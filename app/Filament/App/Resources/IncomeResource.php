@@ -43,11 +43,11 @@ class IncomeResource extends Resource
                         Forms\Components\TextInput::make('income_number')
                             ->label('Income Number')
                             ->required()
-                            ->default(fn () => Income::generateIncomeNumber())
+                            ->default('Auto-generated on save')
                             ->unique(ignoreRecord: true)
-                            ->helperText('Auto-generated sequential number')
+                            ->helperText('Sequential number generated automatically when you save')
                             ->disabled()
-                            ->dehydrated(),
+                            ->dehydrated(false),
 
                         Forms\Components\DatePicker::make('income_date')
                             ->label('Income Date')
