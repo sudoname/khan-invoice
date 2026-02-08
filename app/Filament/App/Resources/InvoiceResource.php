@@ -70,11 +70,13 @@ class InvoiceResource extends Resource
                             ->default(auth()->id()),
                         Forms\Components\Select::make('customer_id')
                             ->label('Customer')
-                            ->relationship('customer', 'name')
+                            ->relationship('customer', 'name', fn ($query) => $query->where('user_id', auth()->id()))
                             ->required()
                             ->searchable()
                             ->preload()
                             ->createOptionForm([
+                                Forms\Components\Hidden::make('user_id')
+                                    ->default(auth()->id()),
                                 Forms\Components\TextInput::make('name')
                                     ->required()
                                     ->label('Customer Name'),
@@ -86,10 +88,6 @@ class InvoiceResource extends Resource
                                 Forms\Components\TextInput::make('phone')
                                     ->label('Phone Number'),
                             ])
-                            ->createOptionUsing(function (array $data) {
-                                $data['user_id'] = auth()->id();
-                                return \App\Models\Customer::create($data)->getKey();
-                            })
                             ->createOptionModalHeading('Add New Customer')
                             ->columnSpanFull(),
                     ])
