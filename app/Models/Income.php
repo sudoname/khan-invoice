@@ -75,7 +75,8 @@ class Income extends Model
     public static function generateIncomeNumber(): string
     {
         $year = now()->year;
-        $lastIncome = self::whereYear('created_at', $year)
+        $lastIncome = self::withTrashed()
+            ->whereYear('created_at', $year)
             ->orderBy('id', 'desc')
             ->first();
 
