@@ -16,13 +16,14 @@ return new class extends Migration
 
             $table->index('wa_conversation_id');
             $table->index('wa_contact_id');
-            $table->index(['whatsapp_last_followup_at', 'whatsapp_followup_attempts']);
+            $table->index(['whatsapp_last_followup_at', 'whatsapp_followup_attempts'], 'invoices_wa_followup_idx');
         });
     }
 
     public function down(): void
     {
         Schema::table('invoices', function (Blueprint $table) {
+            $table->dropIndex('invoices_wa_followup_idx');
             $table->dropForeign(['wa_conversation_id']);
             $table->dropForeign(['wa_contact_id']);
             $table->dropColumn([
