@@ -15,6 +15,8 @@ class Invoice extends Model
         'user_id',
         'business_profile_id',
         'customer_id',
+        'wa_conversation_id',
+        'wa_contact_id',
         'invoice_number',
         'issue_date',
         'due_date',
@@ -40,6 +42,8 @@ class Invoice extends Model
         'payment_expires_at',
         'payment_enabled',
         'simple_mode',
+        'whatsapp_last_followup_at',
+        'whatsapp_followup_attempts',
     ];
 
     protected $casts = [
@@ -233,5 +237,18 @@ class Invoice extends Model
     public function scopeInDateRange($query, $startDate, $endDate)
     {
         return $query->whereBetween('issue_date', [$startDate, $endDate]);
+    }
+
+    /**
+     * WhatsApp Assistant Relationships
+     */
+    public function waConversation(): BelongsTo
+    {
+        return $this->belongsTo(\App\Models\WhatsApp\WaConversation::class, 'wa_conversation_id');
+    }
+
+    public function waContact(): BelongsTo
+    {
+        return $this->belongsTo(\App\Models\WhatsApp\WaContact::class, 'wa_contact_id');
     }
 }

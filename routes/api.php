@@ -15,6 +15,7 @@ use App\Http\Controllers\Api\PaymentController as NewPaymentController;
 use App\Http\Controllers\Api\PaymentWebhookController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\PaystackWebhookController;
+use App\Http\Controllers\WhatsApp\WhatsAppWebhookController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -33,6 +34,17 @@ Route::prefix('webhooks/payment')->group(function () {
 
     Route::post('/flutterwave', [PaymentWebhookController::class, 'handleFlutterwaveWebhook'])
         ->middleware('verify.payment.webhook:flutterwave');
+});
+
+// WhatsApp Webhooks (no auth - verified via signature and verify token)
+Route::prefix('webhooks/whatsapp')->group(function () {
+    // GET endpoint for webhook verification
+    Route::get('/', [WhatsAppWebhookController::class, 'verify'])
+        ->name('whatsapp.webhook.verify');
+
+    // POST endpoint for receiving messages
+    Route::post('/', [WhatsAppWebhookController::class, 'receive'])
+        ->name('whatsapp.webhook.receive');
 });
 
 // Public routes
@@ -112,3 +124,6 @@ Route::prefix('v1')->middleware(['auth:sanctum', 'api.rate.limit'])->group(funct
         Route::get('/stats', [AISuggestionController::class, 'getStatistics']);
     });
 });
+
+// WhatsApp Routes
+require __DIR__ . '/whatsapp.php';

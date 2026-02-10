@@ -12,10 +12,6 @@ We have configured our Transfer Approval URL in the dashboard but it's not being
 - Our approval endpoint at `https://kinvoice.ng/paystack/approve-transfer` is never called
 - We have to manually approve each transfer in the dashboard
 
-**Configuration:**
-- Approval URL: `https://kinvoice.ng/paystack/approve-transfer`
-- Location: Settings → Transfers → Transfer Approval URL
-- Endpoint Status: Working correctly (verified accessible and returns proper responses)
 
 **Test Example:**
 - Transfer Code: TRF_c9j5q48ptwnp28ea (₦500.00)
@@ -32,6 +28,7 @@ We need Paystack to automatically call our approval endpoint when transfers are 
 Thank you for your help.
 
 Best regards,
+
 Yomi
 Khan Invoice
 https://kinvoice.ng
