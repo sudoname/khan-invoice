@@ -9,14 +9,38 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('invoices', function (Blueprint $table) {
-            $table->foreignId('wa_conversation_id')->nullable()->after('customer_id')->constrained()->nullOnDelete();
-            $table->foreignId('wa_contact_id')->nullable()->after('wa_conversation_id')->constrained()->nullOnDelete();
-            $table->timestamp('whatsapp_last_followup_at')->nullable();
-            $table->unsignedSmallInteger('whatsapp_followup_attempts')->default(0);
+            // Check if columns don't already exist before adding
+            if (!Schema::hasColumn('invoices', 'wa_conversation_id')) {
+                $table->foreignId('wa_conversation_id')->nullable()->after('customer_id')->constrained()->nullOnDelete();
+            }
 
-            $table->index('wa_conversation_id');
-            $table->index('wa_contact_id');
-            $table->index(['whatsapp_last_followup_at', 'whatsapp_followup_attempts'], 'invoices_wa_followup_idx');
+            if (!Schema::hasColumn('invoices', 'wa_contact_id')) {
+                $table->foreignId('wa_contact_id')->nullable()->after('wa_conversation_id')->constrained()->nullOnDelete();
+            }
+
+            if (!Schema::hasColumn('invoices', 'whatsapp_last_followup_at')) {
+                $table->timestamp('whatsapp_last_followup_at')->nullable();
+            }
+
+            if (!Schema::hasColumn('invoices', 'whatsapp_followup_attempts')) {
+                $table->unsignedSmallInteger('whatsapp_followup_attempts')->default(0);
+            }
+
+            // Add indexes if they don't exist
+            $sm = Schema::getConnection()->getDoctrineSchemaManager();
+            $indexes = $sm->listTableIndexes('invoices');
+
+            if (!isset($indexes['invoices_wa_conversation_id_index'])) {
+                $table->index('wa_conversation_id');
+            }
+
+            if (!isset($indexes['invoices_wa_contact_id_index'])) {
+                $table->index('wa_contact_id');
+            }
+
+            if (!isset($indexes['invoices_wa_followup_idx'])) {
+                $table->index(['whatsapp_last_followup_at', 'whatsapp_followup_attempts'], 'invoices_wa_followup_idx');
+            }
         });
     }
 
