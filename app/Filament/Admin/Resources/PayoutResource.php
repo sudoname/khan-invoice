@@ -397,4 +397,22 @@ class PayoutResource extends Resource
             'view' => Pages\ViewPayout::route('/{record}'),
         ];
     }
+
+    /**
+     * Prevent direct editing of payouts
+     * Payouts must be managed through PayoutService to ensure accounting integrity
+     */
+    public static function canEdit($record): bool
+    {
+        return false;
+    }
+
+    /**
+     * Prevent deletion of payouts
+     * Use cancel/reverse actions instead
+     */
+    public static function canDelete($record): bool
+    {
+        return false;
+    }
 }

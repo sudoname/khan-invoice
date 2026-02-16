@@ -9,11 +9,13 @@ use App\Models\Invoice;
 use App\Models\InvoiceItem;
 use App\Models\PublicInvoice;
 use App\Models\User;
+use App\Models\Payment\Payout;
 use App\Observers\PaymentObserver;
 use App\Observers\InvoiceObserver;
 use App\Observers\InvoiceItemObserver;
 use App\Observers\PublicInvoiceObserver;
 use App\Observers\UserObserver;
+use App\Observers\PayoutObserver;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Mail\Events\MessageSending;
@@ -51,6 +53,9 @@ class AppServiceProvider extends ServiceProvider
 
         // Register InvoiceItem observer for automatic invoice totals calculation
         InvoiceItem::observe(InvoiceItemObserver::class);
+
+        // Register Payout observer for accounting integrity enforcement
+        Payout::observe(PayoutObserver::class);
 
         // Register email logging listener
         Event::listen(MessageSent::class, LogSentEmail::class);
