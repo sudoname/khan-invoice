@@ -103,15 +103,15 @@ class PayoutResource extends Resource
                     ->searchable(),
                 Tables\Columns\TextColumn::make('gross_amount')
                     ->label('Gross')
-                    ->money('NGN')
+                    ->formatStateUsing(fn ($state) => '₦' . number_format((float) $state, 2))
                     ->sortable(),
                 Tables\Columns\TextColumn::make('payout_fee')
                     ->label('Fee')
-                    ->money('NGN')
+                    ->formatStateUsing(fn ($state) => '₦' . number_format((float) $state, 2))
                     ->sortable(),
                 Tables\Columns\TextColumn::make('net_amount')
                     ->label('Net Amount')
-                    ->money('NGN')
+                    ->formatStateUsing(fn ($state) => '₦' . number_format((float) $state, 2))
                     ->sortable()
                     ->weight('bold')
                     ->color('success'),
