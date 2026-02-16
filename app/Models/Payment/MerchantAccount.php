@@ -73,14 +73,19 @@ class MerchantAccount extends Model
     /**
      * Get current available balance (in currency units, not kobo)
      * Note: Balance is tracked per user, not per merchant account
+     *
+     * IMPORTANT: Calculates balance using accounting equation (Credits - Debits)
+     * instead of relying on balance_after field which may be outdated if entries
+     * were added out of order or ledger was corrupted.
      */
     public function getAvailableBalance(): float
     {
-        $latestEntry = LedgerEntry::where('user_id', $this->user_id)
-            ->latest('created_at')
-            ->first();
-
-        return $latestEntry ? (float) $latestEntry->balance_after : 0.00;
+        return (float) LedgerEntry::where('user_id', $this->user_id)
+            ->sum(\DB::raw('CASE
+                WHEN account_type = "CREDIT" THEN amount
+                WHEN account_type = "DEBIT" THEN -amount
+                ELSE 0
+            END'));
     }
 
     /**
