@@ -89,21 +89,21 @@ class MerchantAccount extends Model
     }
 
     /**
-     * Get total pending payout amount
+     * Get total pending payout amount for THIS merchant account
      */
     public function getPendingPayoutAmount(): float
     {
-        return (float) Payout::where('user_id', $this->user_id)
+        return (float) Payout::where('merchant_account_id', $this->id)
             ->whereIn('status', ['PENDING', 'PROCESSING'])
             ->sum('gross_amount');
     }
 
     /**
-     * Get total completed payout amount
+     * Get total completed payout amount for THIS merchant account
      */
     public function getCompletedPayoutAmount(): float
     {
-        return (float) Payout::where('user_id', $this->user_id)
+        return (float) Payout::where('merchant_account_id', $this->id)
             ->where('status', 'COMPLETED')
             ->sum('net_amount');
     }
