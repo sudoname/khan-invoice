@@ -9,9 +9,9 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
-class BackfillPaymentLedgerEntries extends Command
+class BackfillPaystackLedger extends Command
 {
-    protected $signature = 'payments:backfill-ledger
+    protected $signature = 'payments:backfill-paystack-ledger
                             {--payment-id= : Specific payment ID to backfill}
                             {--dry-run : Show what would be done without making changes}
                             {--force : Skip confirmation prompt}';

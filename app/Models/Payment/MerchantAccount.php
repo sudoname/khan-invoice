@@ -77,13 +77,16 @@ class MerchantAccount extends Model
      * IMPORTANT: Calculates balance using accounting equation (Credits - Debits)
      * instead of relying on balance_after field which may be outdated if entries
      * were added out of order or ledger was corrupted.
+     *
+     * NOTE: Fee entries (GATEWAY_FEE, PLATFORM_FEE, INSTANT_PAYOUT_FEE) are informational
+     * and don't affect balance as they're already deducted from gross amounts.
      */
     public function getAvailableBalance(): float
     {
         return (float) LedgerEntry::where('user_id', $this->user_id)
             ->sum(\DB::raw('CASE
                 WHEN account_type = "CREDIT" THEN amount
-                WHEN account_type = "DEBIT" THEN -amount
+                WHEN account_type = "DEBIT" AND entry_type NOT IN ("GATEWAY_FEE", "PLATFORM_FEE", "INSTANT_PAYOUT_FEE") THEN -amount
                 ELSE 0
             END'));
     }
