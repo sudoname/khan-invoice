@@ -192,6 +192,11 @@ class Invoice extends Model
         return $this->hasMany(Reminder::class);
     }
 
+    public function ledgerEntries(): HasMany
+    {
+        return $this->hasMany(\App\Models\Payment\LedgerEntry::class);
+    }
+
     // Calculate totals
     public function calculateTotals(): void
     {
