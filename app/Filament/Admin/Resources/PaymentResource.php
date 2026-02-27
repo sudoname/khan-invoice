@@ -19,7 +19,7 @@ class PaymentResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-banknotes';
 
-    protected static ?string $navigationLabel = 'All Payments';
+    protected static ?string $navigationLabel = 'Paystack Payments';
 
     protected static ?string $navigationGroup = 'Payment Management';
 
@@ -27,12 +27,13 @@ class PaymentResource extends Resource
 
     public static function getNavigationBadge(): ?string
     {
-        return static::getModel()::count();
+        return static::getModel()::where('payment_method', 'paystack')->count();
     }
 
     public static function table(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(fn (Builder $query) => $query->where('payment_method', 'paystack'))
             ->columns([
                 Tables\Columns\TextColumn::make('id')
                     ->label('ID')
@@ -70,17 +71,6 @@ class PaymentResource extends Resource
                     ->weight('bold')
                     ->color('success'),
 
-                Tables\Columns\TextColumn::make('payment_method')
-                    ->label('Method')
-                    ->badge()
-                    ->colors([
-                        'primary' => 'paystack',
-                        'success' => 'bank_transfer',
-                        'warning' => 'cash',
-                        'info' => 'cheque',
-                    ])
-                    ->sortable(),
-
                 Tables\Columns\TextColumn::make('reference_number')
                     ->label('Payment Reference')
                     ->searchable()
@@ -115,15 +105,6 @@ class PaymentResource extends Resource
                     ->tooltip(fn ($record, $state) => $state ? 'Payment recorded in ledger' : 'WARNING: Payment NOT in ledger!'),
             ])
             ->filters([
-                Tables\Filters\SelectFilter::make('payment_method')
-                    ->label('Payment Method')
-                    ->options([
-                        'paystack' => 'Paystack',
-                        'bank_transfer' => 'Bank Transfer',
-                        'cash' => 'Cash',
-                        'cheque' => 'Cheque',
-                    ]),
-
                 Tables\Filters\SelectFilter::make('merchant')
                     ->label('Merchant/Vendor')
                     ->relationship('invoice.user', 'name')
