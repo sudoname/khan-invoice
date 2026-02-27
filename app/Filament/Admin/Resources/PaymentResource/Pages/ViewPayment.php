@@ -18,7 +18,7 @@ class ViewPayment extends ViewRecord
                 ->label('View Invoice')
                 ->icon('heroicon-o-document-text')
                 ->color('primary')
-                ->url(fn () => $this->record->invoice ? route('filament.admin.resources.invoices.view', $this->record->invoice) : null)
+                ->url(fn () => $this->record->invoice ? route('filament.app.resources.invoices.view', $this->record->invoice) : null)
                 ->visible(fn () => $this->record->invoice !== null),
 
             Actions\Action::make('view_merchant')

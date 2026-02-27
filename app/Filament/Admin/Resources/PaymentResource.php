@@ -45,7 +45,7 @@ class PaymentResource extends Resource
                     ->sortable()
                     ->copyable()
                     ->weight('bold')
-                    ->url(fn ($record) => $record->invoice ? route('filament.admin.resources.invoices.view', $record->invoice) : null),
+                    ->url(fn ($record) => $record->invoice ? route('filament.app.resources.invoices.view', $record->invoice) : null),
 
                 Tables\Columns\TextColumn::make('invoice.user.name')
                     ->label('Merchant/Vendor')
@@ -161,7 +161,7 @@ class PaymentResource extends Resource
                     ->label('View Invoice')
                     ->icon('heroicon-o-document-text')
                     ->color('primary')
-                    ->url(fn ($record) => $record->invoice ? route('filament.admin.resources.invoices.view', $record->invoice) : null)
+                    ->url(fn ($record) => $record->invoice ? route('filament.app.resources.invoices.view', $record->invoice) : null)
                     ->visible(fn ($record) => $record->invoice !== null),
 
                 Tables\Actions\Action::make('view_merchant')
@@ -246,7 +246,7 @@ class PaymentResource extends Resource
                     ->schema([
                         Infolists\Components\TextEntry::make('invoice.invoice_number')
                             ->label('Invoice Number')
-                            ->url(fn ($record) => $record->invoice ? route('filament.admin.resources.invoices.view', $record->invoice) : null),
+                            ->url(fn ($record) => $record->invoice ? route('filament.app.resources.invoices.view', $record->invoice) : null),
 
                         Infolists\Components\TextEntry::make('invoice.total_amount')
                             ->label('Invoice Total')
