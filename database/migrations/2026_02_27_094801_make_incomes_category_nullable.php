@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
@@ -16,9 +17,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('incomes', function (Blueprint $table) {
-            $table->string('category')->nullable()->change();
-        });
+        // Use raw SQL to avoid Doctrine DBAL dependency issues in Laravel 12
+        DB::statement('ALTER TABLE incomes MODIFY COLUMN category VARCHAR(255) NULL');
     }
 
     /**
@@ -26,8 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('incomes', function (Blueprint $table) {
-            $table->string('category')->nullable(false)->change();
-        });
+        DB::statement('ALTER TABLE incomes MODIFY COLUMN category VARCHAR(255) NOT NULL');
     }
 };
