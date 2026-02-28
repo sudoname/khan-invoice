@@ -70,7 +70,6 @@ class MarketingDesignResource extends Resource
                     ->schema([
                         Forms\Components\TextInput::make('status')
                             ->label('Status')
-                            ->badge()
                             ->disabled(),
 
                         Forms\Components\TextInput::make('width')
