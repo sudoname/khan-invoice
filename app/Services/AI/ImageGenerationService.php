@@ -46,25 +46,52 @@ class ImageGenerationService
             'quality' => $quality,
         ]);
 
-        try {
-            $response = Http::timeout(120)
-                ->withHeaders([
-                    'Authorization' => 'Bearer ' . $this->apiKey,
-                    'Content-Type' => 'application/json',
-                ])
-                ->post($this->apiUrl, [
-                    'model' => 'dall-e-3',
-                    'prompt' => $prompt,
-                    'size' => $size,
-                    'quality' => $quality,
-                    'n' => 1,
-                    'response_format' => 'url',
+        $maxRetries = 3;
+        $attempt = 0;
+        $lastError = null;
+
+        while ($attempt < $maxRetries) {
+            $attempt++;
+
+            try {
+                Log::info('DALL-E 3 generation attempt', [
+                    'attempt' => $attempt,
+                    'max_retries' => $maxRetries,
                 ]);
 
-            if ($response->failed()) {
-                $error = $response->json()['error']['message'] ?? 'Unknown error';
-                throw new Exception("DALL-E 3 API error: {$error}");
-            }
+                $response = Http::timeout(120)
+                    ->retry(2, 1000) // Retry twice with 1s delay
+                    ->withHeaders([
+                        'Authorization' => 'Bearer ' . $this->apiKey,
+                        'Content-Type' => 'application/json',
+                    ])
+                    ->post($this->apiUrl, [
+                        'model' => 'dall-e-3',
+                        'prompt' => $prompt,
+                        'size' => $size,
+                        'quality' => $quality,
+                        'n' => 1,
+                        'response_format' => 'url',
+                    ]);
+
+                if ($response->failed()) {
+                    $error = $response->json()['error']['message'] ?? 'Unknown error';
+                    $statusCode = $response->status();
+
+                    // Retry on server errors (5xx)
+                    if ($statusCode >= 500 && $attempt < $maxRetries) {
+                        Log::warning('DALL-E 3 server error, retrying', [
+                            'status' => $statusCode,
+                            'error' => $error,
+                            'attempt' => $attempt,
+                        ]);
+                        sleep(2 * $attempt); // Exponential backoff: 2s, 4s, 6s
+                        $lastError = $error;
+                        continue;
+                    }
+
+                    throw new Exception("DALL-E 3 API error: {$error}");
+                }
 
             $data = $response->json();
 
@@ -72,19 +99,34 @@ class ImageGenerationService
                 'url' => $data['data'][0]['url'] ?? null,
             ]);
 
-            return [
-                'url' => $data['data'][0]['url'],
-                'revised_prompt' => $data['data'][0]['revised_prompt'] ?? $prompt,
-            ];
+                // Success! Break out of retry loop
+                return [
+                    'url' => $data['data'][0]['url'],
+                    'revised_prompt' => $data['data'][0]['revised_prompt'] ?? $prompt,
+                ];
 
-        } catch (Exception $e) {
-            Log::error('DALL-E 3 generation failed', [
-                'error' => $e->getMessage(),
-                'prompt' => substr($prompt, 0, 200),
-            ]);
+            } catch (Exception $e) {
+                if ($attempt >= $maxRetries) {
+                    Log::error('DALL-E 3 generation failed after retries', [
+                        'error' => $e->getMessage(),
+                        'attempts' => $attempt,
+                        'prompt' => substr($prompt, 0, 200),
+                    ]);
 
-            throw new Exception("Failed to generate image: {$e->getMessage()}");
+                    throw new Exception("Failed to generate image: {$e->getMessage()}");
+                }
+
+                $lastError = $e->getMessage();
+                Log::warning('DALL-E 3 attempt failed, retrying', [
+                    'attempt' => $attempt,
+                    'error' => $lastError,
+                ]);
+                sleep(2 * $attempt);
+            }
         }
+
+        // All retries exhausted
+        throw new Exception("Failed to generate image after {$maxRetries} attempts: {$lastError}");
     }
 
     /**
