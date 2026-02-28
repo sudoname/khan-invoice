@@ -34,31 +34,30 @@ class CreateMarketingDesign extends Page
                         ->description('Select a template for your design')
                         ->icon('heroicon-o-rectangle-stack')
                         ->schema([
-                            Forms\Components\Radio::make('template_id')
+                            Forms\Components\Select::make('template_id')
                                 ->label('Template')
                                 ->options(function () {
                                     return MarketingTemplate::active()
                                         ->get()
                                         ->groupBy('category')
-                                        ->flatMap(function ($templates, $category) {
+                                        ->map(function ($templates, $category) {
+                                            return $templates->mapWithKeys(function ($template) {
+                                                return [
+                                                    $template->id => $template->name . ' (' . $template->aspect_ratio . ')'
+                                                ];
+                                            })->toArray();
+                                        })
+                                        ->mapWithKeys(function ($templates, $category) {
                                             return [
-                                                $category => $templates->pluck('name', 'id')->toArray()
+                                                ucwords(str_replace('-', ' ', $category)) => $templates
                                             ];
                                         })
                                         ->toArray();
                                 })
                                 ->required()
-                                ->inline(false)
-                                ->descriptions(function () {
-                                    return MarketingTemplate::active()
-                                        ->get()
-                                        ->mapWithKeys(function ($template) {
-                                            return [
-                                                $template->id => "{$template->aspect_ratio} - {$template->width}x{$template->height}px"
-                                            ];
-                                        })
-                                        ->toArray();
-                                }),
+                                ->searchable()
+                                ->native(false)
+                                ->helperText('Choose the format and style for your design'),
                         ]),
 
                     Forms\Components\Wizard\Step::make('Brand Kit')
