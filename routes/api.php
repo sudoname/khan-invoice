@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\V1\BusinessProfileController;
 use App\Http\Controllers\Api\V1\DashboardController;
 use App\Http\Controllers\Api\V1\InvoiceController;
 use App\Http\Controllers\Api\V1\CustomerController;
+use App\Http\Controllers\Api\V1\MarketingController;
 use App\Http\Controllers\Api\V1\PaymentController;
 use App\Http\Controllers\Api\V1\ReportController;
 use App\Http\Controllers\Api\V1\SubscriptionController;
@@ -122,6 +123,31 @@ Route::prefix('v1')->middleware(['auth:sanctum', 'api.rate.limit'])->group(funct
 
         // Statistics
         Route::get('/stats', [AISuggestionController::class, 'getStatistics']);
+    });
+
+    // Marketing AI Generator (with custom rate limiting)
+    Route::prefix('marketing')->group(function () {
+        // Templates
+        Route::get('/templates', [MarketingController::class, 'templates']);
+
+        // Design Generation
+        Route::post('/generate', [MarketingController::class, 'generate']);
+        Route::post('/from-invoice/{invoice}', [MarketingController::class, 'fromInvoice']);
+
+        // User Designs
+        Route::get('/designs', [MarketingController::class, 'designs']);
+        Route::get('/designs/{design}', [MarketingController::class, 'show']);
+        Route::delete('/designs/{design}', [MarketingController::class, 'destroy']);
+        Route::post('/designs/{design}/download', [MarketingController::class, 'trackDownload']);
+
+        // Brand Kits
+        Route::get('/brand-kits', [MarketingController::class, 'brandKits']);
+        Route::post('/brand-kits', [MarketingController::class, 'storeBrandKit']);
+        Route::put('/brand-kits/{brandKit}', [MarketingController::class, 'updateBrandKit']);
+        Route::delete('/brand-kits/{brandKit}', [MarketingController::class, 'destroyBrandKit']);
+
+        // Statistics
+        Route::get('/stats', [MarketingController::class, 'stats']);
     });
 });
 

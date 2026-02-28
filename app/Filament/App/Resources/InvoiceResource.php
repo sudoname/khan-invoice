@@ -4,11 +4,15 @@ namespace App\Filament\App\Resources;
 
 use App\Filament\App\Resources\InvoiceResource\Pages;
 use App\Filament\App\Resources\InvoiceResource\RelationManagers;
+use App\Models\BrandKit;
 use App\Models\Invoice;
+use App\Models\MarketingTemplate;
+use App\Services\AI\MarketingDesignService;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
 use Filament\Forms\Set;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -542,6 +546,67 @@ class InvoiceResource extends Resource
                         ]);
                     })
                     ->visible(fn (Invoice $record): bool => in_array($record->status, ['sent', 'overdue', 'partially_paid'])),
+
+                Tables\Actions\Action::make('share_invoice')
+                    ->label('Share')
+                    ->icon('heroicon-o-sparkles')
+                    ->color('info')
+                    ->form([
+                        Forms\Components\Select::make('template_id')
+                            ->label('Select Template')
+                            ->options(function () {
+                                return MarketingTemplate::active()
+                                    ->where('category', 'invoice-share')
+                                    ->pluck('name', 'id')
+                                    ->toArray();
+                            })
+                            ->required()
+                            ->default(function () {
+                                return MarketingTemplate::active()
+                                    ->where('category', 'invoice-share')
+                                    ->first()?->id;
+                            })
+                            ->helperText('Choose a template for your share graphic'),
+
+                        Forms\Components\Textarea::make('message')
+                            ->label('Custom Message (Optional)')
+                            ->rows(3)
+                            ->maxLength(300)
+                            ->placeholder('Add a custom message or leave blank for auto-generated text'),
+                    ])
+                    ->modalHeading('Share Invoice as Graphic')
+                    ->modalDescription('Generate a marketing graphic to share on WhatsApp, Instagram, or other social media')
+                    ->modalWidth('md')
+                    ->action(function (Invoice $record, array $data) {
+                        try {
+                            $marketingService = app(MarketingDesignService::class);
+
+                            $design = $marketingService->createFromInvoice(
+                                invoice: $record,
+                                templateId: $data['template_id'],
+                                customMessage: $data['message'] ?? null
+                            );
+
+                            Notification::make()
+                                ->title('Share Graphic Created!')
+                                ->body('Your invoice share graphic is being generated.')
+                                ->success()
+                                ->actions([
+                                    \Filament\Notifications\Actions\Action::make('view')
+                                        ->button()
+                                        ->url(MarketingDesignResource::getUrl('view', ['record' => $design->id])),
+                                ])
+                                ->send();
+
+                        } catch (\Exception $e) {
+                            Notification::make()
+                                ->title('Failed to Create Share Graphic')
+                                ->body($e->getMessage())
+                                ->danger()
+                                ->send();
+                        }
+                    })
+                    ->visible(fn () => config('marketing.enabled', true)),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
