@@ -27,18 +27,21 @@ return new class extends Migration
             }
 
             // Add indexes if they don't exist
-            $sm = Schema::getConnection()->getDoctrineSchemaManager();
-            $indexes = $sm->listTableIndexes('invoices');
+            // Using raw SQL to avoid Doctrine DBAL dependency in Laravel 12
+            $indexExists = function($indexName) {
+                $result = \DB::select("SHOW INDEX FROM invoices WHERE Key_name = ?", [$indexName]);
+                return !empty($result);
+            };
 
-            if (!isset($indexes['invoices_wa_conversation_id_index'])) {
+            if (!$indexExists('invoices_wa_conversation_id_index')) {
                 $table->index('wa_conversation_id');
             }
 
-            if (!isset($indexes['invoices_wa_contact_id_index'])) {
+            if (!$indexExists('invoices_wa_contact_id_index')) {
                 $table->index('wa_contact_id');
             }
 
-            if (!isset($indexes['invoices_wa_followup_idx'])) {
+            if (!$indexExists('invoices_wa_followup_idx')) {
                 $table->index(['whatsapp_last_followup_at', 'whatsapp_followup_attempts'], 'invoices_wa_followup_idx');
             }
         });

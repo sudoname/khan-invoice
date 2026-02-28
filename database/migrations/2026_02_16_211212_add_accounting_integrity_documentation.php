@@ -66,15 +66,13 @@ return new class extends Migration
 
     /**
      * Check if an index exists on a table
+     * Using raw SQL to avoid Doctrine DBAL dependency in Laravel 12
      */
     protected function indexExists(string $table, string $index): bool
     {
-        $connection = Schema::getConnection();
-        $schemaManager = $connection->getDoctrineSchemaManager();
-
         try {
-            $indexes = $schemaManager->listTableIndexes($table);
-            return isset($indexes[$index]);
+            $result = DB::select("SHOW INDEX FROM {$table} WHERE Key_name = ?", [$index]);
+            return !empty($result);
         } catch (\Exception $e) {
             return false;
         }
