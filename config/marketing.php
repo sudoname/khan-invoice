@@ -32,14 +32,22 @@ return [
     | Rendering Configuration
     |--------------------------------------------------------------------------
     |
-    | Configuration for HTML to PNG rendering.
+    | Configuration for image rendering engines.
+    |
+    | Supported engines:
+    | - 'dalle3': DALL-E 3 AI image generation (ultra-realistic, best quality)
+    | - 'playwright': HTML to PNG via Playwright (basic quality)
+    | - 'wkhtmltoimage': HTML to PNG via wkhtmltoimage (basic quality)
     |
     */
     'rendering' => [
-        'engine' => env('RENDER_ENGINE', 'playwright'), // 'playwright' or 'wkhtmltoimage'
+        'engine' => env('RENDER_ENGINE', 'dalle3'), // 'dalle3', 'playwright', or 'wkhtmltoimage'
         'timeout' => env('RENDER_TIMEOUT', 60), // seconds
         'quality' => env('RENDER_QUALITY', 90), // 1-100 for PNG compression
         'playwright_executable' => env('PLAYWRIGHT_EXECUTABLE', null),
+
+        // DALL-E 3 settings
+        'dalle3_quality' => env('DALLE3_QUALITY', 'hd'), // 'standard' or 'hd'
 
         // Playwright-specific settings
         'playwright' => [

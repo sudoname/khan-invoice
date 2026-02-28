@@ -301,4 +301,169 @@ IMPORTANT: You MUST use these brand colors and fonts in your design.
             return false;
         }
     }
+
+    /**
+     * Generate DALL-E 3 optimized image prompt from user request
+     *
+     * @param string $userPrompt User's design request
+     * @param MarketingTemplate $template Template for context
+     * @param BrandKit|null $brandKit User's brand colors
+     * @param Invoice|null $invoice Optional invoice data
+     * @return array ['image_prompt' => string, 'context' => array]
+     * @throws \Exception
+     */
+    public function generateImagePrompt(
+        string $userPrompt,
+        MarketingTemplate $template,
+        ?BrandKit $brandKit = null,
+        ?Invoice $invoice = null
+    ): array {
+        $systemPrompt = $this->buildDallE3SystemPrompt();
+        $enhancedUserPrompt = $this->buildDallE3UserPrompt($userPrompt, $template, $brandKit, $invoice);
+
+        try {
+            $response = Http::withHeaders([
+                'x-api-key' => $this->apiKey,
+                'anthropic-version' => '2023-06-01',
+                'content-type' => 'application/json',
+            ])
+            ->timeout($this->timeout)
+            ->post('https://api.anthropic.com/v1/messages', [
+                'model' => $this->model,
+                'max_tokens' => 1000,
+                'temperature' => 0.7,
+                'system' => $systemPrompt,
+                'messages' => [
+                    [
+                        'role' => 'user',
+                        'content' => $enhancedUserPrompt,
+                    ],
+                ],
+            ]);
+
+            if (!$response->successful()) {
+                throw new \Exception('Claude API request failed: ' . $response->body());
+            }
+
+            $data = $response->json();
+            $imagePrompt = $data['content'][0]['text'] ?? null;
+
+            if (!$imagePrompt) {
+                throw new \Exception('No image prompt in Claude response');
+            }
+
+            // Clean up the prompt (remove any markdown formatting)
+            $imagePrompt = trim(strip_tags($imagePrompt));
+
+            Log::info('DALL-E 3 prompt generated', [
+                'prompt_length' => strlen($imagePrompt),
+                'template' => $template->name,
+            ]);
+
+            return [
+                'image_prompt' => $imagePrompt,
+                'context' => [
+                    'template_name' => $template->name,
+                    'aspect_ratio' => $template->aspect_ratio,
+                    'has_brand_kit' => $brandKit !== null,
+                    'has_invoice' => $invoice !== null,
+                ],
+            ];
+
+        } catch (\Exception $e) {
+            Log::error('DALL-E 3 prompt generation error', [
+                'error' => $e->getMessage(),
+                'user_prompt' => $userPrompt,
+            ]);
+            throw $e;
+        }
+    }
+
+    /**
+     * Build system prompt for DALL-E 3 image generation
+     */
+    protected function buildDallE3SystemPrompt(): string
+    {
+        return <<<PROMPT
+You are an expert marketing designer specializing in creating image generation prompts for DALL-E 3.
+
+Your role is to transform user requests into detailed, professional image generation prompts that will produce:
+- Ultra-realistic, photorealistic marketing graphics
+- Eye-catching designs suitable for social media (WhatsApp Status, Instagram, Facebook)
+- Professional business marketing materials
+- Clear, readable text integration when needed
+
+Guidelines:
+1. Be specific about visual style, colors, composition, lighting
+2. Specify text placement and readability requirements
+3. Include brand colors when provided
+4. Ensure designs are modern, clean, and professional
+5. Optimize for the target aspect ratio (9:16 for WhatsApp Status, 1:1 for Instagram, etc.)
+6. Include keywords: "professional marketing graphic", "high quality", "vibrant colors"
+7. Avoid any prohibited content or copyrighted elements
+
+Output only the optimized DALL-E 3 prompt - no explanations, no markdown, just the prompt text.
+PROMPT;
+    }
+
+    /**
+     * Build user prompt for DALL-E 3 optimization
+     */
+    protected function buildDallE3UserPrompt(
+        string $userPrompt,
+        MarketingTemplate $template,
+        ?BrandKit $brandKit = null,
+        ?Invoice $invoice = null
+    ): string {
+        $context = [];
+
+        // Template context
+        $context[] = "Template: {$template->name}";
+        $context[] = "Aspect Ratio: {$template->aspect_ratio}";
+        $context[] = "Purpose: " . ucwords(str_replace('-', ' ', $template->category));
+
+        // Brand colors
+        if ($brandKit) {
+            if ($brandKit->primary_color) {
+                $context[] = "Primary Brand Color: {$brandKit->primary_color}";
+            }
+            if ($brandKit->secondary_color) {
+                $context[] = "Secondary Brand Color: {$brandKit->secondary_color}";
+            }
+            if ($brandKit->accent_color) {
+                $context[] = "Accent Color: {$brandKit->accent_color}";
+            }
+        }
+
+        // Invoice context for invoice-share templates
+        if ($invoice) {
+            $context[] = "Invoice Number: {$invoice->invoice_number}";
+            $context[] = "Amount: ₦" . number_format($invoice->total_amount, 2);
+            $context[] = "Status: " . ucfirst($invoice->status);
+            if ($invoice->customer) {
+                $context[] = "Customer: {$invoice->customer->name}";
+            }
+        }
+
+        $contextString = implode("\n", $context);
+
+        return <<<PROMPT
+Create a DALL-E 3 image generation prompt based on this request:
+
+User Request: "{$userPrompt}"
+
+Context:
+{$contextString}
+
+Requirements:
+- Ultra-realistic, professional marketing graphic
+- Modern design with vibrant colors and gradients
+- Suitable for Nigerian SME businesses
+- Text must be clear and readable
+- Mobile-optimized for social media sharing
+- Professional quality suitable for business use
+
+Generate the optimized DALL-E 3 prompt now:
+PROMPT;
+    }
 }

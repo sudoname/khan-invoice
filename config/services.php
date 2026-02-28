@@ -73,4 +73,10 @@ return [
         // Get API secret from: Analytics > Admin > Data Streams > [your stream] > Measurement Protocol API secrets
     ],
 
+    'openai' => [
+        'api_key' => env('OPENAI_API_KEY'),
+        'organization' => env('OPENAI_ORGANIZATION', null),
+        // Used for DALL-E 3 image generation in marketing designs
+    ],
+
 ];

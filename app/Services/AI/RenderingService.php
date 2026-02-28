@@ -29,22 +29,35 @@ class RenderingService
      * @param array $designJson Claude-generated design structure
      * @param int $width Canvas width
      * @param int $height Canvas height
+     * @param string|null $imagePrompt Optional direct image generation prompt for DALL-E 3
+     * @param array $brandColors Optional brand colors for DALL-E 3
      * @return array ['path' => string, 'url' => string, 'size' => int]
      * @throws \Exception
      */
-    public function renderToPng(array $designJson, int $width, int $height): array
+    public function renderToPng(
+        array $designJson,
+        int $width,
+        int $height,
+        ?string $imagePrompt = null,
+        array $brandColors = []
+    ): array
     {
-        // Generate HTML from design JSON
-        $html = $this->generateHtml($designJson, $width, $height);
-
-        // Render HTML to PNG based on configured engine
-        $pngData = match ($this->engine) {
-            'playwright' => $this->renderWithPlaywright($html, $width, $height),
-            'wkhtmltoimage' => $this->renderWithWkhtmltoimage($html, $width, $height),
+        // Route to appropriate rendering method based on engine
+        return match ($this->engine) {
+            'dalle3' => $this->renderWithDallE3($imagePrompt ?? $designJson['image_prompt'] ?? '', $width, $height, $brandColors),
+            'playwright' => $this->renderWithPlaywrightEngine($designJson, $width, $height),
+            'wkhtmltoimage' => $this->renderWithWkhtmltoimageEngine($designJson, $width, $height),
             default => throw new \Exception("Unsupported render engine: {$this->engine}"),
         };
+    }
 
-        // Store PNG file
+    /**
+     * Render using Playwright (HTML-based)
+     */
+    protected function renderWithPlaywrightEngine(array $designJson, int $width, int $height): array
+    {
+        $html = $this->generateHtml($designJson, $width, $height);
+        $pngData = $this->renderWithPlaywright($html, $width, $height);
         $storagePath = $this->storePng($pngData);
 
         return [
@@ -53,6 +66,67 @@ class RenderingService
             'size' => strlen($pngData),
             'width' => $width,
             'height' => $height,
+        ];
+    }
+
+    /**
+     * Render using wkhtmltoimage (HTML-based)
+     */
+    protected function renderWithWkhtmltoimageEngine(array $designJson, int $width, int $height): array
+    {
+        $html = $this->generateHtml($designJson, $width, $height);
+        $pngData = $this->renderWithWkhtmltoimage($html, $width, $height);
+        $storagePath = $this->storePng($pngData);
+
+        return [
+            'path' => $storagePath,
+            'url' => Storage::disk($this->storageDisk)->url($storagePath),
+            'size' => strlen($pngData),
+            'width' => $width,
+            'height' => $height,
+        ];
+    }
+
+    /**
+     * Render using DALL-E 3 (AI image generation)
+     */
+    protected function renderWithDallE3(string $prompt, int $width, int $height, array $brandColors = []): array
+    {
+        $imageGenService = app(ImageGenerationService::class);
+
+        Log::info('Rendering with DALL-E 3', [
+            'prompt_length' => strlen($prompt),
+            'dimensions' => "{$width}x{$height}",
+        ]);
+
+        // Generate image with DALL-E 3
+        $result = $imageGenService->generateWithDallE3(
+            prompt: $prompt,
+            width: $width,
+            height: $height,
+            quality: config('marketing.rendering.dalle3_quality', 'hd')
+        );
+
+        // Download and save image
+        $filename = Str::uuid() . '.png';
+        $saved = $imageGenService->downloadAndSave(
+            imageUrl: $result['url'],
+            filename: $filename,
+            disk: $this->storageDisk
+        );
+
+        Log::info('DALL-E 3 rendering completed', [
+            'path' => $saved['path'],
+            'size' => $saved['size'],
+        ]);
+
+        return [
+            'path' => $saved['path'],
+            'url' => $saved['url'],
+            'size' => $saved['size'],
+            'width' => $width,
+            'height' => $height,
+            'revised_prompt' => $result['revised_prompt'],
         ];
     }
 

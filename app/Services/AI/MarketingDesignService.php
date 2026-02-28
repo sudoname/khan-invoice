@@ -71,15 +71,35 @@ class MarketingDesignService
                 'status' => 'draft',
             ]);
 
-            // Generate design JSON using Claude
-            $designJson = $this->claudeService->generateDesign(
-                $prompt,
-                $template,
-                $brandKit,
-                $invoice
-            );
+            // Generate design based on rendering engine
+            $renderEngine = config('marketing.rendering.engine');
 
-            // Update design with JSON
+            if ($renderEngine === 'dalle3') {
+                // Generate image prompt for DALL-E 3
+                $imagePromptData = $this->claudeService->generateImagePrompt(
+                    $prompt,
+                    $template,
+                    $brandKit,
+                    $invoice
+                );
+
+                $designJson = [
+                    'image_prompt' => $imagePromptData['image_prompt'],
+                    'context' => $imagePromptData['context'],
+                    'rendering_engine' => 'dalle3',
+                ];
+            } else {
+                // Generate design JSON for HTML-based rendering (Playwright/wkhtmltoimage)
+                $designJson = $this->claudeService->generateDesign(
+                    $prompt,
+                    $template,
+                    $brandKit,
+                    $invoice
+                );
+                $designJson['rendering_engine'] = $renderEngine;
+            }
+
+            // Update design with JSON/prompt
             $design->update([
                 'design_json' => $designJson,
             ]);
@@ -164,11 +184,26 @@ class MarketingDesignService
 
         try {
             $template = $design->template;
+            $brandColors = [];
+
+            // Get brand colors if brand kit is attached
+            if ($design->brandKit) {
+                $brandColors = [
+                    'primary_color' => $design->brandKit->primary_color,
+                    'secondary_color' => $design->brandKit->secondary_color,
+                    'accent_color' => $design->brandKit->accent_color,
+                ];
+            }
+
+            // Extract image prompt for DALL-E 3 or use design JSON for HTML engines
+            $imagePrompt = $design->design_json['image_prompt'] ?? null;
 
             $result = $this->renderingService->renderToPng(
-                $design->design_json,
-                $template->width,
-                $template->height
+                designJson: $design->design_json,
+                width: $template->width,
+                height: $template->height,
+                imagePrompt: $imagePrompt,
+                brandColors: $brandColors
             );
 
             $design->markAsCompleted(
