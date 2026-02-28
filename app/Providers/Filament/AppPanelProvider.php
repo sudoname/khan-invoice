@@ -44,6 +44,8 @@ class AppPanelProvider extends PanelProvider
                 \App\Filament\Widgets\RevenueChartWidget::class,
                 \App\Filament\Widgets\OverdueInvoicesWidget::class,
                 \App\Filament\Widgets\RecentInvoices::class,
+                \App\Filament\Widgets\MarketingStatsOverview::class,
+                \App\Filament\Widgets\RecentMarketingDesigns::class,
             ])
             ->middleware([
                 EncryptCookies::class,
