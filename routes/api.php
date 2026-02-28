@@ -65,6 +65,11 @@ Route::prefix('v1')->group(function () {
     Route::post('/analytics/events', [AnalyticsEventController::class, 'store'])
         ->middleware('throttle:60,1');
 
+    // Marketing demo (public - rate limited to 3 req/hour per IP)
+    Route::post('/marketing/generate-demo', [MarketingController::class, 'generateDemo']);
+    Route::get('/marketing/designs/{design}/status', [MarketingController::class, 'checkDesignStatus']);
+    Route::get('/marketing/templates', [MarketingController::class, 'templates']);
+
     // Protected auth routes
     Route::middleware('auth:sanctum')->group(function () {
         Route::get('/auth/user', [AuthController::class, 'user']);

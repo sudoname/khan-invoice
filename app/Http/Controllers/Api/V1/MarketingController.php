@@ -21,9 +21,12 @@ class MarketingController extends Controller
     {
         $this->marketingService = $marketingService;
 
-        // Apply authentication and rate limiting
-        $this->middleware('auth:sanctum');
+        // Apply authentication to most endpoints (except demo and status check)
+        $this->middleware('auth:sanctum')->except(['generateDemo', 'checkDesignStatus', 'templates']);
+
+        // Rate limiting: demo endpoint gets stricter limits
         $this->middleware('throttle:marketing_generation')->only(['generate', 'fromInvoice']);
+        $this->middleware('throttle:3,60')->only(['generateDemo']); // 3 per hour per IP
     }
 
     /**
@@ -145,6 +148,106 @@ class MarketingController extends Controller
                 'error' => $e->getMessage(),
             ], 422);
         }
+    }
+
+    /**
+     * Generate demo design (no authentication required)
+     *
+     * POST /api/v1/marketing/generate-demo
+     * Body: {
+     *   "prompt": "Create a product launch graphic",
+     *   "template_id": 5
+     * }
+     */
+    public function generateDemo(Request $request): JsonResponse
+    {
+        if (!$this->marketingService->isEnabled()) {
+            return response()->json([
+                'error' => 'Marketing feature is disabled',
+            ], 503);
+        }
+
+        $request->validate([
+            'prompt' => [
+                'required',
+                'string',
+                'min:10',
+                'max:' . config('marketing.prompts.max_prompt_length'),
+            ],
+            'template_id' => 'required|exists:marketing_templates,id',
+        ]);
+
+        $startTime = microtime(true);
+
+        try {
+            // Create design without user (demo mode)
+            $design = $this->marketingService->createDesign(
+                user: null, // No user for demo
+                prompt: $request->input('prompt'),
+                templateId: $request->input('template_id'),
+                brandKitId: null,
+                invoiceId: null,
+                queueRendering: true
+            );
+
+            $duration = round((microtime(true) - $startTime) * 1000, 2);
+
+            Log::info('Demo design generated', [
+                'design_id' => $design->id,
+                'design_uuid' => $design->uuid,
+                'ip' => $request->ip(),
+                'duration_ms' => $duration,
+            ]);
+
+            return response()->json([
+                'design_id' => $design->id,
+                'uuid' => $design->uuid,
+                'status' => $design->status,
+                'rendered_url' => $design->rendered_url,
+                'message' => 'Demo design created successfully and queued for rendering',
+            ], 201);
+
+        } catch (\Exception $e) {
+            Log::error('Demo design generation failed', [
+                'ip' => $request->ip(),
+                'error' => $e->getMessage(),
+            ]);
+
+            return response()->json([
+                'error' => $e->getMessage(),
+                'message' => 'Failed to generate design',
+            ], 422);
+        }
+    }
+
+    /**
+     * Check design status (no authentication required for public polling)
+     *
+     * GET /api/v1/marketing/designs/{design}/status
+     */
+    public function checkDesignStatus(Request $request, MarketingDesign $design): JsonResponse
+    {
+        return response()->json([
+            'design_id' => $design->id,
+            'uuid' => $design->uuid,
+            'status' => $design->status,
+            'rendered_url' => $design->rendered_url,
+            'message' => $this->getStatusMessage($design->status),
+        ]);
+    }
+
+    /**
+     * Get friendly status message
+     */
+    protected function getStatusMessage(string $status): string
+    {
+        return match ($status) {
+            'draft' => 'Design is being prepared for rendering',
+            'rendering' => 'Design is currently being rendered',
+            'completed' => 'Design is ready for download',
+            'failed' => 'Design generation failed',
+            default => 'Unknown status',
+        };
     }
 
     /**

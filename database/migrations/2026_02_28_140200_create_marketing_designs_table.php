@@ -14,8 +14,8 @@ return new class extends Migration
         Schema::create('marketing_designs', function (Blueprint $table) {
             $table->id();
             $table->uuid('uuid')->unique();
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->foreignId('template_id')->nullable()->constrained('marketing_templates')->onDelete('set null');
+            $table->foreignId('user_id')->nullable()->constrained()->nullOnDelete(); // Nullable for demo mode
+            $table->foreignId('template_id')->constrained('marketing_templates')->cascadeOnDelete();
             $table->foreignId('brand_kit_id')->nullable()->constrained('brand_kits')->onDelete('set null');
             $table->foreignId('invoice_id')->nullable()->constrained('invoices')->onDelete('set null');
 

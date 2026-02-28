@@ -29,7 +29,7 @@ class MarketingDesignService
     /**
      * Create a new marketing design from user prompt
      *
-     * @param User $user
+     * @param User|null $user (null for demo mode)
      * @param string $prompt
      * @param int $templateId
      * @param int|null $brandKitId
@@ -39,7 +39,7 @@ class MarketingDesignService
      * @throws \Exception
      */
     public function createDesign(
-        User $user,
+        ?User $user,
         string $prompt,
         int $templateId,
         ?int $brandKitId = null,
@@ -54,15 +54,17 @@ class MarketingDesignService
         $brandKit = $brandKitId ? BrandKit::findOrFail($brandKitId) : null;
         $invoice = $invoiceId ? Invoice::findOrFail($invoiceId) : null;
 
-        // Check rate limits
-        $this->checkRateLimit($user);
+        // Check rate limits (skip for demo mode)
+        if ($user) {
+            $this->checkRateLimit($user);
+        }
 
         DB::beginTransaction();
 
         try {
             // Create design record
             $design = MarketingDesign::create([
-                'user_id' => $user->id,
+                'user_id' => $user?->id, // Nullable for demo mode
                 'template_id' => $template->id,
                 'brand_kit_id' => $brandKit?->id,
                 'invoice_id' => $invoice?->id,
@@ -116,7 +118,7 @@ class MarketingDesignService
 
             Log::info('Marketing design created', [
                 'design_id' => $design->id,
-                'user_id' => $user->id,
+                'user_id' => $user?->id ?? 'demo',
                 'template_id' => $template->id,
             ]);
 
@@ -126,7 +128,7 @@ class MarketingDesignService
             DB::rollBack();
             Log::error('Failed to create marketing design', [
                 'error' => $e->getMessage(),
-                'user_id' => $user->id,
+                'user_id' => $user?->id ?? 'demo',
                 'template_id' => $templateId,
             ]);
             throw $e;
@@ -338,7 +340,7 @@ class MarketingDesignService
      * Validate create design request
      */
     protected function validateCreateDesign(
-        User $user,
+        ?User $user,
         string $prompt,
         int $templateId,
         ?int $brandKitId,
@@ -358,6 +360,14 @@ class MarketingDesignService
 
         if (!$template->isActive()) {
             throw new \Exception('Template is not active');
+        }
+
+        // Skip ownership validation for demo mode (no user)
+        if (!$user) {
+            if ($brandKitId || $invoiceId) {
+                throw new \Exception('Demo mode does not support brand kits or invoices');
+            }
+            return;
         }
 
         // Validate brand kit ownership
