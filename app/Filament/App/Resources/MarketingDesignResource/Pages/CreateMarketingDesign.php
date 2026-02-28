@@ -94,7 +94,6 @@ class CreateMarketingDesign extends Page
                                 ->inline(false),
                         ]),
                 ])
-                    ->submitAction(new \Filament\Forms\Components\Actions\Action('submit'))
                     ->columns(1),
             ])
             ->statePath('data');
