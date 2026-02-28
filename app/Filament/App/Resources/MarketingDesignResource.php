@@ -227,9 +227,6 @@ class MarketingDesignResource extends Resource
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()
-            ->where('user_id', auth()->id())
-            ->withoutGlobalScopes([
-                SoftDeletingScope::class,
-            ]);
+            ->where('user_id', auth()->id());
     }
 }
