@@ -65,9 +65,9 @@ Route::prefix('v1')->group(function () {
     Route::post('/analytics/events', [AnalyticsEventController::class, 'store'])
         ->middleware('throttle:60,1');
 
-    // Marketing demo (public - rate limited to 3 req/hour per IP)
+    // Marketing demo (public - rate limited to 10 req/hour per IP for testing)
     Route::post('/marketing/generate-demo', [MarketingController::class, 'generateDemo'])
-        ->middleware('throttle:3,60');
+        ->middleware('throttle:10,60');
     Route::get('/marketing/designs/{design}/status', [MarketingController::class, 'checkDesignStatus']);
     Route::get('/marketing/templates', [MarketingController::class, 'templates']);
 
