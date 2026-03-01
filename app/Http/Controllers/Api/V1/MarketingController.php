@@ -20,13 +20,6 @@ class MarketingController extends Controller
     public function __construct(MarketingDesignService $marketingService)
     {
         $this->marketingService = $marketingService;
-
-        // Apply authentication to most endpoints (except demo and status check)
-        $this->middleware('auth:sanctum')->except(['generateDemo', 'checkDesignStatus', 'templates']);
-
-        // Rate limiting: demo endpoint gets stricter limits
-        $this->middleware('throttle:marketing_generation')->only(['generate', 'fromInvoice']);
-        $this->middleware('throttle:3,60')->only(['generateDemo']); // 3 per hour per IP
     }
 
     /**
