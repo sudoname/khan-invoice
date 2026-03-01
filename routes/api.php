@@ -132,9 +132,6 @@ Route::prefix('v1')->middleware(['auth:sanctum', 'api.rate.limit'])->group(funct
 
     // Marketing AI Generator (with custom rate limiting)
     Route::prefix('marketing')->group(function () {
-        // Templates
-        Route::get('/templates', [MarketingController::class, 'templates']);
-
         // Design Generation
         Route::post('/generate', [MarketingController::class, 'generate']);
         Route::post('/from-invoice/{invoice}', [MarketingController::class, 'fromInvoice']);
