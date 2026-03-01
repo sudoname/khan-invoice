@@ -338,7 +338,10 @@ const { chromium } = require(path.join('{$basePath}', 'node_modules', 'playwrigh
     });
 
     await browser.close();
-})();
+})().catch((error) => {
+    console.error('Playwright error:', error.message);
+    process.exit(1);
+});
 JS;
 
             $tempScriptPath = sys_get_temp_dir() . '/' . Str::uuid() . '.js';
