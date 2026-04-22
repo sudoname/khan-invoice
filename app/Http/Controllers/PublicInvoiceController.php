@@ -368,8 +368,8 @@ class PublicInvoiceController extends Controller
             // Items
             'items' => 'required|array|min:1',
             'items.*.description' => 'required|string|max:500',
-            'items.*.quantity' => 'required|numeric|min:0.01',
-            'items.*.unit_price' => 'required|numeric|min:0',
+            'items.*.quantity' => 'required|numeric|min:0.01|max:999999999',
+            'items.*.unit_price' => 'required|numeric|min:0|max:999999999',
 
             // Tax and Discount
             'vat_percentage' => 'nullable|numeric|min:0|max:100',
@@ -401,6 +401,14 @@ class PublicInvoiceController extends Controller
         if ($total <= 0) {
             throw \Illuminate\Validation\ValidationException::withMessages([
                 'items' => ['The total invoice amount must be greater than ₦0.00. Please adjust your items, quantities, or discounts.']
+            ]);
+        }
+
+        // Validate that amounts don't exceed database limits (decimal 15,2 = max 9,999,999,999,999.99)
+        $maxAmount = 9999999999999.99;
+        if ($subtotal > $maxAmount || $total > $maxAmount) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'items' => ['The invoice amount is too large. Maximum allowed is ₦9,999,999,999,999.99. Please reduce quantities or unit prices.']
             ]);
         }
 
