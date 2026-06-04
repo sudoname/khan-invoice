@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\PaymentSetting;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
@@ -21,6 +22,9 @@ class PaystackSubaccountService
     public function createSubaccount(array $data): ?string
     {
         try {
+            // Get platform commission percentage from settings (default 2%)
+            $platformCommissionPercentage = (float) PaymentSetting::get('service_charge_percentage', 2);
+
             $response = Http::withHeaders([
                 'Authorization' => 'Bearer ' . $this->secretKey,
                 'Content-Type' => 'application/json',
@@ -28,16 +32,21 @@ class PaystackSubaccountService
                 'business_name' => $data['business_name'],
                 'settlement_bank' => $data['bank_code'],
                 'account_number' => $data['account_number'],
-                'percentage_charge' => 0, // Platform takes the profit, not a percentage
+                'percentage_charge' => $platformCommissionPercentage, // Platform commission (e.g., 2% = platform keeps 2%, merchant gets 98% auto-settled)
                 'description' => $data['description'] ?? 'Invoice merchant',
             ]);
 
             if ($response->successful() && $response->json('status')) {
                 $subaccountCode = $response->json('data.subaccount_code');
+                $merchantPercentage = 100 - $platformCommissionPercentage;
 
-                Log::info('Paystack subaccount created', [
+                Log::info('Paystack subaccount created with auto-settlement', [
                     'subaccount_code' => $subaccountCode,
                     'business_name' => $data['business_name'],
+                    'platform_commission' => $platformCommissionPercentage . '%',
+                    'merchant_receives' => $merchantPercentage . '%',
+                    'settlement_bank' => $data['bank_code'],
+                    'account_number' => $data['account_number'],
                 ]);
 
                 return $subaccountCode;

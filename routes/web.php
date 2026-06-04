@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AdminPaymentDashboardController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\InvoiceController;
@@ -109,3 +110,11 @@ Route::get('/auth/{provider}/redirect', [SocialAuthController::class, 'redirect'
 Route::get('/auth/{provider}/callback', [SocialAuthController::class, 'callback'])
     ->middleware('throttle:10,1')
     ->name('social.callback');
+
+// Admin Payment Dashboard routes
+// Note: Add your auth/admin middleware here (e.g., middleware(['auth', 'admin']))
+Route::prefix('admin/payments')->name('admin.payments.')->group(function () {
+    Route::get('/', [AdminPaymentDashboardController::class, 'index'])->name('dashboard');
+    Route::get('/unsettled', [AdminPaymentDashboardController::class, 'unsettled'])->name('unsettled');
+    Route::get('/all', [AdminPaymentDashboardController::class, 'all'])->name('all');
+});

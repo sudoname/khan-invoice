@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\AnalyticsEvent;
+use App\Models\PlatformTransaction;
 use App\Models\PublicInvoice;
 use App\Services\AnalyticsService;
 use App\Services\PaystackService;
@@ -300,6 +301,40 @@ class PublicInvoiceController extends Controller
                                 'amount_paid' => ($invoice->amount_paid ?? 0) + $amountPaid,
                                 'payment_status' => 'paid',
                                 'paid_at' => now(),
+                            ]);
+
+                            // Log platform transaction for revenue tracking
+                            $platformCommissionPercentage = (float) \App\Models\PaymentSetting::get('service_charge_percentage', 2);
+                            $platformCommission = $amountPaid * ($platformCommissionPercentage / 100);
+                            $merchantAmount = $amountPaid - $platformCommission;
+
+                            // Determine if payment was auto-settled via subaccount
+                            $hasSubaccount = !empty($invoice->paystack_subaccount_code);
+                            $settledToMerchant = $hasSubaccount; // Subaccounts auto-settle
+
+                            PlatformTransaction::create([
+                                'invoice_id' => $invoice->id,
+                                'reference' => 'TXN_' . time() . '_' . $invoice->id,
+                                'paystack_reference' => $reference,
+                                'type' => 'payment',
+                                'status' => 'success',
+                                'total_amount' => $amountPaid,
+                                'platform_commission' => $platformCommission,
+                                'merchant_amount' => $merchantAmount,
+                                'merchant_name' => $invoice->from_name,
+                                'merchant_email' => $invoice->from_email,
+                                'merchant_account' => $invoice->from_account_number,
+                                'merchant_bank' => $invoice->from_bank_name,
+                                'paystack_subaccount' => $invoice->paystack_subaccount_code,
+                                'settled_to_merchant' => $settledToMerchant,
+                                'settled_at' => $settledToMerchant ? now() : null,
+                                'customer_name' => $invoice->to_name,
+                                'customer_email' => $invoice->to_email,
+                                'metadata' => [
+                                    'paystack_data' => $data,
+                                    'fee_calculation' => $netCalculation,
+                                ],
+                                'notes' => $hasSubaccount ? 'Auto-settled via Paystack subaccount' : 'Manual settlement required',
                             ]);
 
                             Log::info('Public invoice payment processed: ' . $invoice->invoice_number, [
