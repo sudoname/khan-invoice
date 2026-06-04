@@ -6,6 +6,7 @@ use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
+use Filament\Navigation\NavigationItem;
 use Filament\Pages;
 use Filament\Panel;
 use Filament\PanelProvider;
@@ -50,6 +51,14 @@ class AdminPanelProvider extends PanelProvider
             ->authGuard('web')
             ->databaseNotifications()
             ->brandName('Khan Invoice Admin')
+            ->navigationItems([
+                NavigationItem::make('Payment Dashboard')
+                    ->url(fn () => route('admin.payments.dashboard'))
+                    ->icon('heroicon-o-chart-bar')
+                    ->group('Payment Management')
+                    ->sort(1)
+                    ->isActiveWhen(fn () => request()->routeIs('admin.payments.*')),
+            ])
             ->userMenuItems([
                 'app_panel' => \Filament\Navigation\MenuItem::make()
                     ->label('App Panel')
