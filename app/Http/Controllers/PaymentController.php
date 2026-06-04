@@ -36,6 +36,15 @@ class PaymentController extends Controller
             }
 
             // Calculate balance due
+
+            // Validate customer email
+            $customerEmail = $invoice->customer->email;
+            if (empty($customerEmail) || !filter_var($customerEmail, FILTER_VALIDATE_EMAIL)) {
+                return redirect()
+                    ->route('invoice.public', $publicId)
+                    ->with('error', 'This invoice does not have a valid customer email address. Please contact the business to update your email before making payment.');
+            }
+
             $balanceDue = $invoice->total_amount - $invoice->amount_paid;
 
             if ($balanceDue <= 0) {

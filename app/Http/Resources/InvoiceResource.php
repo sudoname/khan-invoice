@@ -35,6 +35,21 @@ class InvoiceResource extends JsonResource
             'public_id' => $this->public_id,
             'payment_status' => $this->payment_status,
             'paid_at' => $this->paid_at?->toIso8601String(),
+            
+            // Public URLs using public_id (use /inv/ for regular user invoices)
+            'public_url' => url('/inv/' . $this->public_id),
+            'pdf_url' => url('/inv/' . $this->public_id . '/download'),
+            
+            // Customer data
+            'customer_id' => $this->customer_id,
+            'customer_name' => $this->customer?->name,
+            'customer_email' => $this->customer?->email,
+            'customer_phone' => $this->customer?->phone,
+            
+            // Formatted values for display
+            'formatted_total' => '₦' . number_format($this->total_amount, 2),
+            'formatted_amount_due' => '₦' . number_format($this->total_amount - $this->amount_paid, 2),
+            
             'customer' => $this->whenLoaded('customer', function () {
                 return [
                     'id' => $this->customer->id,

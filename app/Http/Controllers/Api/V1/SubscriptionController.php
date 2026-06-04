@@ -65,7 +65,7 @@ class SubscriptionController extends Controller
     public function plans(Request $request)
     {
         $plans = Plan::where('is_active', true)
-            ->orderBy('order')
+            ->orderBy('sort_order')
             ->get()
             ->map(function ($plan) {
                 return [

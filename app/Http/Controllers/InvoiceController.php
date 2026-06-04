@@ -10,17 +10,13 @@ class InvoiceController extends Controller
     public function showPublic($publicId)
     {
         $invoice = Invoice::where('public_id', $publicId)
-            ->with(['businessProfile', 'customer', 'items'])
+            ->with(['businessProfile', 'customer', 'items', 'user'])
             ->firstOrFail();
 
         // Get the invoice's business profile (with fallback to first profile if not set)
         $businessProfile = $invoice->businessProfile ?? $invoice->user->businessProfiles->first();
 
-        // Show 404 if no business profile is available
-        if (!$businessProfile) {
-            abort(404, 'Business profile not found');
-        }
-
+        // Allow viewing even without business profile (will show user name as fallback)
         return view('invoices.public', [
             'invoice' => $invoice,
             'businessProfile' => $businessProfile,

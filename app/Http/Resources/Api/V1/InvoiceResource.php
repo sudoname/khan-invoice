@@ -78,9 +78,9 @@ class InvoiceResource extends JsonResource
                 });
             }),
 
-            // URLs
-            'public_url' => url('/invoice/' . $this->public_id),
-            'pdf_url' => url('/invoices/' . $this->id . '/pdf'),
+            // URLs - Use /inv/ for regular user invoices
+            'public_url' => url('/inv/' . $this->public_id),
+            'pdf_url' => url('/inv/' . $this->public_id . '/download'),
         ];
     }
 }
