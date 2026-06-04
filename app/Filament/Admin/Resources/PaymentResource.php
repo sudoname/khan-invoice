@@ -220,8 +220,7 @@ class PaymentResource extends Resource
 
                         Infolists\Components\TextEntry::make('payment_date')
                             ->label('Payment Date')
-                            ->date('F d, Y')
-                            ->description(fn ($record) => $record->payment_date?->diffForHumans()),
+                            ->date('F d, Y'),
                     ])
                     ->columns(3),
 
