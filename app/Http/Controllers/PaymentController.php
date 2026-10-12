@@ -217,7 +217,7 @@ class PaymentController extends Controller
         // Verify Paystack signature
         $signature = $request->header('x-paystack-signature');
 
-        if (!$signature || $signature !== hash_hmac('sha512', $request->getContent(), config('services.paystack.secret_key'))) {
+        if (!$signature || !hash_equals(hash_hmac('sha512', $request->getContent(), config('services.paystack.secret_key')), $signature)) {
             return response()->json(['message' => 'Invalid signature'], 400);
         }
 
@@ -275,6 +275,14 @@ class PaymentController extends Controller
                         } catch (\Exception $e) {
                             Log::error('Failed to send payment notification via webhook: ' . $e->getMessage());
                         }
+
+                        // Server-side Meta conversion event (deduplicated by reference)
+                        app(\App\Services\MetaConversionsService::class)->sendPurchase(
+                            $amountPaid,
+                            $data['currency'] ?? 'NGN',
+                            $data['customer']['email'] ?? $invoice->customer?->email,
+                            $reference
+                        );
                     }
 
                     Log::info('Webhook processed successfully for invoice: ' . $invoice->invoice_number);

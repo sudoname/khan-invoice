@@ -60,6 +60,14 @@ class AppServiceProvider extends ServiceProvider
         // Register email logging listener
         Event::listen(MessageSent::class, LogSentEmail::class);
 
+        // Send server-side Meta conversion event on user registration
+        Event::listen(\Illuminate\Auth\Events\Registered::class, function ($event) {
+            app(\App\Services\MetaConversionsService::class)->sendRegistration(
+                $event->user->email,
+                'reg_' . $event->user->id
+            );
+        });
+
         // Register AI rate limiters
         $this->registerAIRateLimiters();
     }

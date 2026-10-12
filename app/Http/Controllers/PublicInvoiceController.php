@@ -237,7 +237,6 @@ class PublicInvoiceController extends Controller
         Log::info('Public invoice webhook received', [
             'event' => $request->input('event'),
             'reference' => $request->input('data.reference'),
-            'headers' => $request->headers->all(),
         ]);
 
         // Verify Paystack signature
@@ -249,10 +248,9 @@ class PublicInvoiceController extends Controller
         }
 
         $computedSignature = hash_hmac('sha512', $request->getContent(), config('services.paystack.secret_key'));
-        if ($signature !== $computedSignature) {
+        if (!hash_equals($computedSignature, $signature)) {
             Log::warning('Webhook signature mismatch', [
-                'received' => $signature,
-                'computed' => $computedSignature,
+                'reference' => $request->input('data.reference'),
             ]);
             return response()->json(['message' => 'Invalid signature'], 400);
         }
@@ -336,6 +334,14 @@ class PublicInvoiceController extends Controller
                                 ],
                                 'notes' => $hasSubaccount ? 'Auto-settled via Paystack subaccount' : 'Manual settlement required',
                             ]);
+
+                            // Server-side Meta conversion event (deduplicated by reference)
+                            app(\App\Services\MetaConversionsService::class)->sendPurchase(
+                                $amountPaid,
+                                $data['currency'] ?? 'NGN',
+                                $invoice->to_email,
+                                $reference
+                            );
 
                             Log::info('Public invoice payment processed: ' . $invoice->invoice_number, [
                                 'reference' => $reference,

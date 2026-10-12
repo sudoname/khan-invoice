@@ -52,6 +52,12 @@ return [
         'secret_key' => env('PAYSTACK_SECRET_KEY'),
     ],
 
+    'meta' => [
+        'pixel_id' => env('META_PIXEL_ID', '2233096357603757'),
+        'capi_token' => env('META_CAPI_TOKEN'),
+        'test_event_code' => env('META_TEST_EVENT_CODE'),
+    ],
+
     'termii' => [
         'api_key' => env('TERMII_API_KEY'),
         'sender_id' => env('TERMII_SENDER_ID', 'KhanInvoice'),
