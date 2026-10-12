@@ -112,8 +112,7 @@ Route::get('/auth/{provider}/callback', [SocialAuthController::class, 'callback'
     ->name('social.callback');
 
 // Admin Payment Dashboard routes
-// Note: Add your auth/admin middleware here (e.g., middleware(['auth', 'admin']))
-Route::prefix('admin/payments')->name('admin.payments.')->group(function () {
+Route::middleware('admin')->prefix('admin/payments')->name('admin.payments.')->group(function () {
     Route::get('/', [AdminPaymentDashboardController::class, 'index'])->name('dashboard');
     Route::get('/unsettled', [AdminPaymentDashboardController::class, 'unsettled'])->name('unsettled');
     Route::get('/all', [AdminPaymentDashboardController::class, 'all'])->name('all');

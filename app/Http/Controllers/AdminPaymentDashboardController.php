@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\PlatformTransaction;
 use App\Models\PublicInvoice;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
@@ -144,9 +145,14 @@ class AdminPaymentDashboardController extends Controller
     }
 
     /**
-     * Get Paystack balance
+     * Get Paystack balance (cached for 60 seconds)
      */
     private function getPaystackBalance(): array
+    {
+        return Cache::remember('admin.paystack_balance', 60, fn () => $this->fetchPaystackBalance());
+    }
+
+    private function fetchPaystackBalance(): array
     {
         try {
             $secretKey = config('services.paystack.secret_key');
