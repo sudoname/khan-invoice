@@ -36,18 +36,9 @@
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8164278094998913" data-ad-client="ca-pub-8164278094998913"
      crossorigin="anonymous"></script>
 
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-0K2QWREN6J"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
+    @include('partials.tracking')
 
-      // Enable debug mode so events show up in GA4 DebugView immediately
-      gtag('config', 'G-0K2QWREN6J', { debug_mode: true });
-    </script>
-
-    <script src="https://cdn.tailwindcss.com"></script>
+    @vite('resources/css/app.css')
     <style>
         .gradient-bg {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
