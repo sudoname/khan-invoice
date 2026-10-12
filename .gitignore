@@ -33,3 +33,9 @@ list_users.php
 update_member_role.php
 verify_emails.php
 key.txt
+kinvoice_*.csv
+/test-*.php
+/test-*.sh
+/test_*.sh
+/check-*.sh
+/debug-*.php
